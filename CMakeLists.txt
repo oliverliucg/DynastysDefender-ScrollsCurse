@@ -11,4 +11,4 @@ endif()
 
 project ("DynastysDefender-ScrollsCurse")
 
-add_subdirectory ("src")
+add_subdirectory ("src2")
