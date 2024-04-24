@@ -195,6 +195,9 @@ private:
 	// total number of game levels
 	const int numGameLevels = 2;
 
+	// Get the page name for a given game state.
+	std::string GetPageName(GameState gameState);
+
 	// Set the state of the game.
 	void SetState(GameState newState);
 
