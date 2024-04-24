@@ -2,7 +2,7 @@
 
 const float PageSection::kScrollIconWidth = 0.5f * kBubbleRadius;
 
-PageSection::PageSection(const std::string& name) : name_(name), position_(glm::vec2(0.f)), top_spacing_(0.0f), bottom_spacing_(0.0f), left_spacing_(0.0f), max_height_(kWindowSize.y), max_width_(kWindowSize.x), offset_(0.f), scroll_relation_(glm::vec3(0.f)), scroll_icon_(nullptr) {}
+PageSection::PageSection(const std::string& name) : name_(name), position_(glm::vec2(0.f)), top_spacing_(0.0f), bottom_spacing_(0.0f), left_spacing_(0.0f), max_height_(kWindowSize.y), max_width_(kWindowSize.x), offset_(0.f), is_scroll_icon_allowed_(false), scroll_relation_(glm::vec3(0.f)), scroll_icon_(nullptr) {}
 
 std::string PageSection::GetName() const {
 	return name_;
@@ -51,6 +51,14 @@ void PageSection::SetOffset(float offset) {
 
 float PageSection::GetOffset() const {
 	return offset_;
+}
+
+void PageSection::SetScrollIconAllowed(bool is_allowed) {
+	is_scroll_icon_allowed_ = is_allowed;
+}
+
+bool PageSection::IsScrollIconAllowed() const {
+	return is_scroll_icon_allowed_;
 }
 
 glm::vec4 PageSection::GetBoundingBox() const {
@@ -181,7 +189,7 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer, s
 	lines_.emplace_back(point2);
 	// Get the relationship between the offset of scroll icon and the offset of the content in the section.
 	glm::vec2 relationshipPoint1 = glm::vec2(0.f, 0.f);
-	glm::vec2 relationshipPoint2 = glm::vec2(lines_[2].y - lines_[0].y - scroll_icon_->GetSize().y, 0.8f*max_height_-this->GetHeight());
+	glm::vec2 relationshipPoint2 = glm::vec2(lines_[2].y - lines_[0].y - scroll_icon_->GetSize().y, 0.95f*max_height_-this->GetHeight());
 	scroll_relation_ = solveLine(relationshipPoint1, relationshipPoint2);
 	this->SetScrollRelationShip(scroll_relation_);
 
@@ -189,6 +197,14 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer, s
 	color_renderer_ = colorRenderer;
 	circle_renderer_ = circleRenderer;
 	line_renderer_ = lineRenderer;
+}
+
+void PageSection::ResetSrcollIconPosition() {
+	if (scroll_icon_ == nullptr) {
+		return;
+	}
+	float scrollIconOffset = getXOfLine(offset_, scroll_relation_);
+	scroll_icon_->SetCenter(glm::vec2(scroll_icon_->GetCenter().x, scroll_icon_->GetCenter().y + scrollIconOffset));
 }
 
 void PageSection::SetScrollRelationShip(glm::vec3 relation) {
@@ -214,7 +230,6 @@ void PageSection::MoveScrollIcon(float scroll_y_offset) {
 	glm::vec2 position = scroll_icon_->GetPosition();
 	glm::vec2 size = scroll_icon_->GetSize();
 	glm::vec3 relation = GetScrollRelationShip();
-	float oldOffset = GetOffset();
 	float newOffset = getYOfLine(position.y - lines_[0].y, relation);
 	SetOffset(newOffset);
 }
@@ -256,7 +271,7 @@ void PageSection::Draw() {
 	}
 
 	// Draw the scroll icon if it is initialized.
-	if (IsScrollIconInitialized()) {
+	if (IsScrollIconInitialized() && IsScrollIconAllowed()) {
 		scroll_icon_->Draw(color_renderer_, circle_renderer_);
 		line_renderer_->DrawLines(lines_, glm::vec4(0.8f, 0.62353f, 0.54902f, 1.0f));
 	}

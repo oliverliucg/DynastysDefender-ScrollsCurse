@@ -36,8 +36,11 @@ public:
 	float GetMaxWidth() const;
 	void SetOffset(float offset);
 	float GetOffset() const;
+	void SetScrollIconAllowed(bool is_allowed);
+	bool IsScrollIconAllowed() const;
 	glm::vec4 GetBoundingBox() const;
 	void InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer, std::shared_ptr<CircleRenderer> circleRenderer, std::shared_ptr<LineRenderer> lineRenderer, float scrollIconCenterX);
+	void ResetSrcollIconPosition();
 	void SetScrollRelationShip(glm::vec3 relation);
 	glm::vec3 GetScrollRelationShip() const;
 	Capsule& GetScrollIcon();
@@ -68,6 +71,8 @@ private:
 	float max_width_;
 	// offset while rendering the components.
 	float offset_;
+	// scroll icon is allowed or not.
+	bool is_scroll_icon_allowed_;
 	// The linear relationship between the center of the scroll icon and the position of content in the section.
 	glm::vec3 scroll_relation_;
 	// Scroll icon. a capsule with two semicircles and a rectangle.
