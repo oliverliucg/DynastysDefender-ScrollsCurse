@@ -509,6 +509,10 @@ void GameManager::ProcessInput(float dt) {
                             this->GoToState(GameState::CONTROL);
                         }
                         else if (content == "start") {
+                            // print the page story position and all its sections' positions
+                            auto textSection = pages["story"]->GetSection("storytextsection");
+                            auto buttonSection = pages["story"]->GetSection("storybuttonsection");
+                       
                             this->GoToState(GameState::PREPARING);
                             if (gameCharacters["guojie"]->GetState() != GameCharacterState::FIGHTING) {
                                 gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
@@ -1237,7 +1241,6 @@ void GameManager::Update(float dt)
                     this->timer->PauseEventTimer("hideprompttomainmenu");
 				}
 				postProcessor->SetSampleOffsets(newSampleOffsets);
-              /*  std::cout << " dt: " << dt << std::endl;*/
 			}
             if (this->timer->HasEvent("prompttomainmenu") && !this->timer->IsPaused("prompttomainmenu")) {
                 if (this->timer->IsEventTimerExpired("prompttomainmenu")) {
@@ -1261,10 +1264,6 @@ void GameManager::Update(float dt)
             float scrollCenterY = scroll->GetCenter().y;
             // If the scroll is out of the top of the screen and its velocity is 0.f, then we give it a velocity and a acceleration to make it gradually move down.
             if (scrollCenterY < 0.f && scroll->GetVelocity() == glm::vec2(0.f, 0.f)) {
-                std::cout << "scroll->center: " << scroll->GetCenter().x << " " << scroll->GetCenter().y << std::endl;
-                std::cout << "scroll->silkLen: " << scroll->GetSilkLen() << std::endl;
-                std::cout << "toproller position: " << scroll->GetTopRoller()->GetPosition().x << ", " << scroll->GetTopRoller()->GetPosition().y << std::endl;
-                std::cout << "bottomroller position: " << scroll->GetBottomRoller()->GetPosition().x << ", " << scroll->GetBottomRoller()->GetPosition().y << std::endl;
                 glm::vec2 scrollCenter = scroll->GetCenter();
                 scroll->SetVelocity(glm::vec2(0.0f, 26 * kBubbleRadius));
                 float stopPoint = this->height * 0.545f;
@@ -1284,17 +1283,20 @@ void GameManager::Update(float dt)
                     scroll->SetAcceleration(glm::vec2(0.f, 0.f));
                     // Set the transition state to be END.
                     this->SetTransitionState(TransitionState::TRANSITION);
+                    GameState lastLastState = this->lastState;
                     // Set the game state to the target state.
                     this->SetToTargetState();
                     // Set the gameboard state to ACTIVE.
                     gameBoard->SetState(GameBoardState::ACTIVE);
                     // Set the scoll state to be OPENING.
                     scroll->SetState(ScrollState::OPENING);
-                    // Set the offset of the text "Story".
-                    glm::vec2 buttonSectionPos = this->pages.at("story")->GetSection("storybuttonsection")->GetPosition();
-                    glm::vec2 textSectionPos = this->pages.at("story")->GetSection("storytextsection")->GetPosition();
-                    float initialOffset = buttonSectionPos.y - textSectionPos.y;
-                    pages.at("story")->GetSection("storytextsection")->SetOffset(initialOffset);
+                    if (lastLastState == GameState::EXIT) {
+                        // Set the offset of the text "Story".
+                        glm::vec2 buttonSectionPos = this->pages.at("story")->GetSection("storybuttonsection")->GetPosition();
+                        glm::vec2 textSectionPos = this->pages.at("story")->GetSection("storytextsection")->GetPosition();
+                        float initialOffset = buttonSectionPos.y - textSectionPos.y;
+                        pages.at("story")->GetSection("storytextsection")->SetOffset(initialOffset);
+                    }
                 }
             }
         }
@@ -1302,41 +1304,15 @@ void GameManager::Update(float dt)
         }
     }
     else if (this->state == GameState::STORY) {
-    //    if (buttons["start"]->GetState() == ButtonState::Inactive) {
-    //        if (this->targetState == GameState::UNDEFINED) {
-    //            // Initialized the positions of the texts only when the last state is INITIAL.
-    //            if (this->lastState == GameState::INITIAL) {
-    //                auto gameBoardBounds = gameBoard->GetBoundaries();
-    //                // Set the box size of the text
-    //                this->texts["story"]->SetBoxBounds(glm::vec4(gameBoardBounds[0], gameBoardBounds[1] + kBubbleRadius / 2.0f, gameBoardBounds[2], gameBoardBounds[3] - 5.935f * kBubbleRadius));
-    //                // Set the position of the text
-    //                glm::vec2 curTextPos = this->texts["story"]->GetPosition();
-    //                glm::vec4 curBoxBounds = this->texts["story"]->GetBoxBounds();
-    //                this->texts["story"]->SetPosition(glm::vec2(curTextPos.x, curBoxBounds.w));
-    //            }
-    //            // Set the button "Start", "Control", and "Exit" to from inactive to normal.
-    //            buttons["start"]->SetState(ButtonState::Normal);
-    //            buttons["control"]->SetState(ButtonState::Normal);
-    //            buttons["exit"]->SetState(ButtonState::Normal);
-    //            AdjustButtonsHorizontalPosition({"control", "exit" });
-
-    //            // If last state is not INITIAL, then we directly set the text position based on its relationship with the scroll icon.
-    //            if (this->lastState != GameState::INITIAL) {
-				//	glm::vec2 textPos = this->texts["story"]->GetPosition();
-				//	textPos.y = this->gameBoard->GetPosition().y + 0.5f * kBubbleRadius;
-				//	this->texts["story"]->SetPosition(textPos);
-				//}
-    //        }
-    //    }
-        if (this->transitionState != TransitionState::END) {
+        auto textSection = this->pages.at("story")->GetSection("storytextsection");
+        if ((this->transitionState == TransitionState::TRANSITION && this->targetState == GameState::UNDEFINED 
+            || this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSING) && !textSection->IsScrollIconAllowed()) {
             // If the offset of the text section is greater than 0, then we decrease the offset to move the text section upwards.
-            auto textSection = this->pages.at("story")->GetSection("storytextsection");
             float offset = textSection->GetOffset();
             float targetOffset = 0.95f*textSection->GetMaxHeight() - textSection->GetHeight();
             targetOffset = std::min(0.f, targetOffset);
             if (offset > targetOffset) {
-				offset -= 5*kBubbleRadius * dt;
-                offset = std::max(targetOffset, offset);
+                offset = std::max(offset - 5 * kBubbleRadius * dt, targetOffset);
 				this->pages.at("story")->GetSection("storytextsection")->SetOffset(offset);
 			}
             else {
@@ -1346,82 +1322,12 @@ void GameManager::Update(float dt)
                 textSection->SetScrollIconAllowed(true);
                 // Set the position of the scroll icon
                 textSection->ResetSrcollIconPosition();
+                // print the page story position and all its sections' positions
+                auto textSection = pages["story"]->GetSection("storytextsection");
+                auto buttonSection = pages["story"]->GetSection("storybuttonsection");
 			}
         }
-    //    if(this->transitionState != TransitionState::END){
-    //        glm::vec2 textPos = this->texts["story"]->GetPosition();
-    //        glm::vec4 textBoxBounds = this->texts["story"]->GetBoxBounds();
-    //        float moveSpeed = 10 * kBubbleRadius / 90.f;
-    //        float targetY = this->gameBoard->GetPosition().y - 14 * kBubbleRadius;
-    //        if (this->lastState == GameState::INITIAL) {
-    //            if (this->scroll->GetState() == ScrollState::OPENED) {
-    //                if (textPos.y > targetY) {
-    //                    if (textPos.y - targetY < moveSpeed) {
-    //                        textPos.y = targetY;
-    //                    }
-    //                    else {
-    //                        textPos.y -= moveSpeed;
-    //                    }
-    //                    this->texts["story"]->SetPosition(textPos);
-    //                }
-    //                else {
-    //                    // Finish the transition to GameState::STORY
-    //                    this->SetTransitionState(TransitionState::END);
-    //                }
-    //            }
-    //            if (texts["story"]->IsScrollIconInitialized() == false) {
-    //                // Get the bounds of game board
-    //                glm::vec4 gameBoardBounds = gameBoard->GetBoundaries();
-    //                // Create icon to allow the player to scroll the story.
-    //                Capsule& icon = texts["story"]->GetScrollIcon();
-    //                // Get the text box bounds
-    //                glm::vec4 textBoxBounds = this->texts["story"]->GetBoxBounds();
-    //                // Set the size of the icon
-    //                icon.SetSize(glm::vec2(0.5f * kBubbleRadius, 28.f * kBubbleRadius));
-    //                // Set the center of the icon to be at the right bottom of the text box.
-    //                icon.SetCenter(glm::vec2(textBoxBounds.z - icon.GetSize().x / 2.0f - this->gameBoard->GetSize().x / 170.f, textBoxBounds.w - icon.GetSize().y / 2.f));
-    //                // Set the color of the icon to light brown: (0.75294, 0.43922, 0.03922)
-    //                icon.SetColor(glm::vec4(0.75294f, 0.43922f, 0.03922f, 1.0f));
-    //                // Set all parts of icon to be visible
-    //                icon.SetRectangleVisible(true);
-    //                icon.SetTopSemiCircleVisible(true);
-    //                icon.SetBottomSemiCircleVisible(true);
-    //                // Get the relationship between y values of the center icon and the postion of the text.
-    //                glm::vec2 relationshipPoint1 = glm::vec2(icon.GetCenter().y, targetY);
-    //                glm::vec2 relationshipPoint2 = glm::vec2(gameBoardBounds.y + kBubbleRadius / 14.f + icon.GetSize().y / 2.0f, targetY + 14.5f * kBubbleRadius);
-    //                glm::vec3 relationship = solveLine(relationshipPoint1, relationshipPoint2);
-    //                this->texts["story"]->SetScrollRelationShip(relationship);
-    //            }
-    //        }
-    //        else {
-    //            // Set the story text based on the current postion of the center of the scroll.
-    //            glm::vec2 center = texts["story"]->GetScrollIcon().GetCenter();
-    //            glm::vec3 scrollRelation = texts["story"]->GetScrollRelationShip();
-    //            glm::vec2 oldPostionOfText = texts["story"]->GetPosition();
-    //            glm::vec2 newPostionOfText = glm::vec2(oldPostionOfText.x, getYOfLine(center.y, scrollRelation));
-    //            texts["story"]->SetPosition(newPostionOfText);
-
-    //            // Set the transition state to end when the scoll is opened.
-    //            if (this->scroll->GetState() == ScrollState::OPENED) {
-				//	this->SetTransitionState(TransitionState::END);
-				//}
-    //        }
-    //    }
-        if (this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSING) {
-            glm::vec2 textPos = this->texts["story"]->GetPosition();
-            glm::vec4 textBoxBounds = this->texts["story"]->GetBoxBounds();
-            float moveSpeed = 10 * kBubbleRadius / 90.f;
-            float targetY = this->gameBoard->GetPosition().y - 14 * kBubbleRadius;
-            if (textPos.y > targetY) {
-                if (textPos.y - targetY < moveSpeed) {
-                    textPos.y = targetY;
-                }
-                else {
-                    textPos.y -= moveSpeed;
-                }
-                this->texts["story"]->SetPosition(textPos);
-            }
-        }else if (this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSED) {
+        if (this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSED) {
 			this->SetToTargetState();
             this->SetTransitionState(TransitionState::TRANSITION);
             if (this->state != GameState::PREPARING) {
@@ -1509,10 +1415,6 @@ void GameManager::Update(float dt)
                 // Set the time for cracks on the ground.
                 this->timer->SetEventTimer("cracks", 1.5f);
                 this->timer->StartEventTimer("cracks");
-                std::cout << "target position: " << character->GetCurrentTargetPosition().x << " " << character->GetCurrentTargetPosition().y << std::endl;
-                std::cout << "character position: " << character->GetPosition().x << " " << character->GetPosition().y << std::endl;
-                std::cout << "total health bar center: " << character->GetHealth().GetTotalHealthBar().GetCenter().x << " " << character->GetHealth().GetTotalHealthBar().GetCenter().y << std::endl;
-                std::cout << "current health bar center: " << character->GetHealth().GetCurrentHealthBar().GetCenter().x << " " << character->GetHealth().GetCurrentHealthBar().GetCenter().y << std::endl;
             }
 		}
         // Set the state of the game characters after guojie arrives at the target position.

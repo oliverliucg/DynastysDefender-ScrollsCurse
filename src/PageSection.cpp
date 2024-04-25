@@ -204,7 +204,7 @@ void PageSection::ResetSrcollIconPosition() {
 		return;
 	}
 	float scrollIconOffset = getXOfLine(offset_, scroll_relation_);
-	scroll_icon_->SetCenter(glm::vec2(scroll_icon_->GetCenter().x, scroll_icon_->GetCenter().y + scrollIconOffset));
+	scroll_icon_->SetCenter(glm::vec2(scroll_icon_->GetCenter().x, lines_[0].y + scrollIconOffset + scroll_icon_->GetSize().y*0.5f));
 }
 
 void PageSection::SetScrollRelationShip(glm::vec3 relation) {
@@ -256,7 +256,6 @@ void PageSection::Draw() {
 	GLsizei scissorBoxWidth = std::ceil(boundingBox.z - boundingBox.x);
 	GLsizei scissorBoxHeight = std::ceil(boundingBox.w - boundingBox.y);
 	ScissorBoxHandler::ScissorBox sectionScissorBox(boundingBox.x, kWindowSize.y-boundingBox.w, scissorBoxWidth, scissorBoxHeight);
-	/*std::cout << "page section name: " << name_ << std::endl;*/
 	handler.SetIntersectedScissorBox(sectionScissorBox);
 	for (size_t i = 0; i < order_.size(); ++i) {
 		assert(content_.find(order_[i]) != content_.end() && "Content not found in PageSection!");
