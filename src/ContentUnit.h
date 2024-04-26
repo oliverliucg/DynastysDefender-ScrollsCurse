@@ -33,6 +33,7 @@ public:
 	TextUnit(const std::string& name, std::shared_ptr<Text> text, std::shared_ptr<TextRenderer> textRenderer);
 	std::shared_ptr<Text> GetText();
 	void SetText(std::shared_ptr<Text> text);
+	std::shared_ptr<TextRenderer> GetTextRenderer();
 	void SetTextRenderer(std::shared_ptr<TextRenderer> textRenderer);
 	void UpdateHeight() override;
 	void SetPosition(glm::vec2 pos) override;

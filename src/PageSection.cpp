@@ -2,7 +2,7 @@
 
 const float PageSection::kScrollIconWidth = 0.5f * kBubbleRadius;
 
-PageSection::PageSection(const std::string& name) : name_(name), position_(glm::vec2(0.f)), top_spacing_(0.0f), bottom_spacing_(0.0f), left_spacing_(0.0f), max_height_(kWindowSize.y), max_width_(kWindowSize.x), offset_(0.f), is_scroll_icon_allowed_(false), scroll_relation_(glm::vec3(0.f)), scroll_icon_(nullptr) {}
+PageSection::PageSection(const std::string& name) : name_(name), position_(glm::vec2(0.f)), top_spacing_(0.0f), bottom_spacing_(0.0f), left_spacing_(0.0f), max_height_(kWindowSize.y), max_width_(kWindowSize.x), offset_(0.f), is_scroll_icon_allowed_(true), scroll_relation_(glm::vec3(0.f)), scroll_icon_(nullptr) {}
 
 std::string PageSection::GetName() const {
 	return name_;
@@ -36,7 +36,9 @@ void PageSection::SetMaxWidth(float width) {
 	max_width_ = width;
 	for (const auto& unit : order_) {
 		if (content_[unit]->GetType() == ContentType::kText) {
-			std::dynamic_pointer_cast<TextUnit>(content_[unit])->GetText()->SetLineWidth(max_width_ - left_spacing_);
+			auto textUnit = std::dynamic_pointer_cast<TextUnit>(content_[unit]);
+			textUnit->GetText()->SetLineWidth(max_width_ - left_spacing_);
+			textUnit->UpdateHeight();
 		}
 	}
 }
@@ -197,6 +199,16 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer, s
 	color_renderer_ = colorRenderer;
 	circle_renderer_ = circleRenderer;
 	line_renderer_ = lineRenderer;
+	auto textUnit = std::dynamic_pointer_cast<TextUnit>(content_[order_[0]]);
+	float textHeight = textUnit->GetText()->GetTextSize(textUnit->GetTextRenderer()).y;
+	float textHeight2 = this->GetHeight();
+	std::cout << "text height: " << textHeight << std::endl;
+	std::cout << "text height2: " << textHeight2 << std::endl;
+	std::cout << "text section name: " << name_ << std::endl;
+	std::cout << "relations: " << scroll_relation_.x << " " << scroll_relation_.y << " " << scroll_relation_.z << std::endl;
+	std::cout << "height: " << height << std::endl;
+	std::cout << "max height: " << max_height_ << std::endl;
+	std::cout << "expecting max offset: " << 0.95f * max_height_ - this->GetHeight() << std::endl;
 }
 
 void PageSection::ResetSrcollIconPosition() {
@@ -232,6 +244,10 @@ void PageSection::MoveScrollIcon(float scroll_y_offset) {
 	glm::vec3 relation = GetScrollRelationShip();
 	float newOffset = getYOfLine(position.y - lines_[0].y, relation);
 	SetOffset(newOffset);
+
+	std::cout << "relation: " << relation.x << " " << relation.y << " " << relation.z << std::endl;
+	std::cout << "icon offset: " << position.y - lines_[0].y << std::endl;
+	std::cout << "text offset: " << newOffset << std::endl;
 }
 
 bool PageSection::NeedScrollIcon() {

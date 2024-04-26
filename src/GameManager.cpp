@@ -330,6 +330,7 @@ void GameManager::Init() {
     auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["exit"], textRenderer2, colorRenderer);
     auto textSection = std::make_shared<PageSection>("storytextsection");
     textSection->AddContent(textUnit);
+    textSection->SetScrollIconAllowed(false);
     auto buttionSection = std::make_shared<PageSection>("storybuttonsection");
     buttionSection->AddContent(startButtonUnit);
     buttionSection->AddContent(controlButtonUnit);
@@ -370,52 +371,52 @@ void GameManager::Init() {
 		/*textSection->SetOffset(9*kBubbleRadius);*/
 	}
 
-  //  // Create page "control"
-  //  textUnit = std::make_shared<TextUnit>("controltextunit", texts["control"], textRenderer2);
-  ///*  auto startButtonUnit = std::make_shared<ButtonUnit>("startbuttonunit", buttons["controlstart"], textRenderer2, colorRenderer);*/
-  //  auto backButtonUnit = std::make_shared<ButtonUnit>("backbuttonunit", buttons["back"], textRenderer2, colorRenderer);
-  ///*  auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["controlexit"], textRenderer2, colorRenderer);*/
-  //  textSection = std::make_shared<PageSection>("controltextsection");
-  //  textSection->AddContent(textUnit);
-  //  buttionSection = std::make_shared<PageSection>("controlbuttonsection");
-  //  buttionSection->AddContent(startButtonUnit);
-  //  buttionSection->AddContent(backButtonUnit);
-  //  buttionSection->AddContent(exitButtonUnit);
-  //  buttionSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit", 0.1f * kBubbleRadius);
-  //  buttionSection->SetInterUnitSpacing("backbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
-  //  pages["control"] = std::make_unique<Page>("control");
-  //  pages["control"]->AddSection(textSection);
-  //  pages["control"]->AddSection(buttionSection);
-  //  // Set the top, bottom and left spacing of the page "control".
-  //  pages["control"]->SetTopSpacing(0.5f * kBubbleRadius);
-  //  pages["control"]->SetBottomSpacing(0.5f * kBubbleRadius);
-  //  pages["control"]->SetLeftSpacing(0.5f * kBubbleRadius);
-  //  // Set the inter spacing between the sections of the page "control".
-  //  pages["control"]->SetInterSectionSpacing("controltextsection", "controlbuttonsection", 0.5f * kBubbleRadius);
+    // Create page "control"
+    textUnit = std::make_shared<TextUnit>("controltextunit", texts["control"], textRenderer2);
+    /*auto startButtonUnit = std::make_shared<ButtonUnit>("startbuttonunit", buttons["controlstart"], textRenderer2, colorRenderer);*/
+    auto backButtonUnit = std::make_shared<ButtonUnit>("backbuttonunit", buttons["back"], textRenderer2, colorRenderer);
+    /*auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["controlexit"], textRenderer2, colorRenderer);*/
+    textSection = std::make_shared<PageSection>("controltextsection");
+    textSection->AddContent(textUnit);
+    buttionSection = std::make_shared<PageSection>("controlbuttonsection");
+    buttionSection->AddContent(startButtonUnit);
+    buttionSection->AddContent(backButtonUnit);
+    buttionSection->AddContent(exitButtonUnit);
+    buttionSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit", 0.1f * kBubbleRadius);
+    buttionSection->SetInterUnitSpacing("backbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
+    pages["control"] = std::make_unique<Page>("control");
+    pages["control"]->AddSection(textSection);
+    pages["control"]->AddSection(buttionSection);
+    // Set the top, bottom and left spacing of the page "control".
+    pages["control"]->SetTopSpacing(0.5f * kBubbleRadius);
+    pages["control"]->SetBottomSpacing(0.5f * kBubbleRadius);
+    pages["control"]->SetLeftSpacing(0.5f * kBubbleRadius);
+    // Set the inter spacing between the sections of the page "control".
+    pages["control"]->SetInterSectionSpacing("controltextsection", "controlbuttonsection", 0.5f * kBubbleRadius);
 
-  //  commonButtionPosition = glm::vec2(pages["control"]->GetPosition().x + pages["control"]->GetLeftSpacing(), this->height * 0.84f);
-  //  commonButtonSize = glm::vec2(gameBoard->GetSize().x - 2 * (commonButtionPosition.x - pages["control"]->GetPosition().x), kBubbleRadius * 2.0f);
-  //  for (const auto& buttonName : buttionSection->GetOrder()) {
-  //      std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttionSection->GetContent(buttonName));
-  //      buttonUnit->SetPosition(commonButtionPosition);
-  //      buttonUnit->SetSize(commonButtonSize);
-  //      auto button = buttonUnit->GetButton();
-  //      button->SetTextOnCenter(true);
-  //  }
-  //  interspacingBetweenTextAndButton = pages["control"]->GetInterSectionSpacing("controltextsection", "controlbuttonsection");
-  //  maxHeightForTextSection = gameBoard->GetSize().y - buttionSection->GetHeight() - pages["control"]->GetBottomSpacing() - pages["control"]->GetTopSpacing() - interspacingBetweenTextAndButton;
-  //  textSection->SetMaxHeight(maxHeightForTextSection);
-  //  textSection->SetMaxWidth(gameBoard->GetSize().x - pages["control"]->GetLeftSpacing() - 0.5*kBubbleRadius);
-  //  pages["control"]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y-pages["control"]->GetHeight()*0.5f, this->gameBoard->GetPosition().y)));
-  //  if (textSection->NeedScrollIcon()) {
-  //      // Adjust the line width of text content
-  //      textSection->SetMaxWidth(textSection->GetMaxWidth() - PageSection::kScrollIconWidth);
-  //      // Create scroll icon
-  //      textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
-  //          this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
-  //      // Set offset for the text content
-  //      /*textSection->SetOffset(9*kBubbleRadius);*/
-  //  }
+    commonButtionPosition = glm::vec2(pages["control"]->GetPosition().x + pages["control"]->GetLeftSpacing(), this->height * 0.84f);
+    commonButtonSize = glm::vec2(gameBoard->GetSize().x - 2 * (commonButtionPosition.x - pages["control"]->GetPosition().x), kBubbleRadius * 2.0f);
+    for (const auto& buttonName : buttionSection->GetOrder()) {
+        std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttionSection->GetContent(buttonName));
+        buttonUnit->SetPosition(commonButtionPosition);
+        buttonUnit->SetSize(commonButtonSize);
+        auto button = buttonUnit->GetButton();
+        button->SetTextOnCenter(true);
+    }
+    interspacingBetweenTextAndButton = pages["control"]->GetInterSectionSpacing("controltextsection", "controlbuttonsection");
+    maxHeightForTextSection = gameBoard->GetSize().y - buttionSection->GetHeight() - pages["control"]->GetBottomSpacing() - pages["control"]->GetTopSpacing() - interspacingBetweenTextAndButton;
+    textSection->SetMaxHeight(maxHeightForTextSection);
+    textSection->SetMaxWidth(gameBoard->GetSize().x - pages["control"]->GetLeftSpacing() - 0.5*kBubbleRadius);
+    pages["control"]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y-pages["control"]->GetHeight()*0.5f, this->gameBoard->GetPosition().y)));
+    if (textSection->NeedScrollIcon()) {
+        // Adjust the line width of text content
+        textSection->SetMaxWidth(textSection->GetMaxWidth() - PageSection::kScrollIconWidth);
+        // Create scroll icon
+        textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
+            this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
+        // Set offset for the text content
+        /*textSection->SetOffset(9*kBubbleRadius);*/
+    }
     
     // Initialize the timer
     timer = std::make_shared<Timer>();
@@ -1305,11 +1306,11 @@ void GameManager::Update(float dt)
     }
     else if (this->state == GameState::STORY) {
         auto textSection = this->pages.at("story")->GetSection("storytextsection");
+        float targetOffset = 0.95f * textSection->GetMaxHeight() - textSection->GetHeight();
         if ((this->transitionState == TransitionState::TRANSITION && this->targetState == GameState::UNDEFINED 
             || this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSING) && !textSection->IsScrollIconAllowed()) {
             // If the offset of the text section is greater than 0, then we decrease the offset to move the text section upwards.
             float offset = textSection->GetOffset();
-            float targetOffset = 0.95f*textSection->GetMaxHeight() - textSection->GetHeight();
             targetOffset = std::min(0.f, targetOffset);
             if (offset > targetOffset) {
                 offset = std::max(offset - 5 * kBubbleRadius * dt, targetOffset);
@@ -1322,9 +1323,6 @@ void GameManager::Update(float dt)
                 textSection->SetScrollIconAllowed(true);
                 // Set the position of the scroll icon
                 textSection->ResetSrcollIconPosition();
-                // print the page story position and all its sections' positions
-                auto textSection = pages["story"]->GetSection("storytextsection");
-                auto buttonSection = pages["story"]->GetSection("storybuttonsection");
 			}
         }
         if (this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSED) {
@@ -1337,6 +1335,14 @@ void GameManager::Update(float dt)
             // If the new state is Preparing, then we set the gameboard state to be INGAME.
             if (this->state == GameState::PREPARING) {
 				gameBoard->SetState(GameBoardState::INGAME);
+			}
+
+            if (!textSection->IsScrollIconAllowed()) {
+				textSection->SetOffset(targetOffset);
+                // Enable the scroll icon
+                textSection->SetScrollIconAllowed(true);
+                // Set the position of the scroll icon
+                textSection->ResetSrcollIconPosition();
 			}
             
 		}
@@ -1769,55 +1775,6 @@ void GameManager::Render(){
 			gameBoard->Draw(spriteRenderer);
 		}    
         
-   //     // Draw the story text
-   //     if (this->state == GameState::STORY) {
-   //         glm::vec4 textBoxBounds = texts["story"]->GetBoxBounds();
-   //         // Save current scissor box
-   //         GLint originalScissorBox[4];
-   //         glGetIntegerv(GL_SCISSOR_BOX, originalScissorBox);
-   //         // Get the bounds of the silk.
-   //         glm::vec4 silkBounds = scroll->GetSilkBounds();
-   //         // Set the text bound to silk bound if the text bound is out of the silk bound.
-   //         if (textBoxBounds.y < silkBounds.y) {
-   //             textBoxBounds.y = silkBounds.y;
-   //         }
-   //         if (textBoxBounds.w > silkBounds.w) {
-   //             textBoxBounds.w = silkBounds.w;
-   //         }
-   //         // textBoxBounds
-   //        /* glScissor(textBoxBounds[0], kWindowSize.y - textBoxBounds[3], textBoxBounds[2] - textBoxBounds[0], textBoxBounds[3] - textBoxBounds[1]);*/
-   //         handler.SetScissorBox(textBoxBounds[0], kWindowSize.y - textBoxBounds[3], textBoxBounds[2] - textBoxBounds[0], textBoxBounds[3] - textBoxBounds[1]);
-   //         texts["story"]->Draw(textRenderer2);
-   //         // Restore the original scissor box
-   //         /*glScissor(originalScissorBox[0], originalScissorBox[1], originalScissorBox[2], originalScissorBox[3]);*/
-   //         handler.RestoreScissorBox();
-   //         
-   //         // Draw the scroll icon when the transition state is END
-   //         if (this->transitionState == TransitionState::END && this->state == GameState::STORY) {
-   //             // Draw the scroll icon
-   //             texts["story"]->GetScrollIcon().Draw(colorRenderer, circleRenderer);
-   //             // Draw line on the boundaries of the text box
-   //             std::vector<glm::vec2> lines = {
-   //                 // bottom line
-   //                 glm::vec2(textBoxBounds.x + kBubbleRadius * 0.4f, textBoxBounds.w),
-   //                 glm::vec2(textBoxBounds.z, textBoxBounds.w),
-   //                 // right line
-   //                 glm::vec2(texts["story"]->GetScrollIcon().GetPosition().x, this->scroll->GetSilkBounds().y + kBubbleRadius / 14.f),
-   //                 glm::vec2(texts["story"]->GetScrollIcon().GetPosition().x, textBoxBounds.w)
-   //             };
-   //             lineRenderer->DrawLines(lines, glm::vec4(0.8f, 0.62353f, 0.54902f, 1.0f));
-			//}
-   //     }
-      //  else if (this->state == GameState::CONTROL) {
-      ///*      texts["control"]->Draw(textRenderer2);*/
-      //      pages["control"]->Draw();
-      //      //buttons["start"]->Draw(textRenderer2, colorRenderer);
-      //      //buttons["back"]->Draw(textRenderer2, colorRenderer);
-      //      //buttons["exit"]->Draw(textRenderer2, colorRenderer);
-      //  }
-        //if (this->state == GameState::STORY) {
-        //    pages["story"]->Draw();
-        //}
         if (!activePage.empty()) {
 			pages.at(activePage)->Draw();
 		}

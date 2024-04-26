@@ -30,6 +30,10 @@ void TextUnit::SetText(std::shared_ptr<Text> text) {
 	height_ = text_->GetTextSize(textRenderer_).y;
 }
 
+std::shared_ptr<TextRenderer> TextUnit::GetTextRenderer() {
+	return textRenderer_;
+}
+
 void TextUnit::SetTextRenderer(std::shared_ptr<TextRenderer> textRenderer) {
 	textRenderer_ = textRenderer;
 	// Update height
@@ -37,7 +41,9 @@ void TextUnit::SetTextRenderer(std::shared_ptr<TextRenderer> textRenderer) {
 }
 
 void TextUnit::UpdateHeight() {
+	std::cout << "old height: " << height_ << std::endl;
 	height_ = text_->GetTextSize(textRenderer_).y;
+	std::cout << "new height: " << height_ << std::endl;
 }
 
 void TextUnit::SetPosition(glm::vec2 pos) {
