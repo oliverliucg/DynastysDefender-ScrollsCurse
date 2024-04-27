@@ -273,14 +273,6 @@ void GameManager::Init() {
     texts["control"]->AddParagraph(kControlInstruction2);
     texts["control"]->AddParagraph(kControlInstruction3);
     texts["control"]->AddParagraph(kControlInstruction4);
-    texts["control"]->AddParagraph(kControlInstruction1);
-    texts["control"]->AddParagraph(kControlInstruction2);
-    texts["control"]->AddParagraph(kControlInstruction3);
-    texts["control"]->AddParagraph(kControlInstruction4);
-    texts["control"]->AddParagraph(kControlInstruction1);
-    texts["control"]->AddParagraph(kControlInstruction2);
-    texts["control"]->AddParagraph(kControlInstruction3);
-    texts["control"]->AddParagraph(kControlInstruction4);
     texts["control"]->SetScale(0.0216f/kFontScale);
 
     texts["victory"] = std::make_shared<Text>(/*pos=*/glm::vec2(0,0),
@@ -316,9 +308,7 @@ void GameManager::Init() {
     buttons["back"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), "Back");
     buttons["control"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 9.5f, kBubbleRadius * 3.0f), "Control");
     buttons["start"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 11.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), "Start");
-    buttons["controlstart"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 11.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), "Start");
     buttons["exit"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f + kBubbleRadius * 5.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 5.5f, kBubbleRadius * 3.0f), "Exit");
-    buttons["controlexit"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f + kBubbleRadius * 5.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 5.5f, kBubbleRadius * 3.0f), "Exit");
     buttons["restart"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 11.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 9.0f, kBubbleRadius * 3.0f), "Restart");
     buttons["resume"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 2.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 10.0f, kBubbleRadius * 3.0f), "Resume");
     buttons["stop"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f + kBubbleRadius * 7.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 6.0f, kBubbleRadius * 3.0f), "Stop");
@@ -367,8 +357,6 @@ void GameManager::Init() {
 		// Create scroll icon
 		textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
             			this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
-		// Set offset for the text content
-		/*textSection->SetOffset(9*kBubbleRadius);*/
 	}
 
     // Create page "control"
@@ -379,9 +367,7 @@ void GameManager::Init() {
     textSection = std::make_shared<PageSection>("controltextsection");
     textSection->AddContent(textUnit);
     buttionSection = std::make_shared<PageSection>("controlbuttonsection");
-    buttionSection->AddContent(startButtonUnit);
     buttionSection->AddContent(backButtonUnit);
-    buttionSection->AddContent(exitButtonUnit);
     buttionSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit", 0.1f * kBubbleRadius);
     buttionSection->SetInterUnitSpacing("backbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
     pages["control"] = std::make_unique<Page>("control");
@@ -392,7 +378,7 @@ void GameManager::Init() {
     pages["control"]->SetBottomSpacing(0.5f * kBubbleRadius);
     pages["control"]->SetLeftSpacing(0.5f * kBubbleRadius);
     // Set the inter spacing between the sections of the page "control".
-    pages["control"]->SetInterSectionSpacing("controltextsection", "controlbuttonsection", 0.5f * kBubbleRadius);
+    pages["control"]->SetInterSectionSpacing("controltextsection", "controlbuttonsection", 2.0f * kBubbleRadius);
 
     commonButtionPosition = glm::vec2(pages["control"]->GetPosition().x + pages["control"]->GetLeftSpacing(), this->height * 0.84f);
     commonButtonSize = glm::vec2(gameBoard->GetSize().x - 2 * (commonButtionPosition.x - pages["control"]->GetPosition().x), kBubbleRadius * 2.0f);
@@ -414,8 +400,6 @@ void GameManager::Init() {
         // Create scroll icon
         textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
             this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
-        // Set offset for the text content
-        /*textSection->SetOffset(9*kBubbleRadius);*/
     }
     
     // Initialize the timer
@@ -492,119 +476,8 @@ void GameManager::ProcessInput(float dt) {
         //}
     }
     else if (this->state == GameState::STORY) {
-        glm::vec2 mousePosition = glm::vec2(this->mouseX, this->mouseY);
-        if (this->targetState == GameState::UNDEFINED) {
-            // check if the mouse is hovering over the buttons that are active.
-            auto it = buttons.begin();
-            while (it != buttons.end()) {
-                auto& [content, button] = *it++;
-                // continue if the button is not active
-                if (button->GetState() == ButtonState::Inactive) {
-                    continue;
-                }
-                if (button->IsPositionInside(mousePosition)) {
-                    // Check if the button is pressed
-                    if (this->leftMousePressed) {
-                        button->SetState(ButtonState::Pressed);
-                        if (content == "control") {
-                            this->GoToState(GameState::CONTROL);
-                        }
-                        else if (content == "start") {
-                            // print the page story position and all its sections' positions
-                            auto textSection = pages["story"]->GetSection("storytextsection");
-                            auto buttonSection = pages["story"]->GetSection("storybuttonsection");
-                       
-                            this->GoToState(GameState::PREPARING);
-                            if (gameCharacters["guojie"]->GetState() != GameCharacterState::FIGHTING) {
-                                gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
-                            }
-                            // Set the position of guojie to be out of the screen.
-                            gameCharacters["guojie"]->SetPosition(gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
-                            // Set the target position of guojie to be landing
-                            gameCharacters["guojie"]->SetAndMoveToTargetPosition(gameCharacters["guojie"]->GetTargetPosition("landing"));
-                            // Set the initial velocity and acceleration of guojie.
-                            gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f * kBubbleRadius));
-                            gameCharacters["guojie"]->SetAcceleration(glm::vec2(0.0f, 10.0f * 9.8f * kBubbleRadius));
-
-                            //// Set the velocity of guojie.
-                            //gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f*kBubbleRadius));
-                        }
-                        else if (content == "exit") {
-                            this->SetState(GameState::EXIT);
-                        }
-                        // Set scroll state to be CLOSING
-                        this->scroll->SetState(ScrollState::CLOSING);
-
-                        // Deactivate all the buttons.
-                        for (auto& [content, button] : buttons) {
-                            button->SetState(ButtonState::Inactive);
-                        }
-
-                        // assume that only one button is pressed at a time, so we break the loop.
-                        break;
-                    }
-                    else {
-                        button->SetState(ButtonState::Hover);
-                    }
-                }
-                else {
-                    button->SetState(ButtonState::Normal);
-                }
-            }
-        }
     }
 	else if (this->state == GameState::CONTROL) {
-  //      // Move the text content of the page "control" based on the scroll offset.
-  //      if (this->scrollYOffset != 0.f) {
-  //          // Iterate over the sections of the page "control"
-  //          for (auto sectionName : pages["control"]->GetOrder()) {
-		//		auto section = pages["control"]->GetSection(sectionName);
-		//		// Skip if there's no scroll icon is not initialized.
-  //              if (!section->IsScrollIconInitialized()) {
-  //                  continue;
-  //              }
-  //              // Skip if the mouse cursor is not in the box.
-  //              if (!section->IsMouseInBox(glm::vec2(this->mouseX, this->mouseY))) {
-		//			continue;
-		//		}
-  //              section->MoveScrollIcon(-this->scrollYOffset * this->scrollSensitivity);
-  //              // assume that only one section is scrolled at a time, so we break the loop.
-  //              break;
-		//	}
-  //          // reset the scroll offset
-		//	this->scrollYOffset = 0.f;
-		//}
-  //      else if (this->leftMousePressed) {
-  //          glm::vec2 mousePosition = glm::vec2(this->mouseX, this->mouseY);
-  //          for (auto sectionName : pages["control"]->GetOrder()) {
-  //              auto section = pages["control"]->GetSection(sectionName);
-  //              // Skip if there's no scroll icon is not initialized.
-  //              if (!section->IsScrollIconInitialized()) {
-		//			continue;
-		//		}
-  //              Capsule& icon = section->GetScrollIcon();
-  //              auto sectionboundingBox = section->GetBoundingBox();
-  //              sectionboundingBox.z += 20 * icon.GetSize().x;
-  //              bool mouseIsCustomBox = mousePosition.x > sectionboundingBox.x && mousePosition.x < sectionboundingBox.z && mousePosition.y > sectionboundingBox.y && mousePosition.y < sectionboundingBox.w;
-  //              if (mouseIsCustomBox && (icon.IsPositionInside(mousePosition) || isReadyToDrag && isDragging)) {
-		//			if (isReadyToDrag) {
-		//				isDragging = true;
-		//				// move the story text scroll based on the mouse cursor postion offset.
-		//				float mouseYOffset = this->mouseY - this->mouseLastY;
-		//				section->MoveScrollIcon(mouseYOffset);
-		//				this->mouseLastX = this->mouseX;
-		//				this->mouseLastY = this->mouseY;
-		//			}
-		//		}
-		//		else{
-		//			isReadyToDrag = false;
-		//			isDragging = false;
-		//			// If the mouse cursor is not in the scroll, we reset the mouse last position to the current position.
-		//			this->mouseLastX = this->mouseX;
-		//			this->mouseLastY = this->mouseY;
-		//		}
-  //          }
-  //      }
     }
     else if (this->state == GameState::WIN || this->state == GameState::LOSE) {
         if (this->keys[GLFW_KEY_ENTER] && this->keysLocked[GLFW_KEY_ENTER] == false) {
@@ -718,6 +591,7 @@ void GameManager::ProcessInput(float dt) {
             }
         }
     }
+
     if (!activePage.empty()) {
         // Move the text content of the page "control" based on the scroll offset.
         if (this->scrollYOffset != 0.f) {
@@ -774,11 +648,80 @@ void GameManager::ProcessInput(float dt) {
                 }
             }
         }
+
+        glm::vec2 mousePosition = glm::vec2(this->mouseX, this->mouseY);
+        if (this->targetState == GameState::UNDEFINED) {
+            // check if the mouse is hovering over the buttons that are active.
+            auto it = buttons.begin();
+            while (it != buttons.end()) {
+                auto& [content, button] = *it++;
+                // continue if the button is not active
+                if (button->GetState() == ButtonState::Inactive) {
+                    continue;
+                }
+                if (button->IsPositionInside(mousePosition)) {
+                    // Check if the button is pressed
+                    if (this->leftMousePressed) {
+                        button->SetState(ButtonState::Pressed);
+                        if (content == "control") {
+                            this->GoToState(GameState::CONTROL);
+                        }
+                        else if (content == "start") {
+                            // print the page story position and all its sections' positions
+                            auto textSection = pages["story"]->GetSection("storytextsection");
+                            auto buttonSection = pages["story"]->GetSection("storybuttonsection");
+
+                            this->GoToState(GameState::PREPARING);
+                            if (gameCharacters["guojie"]->GetState() != GameCharacterState::FIGHTING) {
+                                gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
+                            }
+                            // Set the position of guojie to be out of the screen.
+                            gameCharacters["guojie"]->SetPosition(gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
+                            // Set the target position of guojie to be landing
+                            gameCharacters["guojie"]->SetAndMoveToTargetPosition(gameCharacters["guojie"]->GetTargetPosition("landing"));
+                            // Set the initial velocity and acceleration of guojie.
+                            gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f * kBubbleRadius));
+                            gameCharacters["guojie"]->SetAcceleration(glm::vec2(0.0f, 10.0f * 9.8f * kBubbleRadius));
+
+                            //// Set the velocity of guojie.
+                            //gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f*kBubbleRadius));
+                        }
+                        else if (content == "exit") {
+                            this->SetState(GameState::EXIT);
+                        }
+                        else if (content == "back") {
+                        	// Go to the last state
+                            this->GoToState(this->lastState);
+                        }
+
+                        // Set scroll state to be CLOSING
+                        this->scroll->SetState(ScrollState::CLOSING);
+
+                        // assume that only one button is pressed at a time, so we break the loop.
+                        break;
+                    }
+                    else {
+                        if (content == "back") {
+                            std::string str = ""; (void)str;
+                        }
+                        button->SetState(ButtonState::Hover);
+                    }
+                }
+                else {
+                    button->SetState(ButtonState::Normal);
+                }
+            }
+        }
     }
 }
 
 void GameManager::Update(float dt)
  {  
+    // Adjust the length of scroll based on the length of the page "control".
+    if (!this->activePage.empty()) {
+    	this->scroll->SetTargetSilkLenForOpening(std::min(pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y));
+    }
+
     // silk boundary before scrolling
     glm::vec4 silkBoundsBefore = this->scroll->GetSilkBounds();
 
@@ -1331,12 +1274,10 @@ void GameManager::Update(float dt)
             if (this->state != GameState::PREPARING) {
                 this->scroll->SetState(ScrollState::OPENING);
             }
-
             // If the new state is Preparing, then we set the gameboard state to be INGAME.
             if (this->state == GameState::PREPARING) {
 				gameBoard->SetState(GameBoardState::INGAME);
 			}
-
             if (!textSection->IsScrollIconAllowed()) {
 				textSection->SetOffset(targetOffset);
                 // Enable the scroll icon
@@ -1350,17 +1291,15 @@ void GameManager::Update(float dt)
     }
     if (this->state == GameState::CONTROL) {
         if (this->transitionState == TransitionState::TRANSITION) {
-            // Adjust the length of scroll based on the length of the page "control".
-            scroll->SetTargetSilkLenForOpening(std::min(pages["control"]->GetHeight(), gameBoard->GetSize().y));
 
 			// Set the button "Start", "Story", and "Exit" to from inactive to normal.
             if (this->lastState == GameState::STORY && buttons["start"]->GetState() == ButtonState::Inactive) {
-                auto buttonSection = pages["control"]->GetSection("controlbuttonsection");
-                for (const auto& buttonName : buttonSection->GetOrder()) {
-                    std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttonSection->GetContent(buttonName));
-					buttonUnit->GetButton()->SetState(ButtonState::Normal);
+    //            auto buttonSection = pages["control"]->GetSection("controlbuttonsection");
+    //            for (const auto& buttonName : buttonSection->GetOrder()) {
+    //                std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttonSection->GetContent(buttonName));
+				//	buttonUnit->GetButton()->SetState(ButtonState::Normal);
 
-				}
+				//}
 
                 /*AdjustButtonsHorizontalPosition({ "back", "exit" });*/
             } else if (this->lastState == GameState::ACTIVE && buttons["restart"]->GetState() == ButtonState::Inactive) {
@@ -1779,17 +1718,17 @@ void GameManager::Render(){
 			pages.at(activePage)->Draw();
 		}
 
-        // Render the buttons that is active
-        if (this->state != GameState::CONTROL) {
-            auto it = buttons.begin();
-            while (it != buttons.end())
-            {
-                if (it->second->GetState() != ButtonState::Inactive) {
-                    it->second->Draw(textRenderer2, colorRenderer);
-                }
-                ++it;
-            }
-        }
+        //// Render the buttons that is active
+        //if (this->state != GameState::CONTROL) {
+        //    auto it = buttons.begin();
+        //    while (it != buttons.end())
+        //    {
+        //        if (it->second->GetState() != ButtonState::Inactive) {
+        //            it->second->Draw(textRenderer2, colorRenderer);
+        //        }
+        //        ++it;
+        //    }
+        //}
 
         // Disable scissor test
    /*     glDisable(GL_SCISSOR_TEST);*/
