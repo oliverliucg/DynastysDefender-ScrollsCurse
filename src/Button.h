@@ -11,7 +11,7 @@
 #include "ColorRenderer.h"
 
 // State of the button
-enum ButtonState {
+enum class ButtonState {
 	Inactive,
 	Normal,
 	Hover,

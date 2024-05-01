@@ -69,12 +69,15 @@ private:
 
 class ImageUnit : public ContentUnit {
 public:
-	ImageUnit(const std::string& name, glm::vec2 position, glm::vec2 size, const Texture2D& sprite, std::shared_ptr<SpriteRenderer> spriteRenderer, float rotation = 0.f, glm::vec2 rotationPivot = glm::vec2(0.5f, 0.5f), glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	ImageUnit(const std::string& name, glm::vec2 position, glm::vec2 size, const Texture2D& sprite, std::shared_ptr<SpriteRenderer> spriteRenderer, 
+		float rotation = 0.f, glm::vec2 rotationPivot = glm::vec2(0.5f, 0.5f), glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), TextureRenderingMode mode = TextureRenderingMode::Normal);
 	void UpdateHeight() override;
 	void SetPosition(glm::vec2 pos) override;
 	glm::vec2 GetPosition() const override;
 	void SetSize(glm::vec2 size);
 	glm::vec2 GetSize() const; 
+	void SetTextureRenderingMode(TextureRenderingMode mode);
+	TextureRenderingMode GetTextureRenderingMode() const;
 	void Draw() override;
 private:
 	Texture2D  sprite_;
@@ -83,13 +86,14 @@ private:
 	float      rotation_;
 	glm::vec2  rotation_pivot_;
 	glm::vec4  color_;
+	TextureRenderingMode mode_;
 	std::shared_ptr<SpriteRenderer> sprite_renderer_;
 };
 
 // OptionUnit is a ContentUnit that used to choose an option, such as windowed mode or full screen mode. Each option has one icon image and one line of text.
 class OptionUnit : public ContentUnit {
 public:
-	OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, float horizontal_spacing = kBubbleRadius, bool clickable = true, bool imageOnLeft = true, bool textOnCenter = false);
+	OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, float horizontal_spacing = 0.7f*kBubbleRadius, bool clickable = true, bool imageOnLeft = true, bool textOnCenter = false);
 	std::shared_ptr<ImageUnit> GetIcon();
 	void SetIcon(std::shared_ptr<ImageUnit> icon);
 	std::shared_ptr<TextUnit> GetText();

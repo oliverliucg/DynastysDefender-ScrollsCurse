@@ -115,6 +115,11 @@ void PageSection::SetInterUnitSpacing(const std::string& unit1, const std::strin
 	inter_unit_spacing_[unit2][unit1] = spacing;
 }
 
+void PageSection::SetUnitHorizontalOffset(const std::string& unit, float offset) {
+	assert(content_.find(unit) != content_.end() && "Content not found in PageSection!");
+	horizontal_offset_[unit] = offset;
+}
+
 void PageSection::SetTopSpacing(float spacing) {
 	top_spacing_ = spacing;
 }
@@ -287,12 +292,15 @@ void PageSection::Draw() {
 		//		std::string str = ""; (void)str;
 		//	}
 		//}
-		if (offset_ != 0.f) {
-			content_[order_[i]]->SetPosition(glm::vec2(content_[order_[i]]->GetPosition().x, content_[order_[i]]->GetPosition().y + offset_));
+		float unit_horizontal_offset_ = this->horizontal_offset_.find(order_[i]) != this->horizontal_offset_.end() ? this->horizontal_offset_.at(order_[i]) : 0.f;
+		float original_x = content_[order_[i]]->GetPosition().x;
+		float original_y = content_[order_[i]]->GetPosition().y;
+		if (offset_ != 0.f || unit_horizontal_offset_ != 0.f) {
+			content_[order_[i]]->SetPosition(glm::vec2(original_x + unit_horizontal_offset_, original_y + offset_));
 		}
 		content_[order_[i]]->Draw();
-		if (offset_ != 0.f) {
-			content_[order_[i]]->SetPosition(glm::vec2(content_[order_[i]]->GetPosition().x, content_[order_[i]]->GetPosition().y - offset_));
+		if (offset_ != 0.f || unit_horizontal_offset_ != 0.f) {
+			content_[order_[i]]->SetPosition(glm::vec2(original_x, original_y));
 		}
 	}
 	// Restore the scissor box

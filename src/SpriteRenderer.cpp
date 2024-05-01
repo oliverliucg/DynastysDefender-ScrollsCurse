@@ -7,7 +7,7 @@ SpriteRenderer::SpriteRenderer(const Shader& shader):Renderer(shader)
 
 SpriteRenderer::~SpriteRenderer() {}
 
-void SpriteRenderer::DrawSprite(const Texture2D& texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec2 rotationPivot, glm::vec4 color)
+void SpriteRenderer::DrawSprite(const Texture2D& texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec2 rotationPivot, glm::vec4 color, TextureRenderingMode mode)
 {
 	// Prepare transformations
 	this->shader.Use();
@@ -29,6 +29,9 @@ void SpriteRenderer::DrawSprite(const Texture2D& texture, glm::vec2 position, gl
 	model = glm::scale(model, glm::vec3(size, 1.0f)); 
 
 	this->shader.SetMatrix4("model", model);
+
+	// Set the texture mode uniform
+	this->shader.SetInteger("textureMode", static_cast<int>(mode));
 
 	// Render textured quad
 	this->shader.SetVector4f("spriteColor", color);

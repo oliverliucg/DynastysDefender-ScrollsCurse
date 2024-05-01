@@ -113,8 +113,8 @@ void ButtonUnit::Draw() {
 	button_->Draw(text_renderer_, color_renderer_);
 }
 
-ImageUnit::ImageUnit(const std::string& name, glm::vec2 position, glm::vec2 size, const Texture2D& sprite, std::shared_ptr<SpriteRenderer> spriteRenderer, float rotation, glm::vec2 rotationPivot, glm::vec4 color):
-	ContentUnit(ContentType::kImage, size.y, name), sprite_(sprite), position_(position), size_(size), rotation_(rotation), rotation_pivot_(rotationPivot), color_(color), sprite_renderer_(spriteRenderer) {}
+ImageUnit::ImageUnit(const std::string& name, glm::vec2 position, glm::vec2 size, const Texture2D& sprite, std::shared_ptr<SpriteRenderer> spriteRenderer, float rotation, glm::vec2 rotationPivot, glm::vec4 color, TextureRenderingMode mode):
+	ContentUnit(ContentType::kImage, size.y, name), sprite_(sprite), position_(position), size_(size), rotation_(rotation), rotation_pivot_(rotationPivot), color_(color), mode_(mode), sprite_renderer_(spriteRenderer) {}
 
 void ImageUnit::UpdateHeight() {
 	height_ = size_.y;
@@ -138,8 +138,16 @@ glm::vec2 ImageUnit::GetSize() const {
 	return size_;
 }
 
+void ImageUnit::SetTextureRenderingMode(TextureRenderingMode mode) {
+	mode_ = mode;
+}
+
+TextureRenderingMode ImageUnit::GetTextureRenderingMode() const {
+	return mode_;
+}
+
 void ImageUnit::Draw() {
-	sprite_renderer_->DrawSprite(sprite_, position_, size_, rotation_, rotation_pivot_, color_);
+	sprite_renderer_->DrawSprite(sprite_, position_, size_, rotation_, rotation_pivot_, color_, mode_);
 }
 
 OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, float horizontal_spacing, bool clickable, bool imageOnLeft, bool textOnCenter):

@@ -343,23 +343,25 @@ void GameManager::Init() {
     // Set the horizontal spacing between the icon and text in weizifuicontextunit
     float horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - weizifuIconUnit->GetSize().x;
     weizifuIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
+    const float weiqingIconOffset = -0.75f * kBubbleRadius;
     auto weiqingIconUnit = std::make_shared<ImageUnit>("weiqingiconunit", 
         				/*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("weiqing")->GetGeneralSize(GameCharacterState::HAPPY)*0.75f, 
         				/*texture=*/gameCharacters.at("weiqing")->GetGeneralTexture(GameCharacterState::HAPPY), spriteRenderer);
+    weiqingIconUnit->SetTextureRenderingMode(TextureRenderingMode::FlipHorizontally);
     auto weiqingTextUnit = std::make_shared<TextUnit>("weiqingtextunit", texts["weiqingintro"], textRenderer2);
     auto weiqingIconTextUnit = std::make_shared<OptionUnit>("weiqingicontextunit", weiqingIconUnit, weiqingTextUnit);
     // Set the horizontal spacing between the icon and text in weiqingicontextunit
-    horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - weiqingIconUnit->GetSize().x;
+    horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - weiqingIconUnit->GetSize().x - weiqingIconOffset;
     weiqingIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
+    const float guojieIconOffset = -0.3f * kBubbleRadius;
     auto guojieIconUnit = std::make_shared<ImageUnit>("guojieiconunit", 
         						/*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("guojie")->GetGeneralSize(GameCharacterState::FIGHTING)*0.75f, 
         						/*texture=*/gameCharacters.at("guojie")->GetGeneralTexture(GameCharacterState::FIGHTING), spriteRenderer);
     auto guojieTextUnit = std::make_shared<TextUnit>("guojiestextunit", texts["guojieintro"], textRenderer2);
     auto guojieIconTextUnit = std::make_shared<OptionUnit>("guojieicontextunit", guojieIconUnit, guojieTextUnit);
     // Set the horizontal spacing between the icon and text in guojieicontextunit
-    horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - guojieIconUnit->GetSize().x;
+    horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - guojieIconUnit->GetSize().x - guojieIconOffset;
     guojieIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
-
 
 
     auto textSection = std::make_shared<PageSection>("storytextsection");
@@ -400,6 +402,8 @@ void GameManager::Init() {
     textSection->SetInterUnitSpacing("liucheicontextunit", "weizifuicontextunit", 2.f * kBubbleRadius);
     textSection->SetInterUnitSpacing("weizifuicontextunit", "weiqingicontextunit", 2.f * kBubbleRadius);
     textSection->SetInterUnitSpacing("weiqingicontextunit", "guojieicontextunit", 2.f * kBubbleRadius);
+    textSection->SetUnitHorizontalOffset("weiqingicontextunit", weiqingIconOffset);
+    textSection->SetUnitHorizontalOffset("guojieicontextunit", guojieIconOffset);
     textSection->SetMaxHeight(maxHeightForTextSection);
     textSection->SetMaxWidth(gameBoard->GetSize().x - pages["story"]->GetLeftSpacing() - 0.5*kBubbleRadius);
     pages["story"]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y - pages["story"]->GetHeight() * 0.5f, this->gameBoard->GetPosition().y)));

@@ -6,6 +6,12 @@
 #include "Texture.h"
 #include "Renderer.h"
 
+enum class TextureRenderingMode {
+    Normal = 0,
+    FlipHorizontally = 1,
+    FlipVertically = 2,
+};
+
 class SpriteRenderer: public Renderer
 {
 public:
@@ -14,7 +20,7 @@ public:
     // Destructor
     ~SpriteRenderer();
     // Renders a defined quad textured with given sprite
-    void DrawSprite(const Texture2D& texture, glm::vec2 position, glm::vec2 size = glm::vec2(100.0f, 100.0f), float rotate = 0.0f, glm::vec2 rotationPivot = glm::vec2(0.5f, 0.5f), glm::vec4 color = glm::vec4(1.0f));
+    void DrawSprite(const Texture2D& texture, glm::vec2 position, glm::vec2 size = glm::vec2(100.0f, 100.0f), float rotate = 0.0f, glm::vec2 rotationPivot = glm::vec2(0.5f, 0.5f), glm::vec4 color = glm::vec4(1.0f), TextureRenderingMode mode = TextureRenderingMode::Normal);
 
 private:
 

@@ -21,6 +21,7 @@ public:
 	std::vector<std::string> GetOrder() const;
 	void SetOrder(const std::vector<std::string>& order);
 	void SetInterUnitSpacing(const std::string& unit1, const std::string& unit2, float spacing);
+	void SetUnitHorizontalOffset(const std::string& unit, float offset);
 	void SetTopSpacing(float spacing);
 	float GetTopSpacing() const;
 	void SetBottomSpacing(float spacing);
@@ -59,6 +60,8 @@ private:
 	std::vector<std::string> order_;
 	// space between content units
 	std::unordered_map<std::string, std::unordered_map<std::string, float>> inter_unit_spacing_;
+	// horizontal offset of the content units
+	std::unordered_map<std::string, float> horizontal_offset_;
 	// space between the top of the section and the first content unit
 	float top_spacing_;
 	// space between the bottom of the section and the last content unit
