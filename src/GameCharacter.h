@@ -92,6 +92,12 @@ public:
 	// Clear carried objects and relative position ratios
 	void ClearCarriedObjects();
 
+	// Get the size of the character under certain state
+	glm::vec2 GetGeneralSize(GameCharacterState state) const;
+
+	// Get the texture of the character under certain state
+	Texture2D GetGeneralTexture(GameCharacterState state) const;
+
 private:
 	std::string name;
 	GameCharacterState state;

@@ -204,7 +204,6 @@ void GameManager::Init() {
     // Set the target position "out of the screen"
     gameCharacters["guojie"]->SetTargetPosition("outofscreen", gameCharacters["guojie"]->GetPosition() - glm::vec2(0, 40 * kBubbleRadius));
 
-
     // Wei Qing
     positions.clear();
     positions = {
@@ -260,9 +259,6 @@ void GameManager::Init() {
     // Initialize text box
     texts["story"] = std::make_shared<Text>(/*pos=*/glm::vec2(gameBoard->GetPosition().x + kBubbleRadius / 2.0f, gameBoard->GetPosition().y + kBubbleRadius / 2.0f), 
         /*lineWidth=*/gameBoard->GetSize().x - 2 * kBubbleRadius);
-    std::cout << "gameBoard->GetSize(): " << gameBoard->GetSize().x << " " << gameBoard->GetSize().y << std::endl;
-    std::cout << "kBubbleRadius: " << kBubbleRadius << std::endl;
-    std::cout << "line width: " << gameBoard->GetSize().x - 2 * kBubbleRadius << std::endl;
     texts["story"]->AddParagraph(kBackgroundStoryPart1);
     texts["story"]->AddParagraph(kBackgroundStoryPart2);
     texts["story"]->SetScale(0.03f/kFontScale);
@@ -318,8 +314,60 @@ void GameManager::Init() {
     auto startButtonUnit = std::make_shared<ButtonUnit>("startbuttonunit", buttons["start"], textRenderer2, colorRenderer);
     auto controlButtonUnit = std::make_shared<ButtonUnit>("controlbuttonunit", buttons["control"], textRenderer2, colorRenderer);
     auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["exit"], textRenderer2, colorRenderer);
+    // Create character introduction units
+    texts["liucheintro"] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+    texts["liucheintro"]->AddParagraph(kLiuCheIntroduction);
+    texts["liucheintro"]->SetScale(0.0216f / kFontScale);
+    texts["weizifuintro"] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+    texts["weizifuintro"]->AddParagraph(kWeiZiFuIntroduction);
+    texts["weizifuintro"]->SetScale(0.0216f / kFontScale);
+    texts["weiqingintro"] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+    texts["weiqingintro"]->AddParagraph(kWeiQingIntroduction);
+    texts["weiqingintro"]->SetScale(0.0216f / kFontScale);
+    texts["guojieintro"] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+    texts["guojieintro"]->AddParagraph(kGuoJieIntroduction);
+    texts["guojieintro"]->SetScale(0.0216f / kFontScale);
+
+    auto liucheIconUnit = std::make_shared<ImageUnit>("liucheiconunit", 
+        /*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("liuche")->GetGeneralSize(GameCharacterState::HAPPY)*0.75f, 
+        /*texture=*/gameCharacters.at("liuche")->GetGeneralTexture(GameCharacterState::HAPPY), spriteRenderer);
+    auto liucheTextUnit = std::make_shared<TextUnit>("liuchetextunit", texts["liucheintro"], textRenderer2);
+    auto liucheIconTextUnit = std::make_shared<OptionUnit>("liucheicontextunit", liucheIconUnit, liucheTextUnit);
+    // Get the icon size of liucheiconunit
+    glm::vec2 liucheIconSize = liucheIconUnit->GetSize();
+    auto weizifuIconUnit = std::make_shared<ImageUnit>("weizifuiconunit", 
+        		/*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("weizifu")->GetGeneralSize(GameCharacterState::HAPPY)*0.75f, 
+        		/*texture=*/gameCharacters.at("weizifu")->GetGeneralTexture(GameCharacterState::HAPPY), spriteRenderer);
+    auto weizifuTextUnit = std::make_shared<TextUnit>("weizifutextunit", texts["weizifuintro"], textRenderer2);
+    auto weizifuIconTextUnit = std::make_shared<OptionUnit>("weizifuicontextunit", weizifuIconUnit, weizifuTextUnit);
+    // Set the horizontal spacing between the icon and text in weizifuicontextunit
+    float horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - weizifuIconUnit->GetSize().x;
+    weizifuIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
+    auto weiqingIconUnit = std::make_shared<ImageUnit>("weiqingiconunit", 
+        				/*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("weiqing")->GetGeneralSize(GameCharacterState::HAPPY)*0.75f, 
+        				/*texture=*/gameCharacters.at("weiqing")->GetGeneralTexture(GameCharacterState::HAPPY), spriteRenderer);
+    auto weiqingTextUnit = std::make_shared<TextUnit>("weiqingtextunit", texts["weiqingintro"], textRenderer2);
+    auto weiqingIconTextUnit = std::make_shared<OptionUnit>("weiqingicontextunit", weiqingIconUnit, weiqingTextUnit);
+    // Set the horizontal spacing between the icon and text in weiqingicontextunit
+    horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - weiqingIconUnit->GetSize().x;
+    weiqingIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
+    auto guojieIconUnit = std::make_shared<ImageUnit>("guojieiconunit", 
+        						/*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("guojie")->GetGeneralSize(GameCharacterState::FIGHTING)*0.75f, 
+        						/*texture=*/gameCharacters.at("guojie")->GetGeneralTexture(GameCharacterState::FIGHTING), spriteRenderer);
+    auto guojieTextUnit = std::make_shared<TextUnit>("guojiestextunit", texts["guojieintro"], textRenderer2);
+    auto guojieIconTextUnit = std::make_shared<OptionUnit>("guojieicontextunit", guojieIconUnit, guojieTextUnit);
+    // Set the horizontal spacing between the icon and text in guojieicontextunit
+    horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - guojieIconUnit->GetSize().x;
+    guojieIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
+
+
+
     auto textSection = std::make_shared<PageSection>("storytextsection");
     textSection->AddContent(textUnit);
+    textSection->AddContent(liucheIconTextUnit);
+    textSection->AddContent(weizifuIconTextUnit);
+    textSection->AddContent(weiqingIconTextUnit);
+    textSection->AddContent(guojieIconTextUnit);
     textSection->SetScrollIconAllowed(false);
     auto buttionSection = std::make_shared<PageSection>("storybuttonsection");
     buttionSection->AddContent(startButtonUnit);
@@ -348,6 +396,10 @@ void GameManager::Init() {
 	}
     float interspacingBetweenTextAndButton = pages["story"]->GetInterSectionSpacing("storytextsection", "storybuttonsection");
     float maxHeightForTextSection = gameBoard->GetSize().y - buttionSection->GetHeight() - pages["story"]->GetBottomSpacing() - pages["story"]->GetTopSpacing() - interspacingBetweenTextAndButton;
+    textSection->SetInterUnitSpacing("storytextunit", "liucheicontextunit", 3.5f * kBubbleRadius);
+    textSection->SetInterUnitSpacing("liucheicontextunit", "weizifuicontextunit", 2.f * kBubbleRadius);
+    textSection->SetInterUnitSpacing("weizifuicontextunit", "weiqingicontextunit", 2.f * kBubbleRadius);
+    textSection->SetInterUnitSpacing("weiqingicontextunit", "guojieicontextunit", 2.f * kBubbleRadius);
     textSection->SetMaxHeight(maxHeightForTextSection);
     textSection->SetMaxWidth(gameBoard->GetSize().x - pages["story"]->GetLeftSpacing() - 0.5*kBubbleRadius);
     pages["story"]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y - pages["story"]->GetHeight() * 0.5f, this->gameBoard->GetPosition().y)));
@@ -358,6 +410,8 @@ void GameManager::Init() {
 		textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
             			this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
 	}
+
+    pages.at("story")->UpdatePosition();
 
     // Create page "control"
     textUnit = std::make_shared<TextUnit>("controltextunit", texts["control"], textRenderer2);
@@ -401,6 +455,9 @@ void GameManager::Init() {
         textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
             this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
     }
+
+    // Create page "Screen Settings"
+
     
     // Initialize the timer
     timer = std::make_shared<Timer>();

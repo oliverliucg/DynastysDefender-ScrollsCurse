@@ -338,4 +338,10 @@ void GameCharacter::ClearCarriedObjects() {
 	carriedObjects.clear();
 }
 
+glm::vec2 GameCharacter::GetGeneralSize(GameCharacterState otherState) const {
+	return sizes.at(otherState);
+}
 
+Texture2D GameCharacter::GetGeneralTexture(GameCharacterState otherState) const {
+	return textures.at(otherState);
+}

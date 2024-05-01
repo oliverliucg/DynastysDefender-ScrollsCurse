@@ -40,6 +40,11 @@ void PageSection::SetMaxWidth(float width) {
 			textUnit->GetText()->SetLineWidth(max_width_ - left_spacing_);
 			textUnit->UpdateHeight();
 		}
+		else if (content_[unit]->GetType() == ContentType::kOption) {
+			auto optionUnit = std::dynamic_pointer_cast<OptionUnit>(content_[unit]);
+			optionUnit->GetText()->GetText()->SetLineWidth(max_width_ - left_spacing_ - optionUnit->GetIcon()->GetSize().x - optionUnit->GetHorizontalSpacing());
+			optionUnit->UpdateHeight();
+		}
 	}
 }
 
@@ -275,9 +280,20 @@ void PageSection::Draw() {
 	handler.SetIntersectedScissorBox(sectionScissorBox);
 	for (size_t i = 0; i < order_.size(); ++i) {
 		assert(content_.find(order_[i]) != content_.end() && "Content not found in PageSection!");
-		content_[order_[i]]->SetPosition(glm::vec2(content_[order_[i]]->GetPosition().x, content_[order_[i]]->GetPosition().y + offset_));
+		//if (content_[order_[i]]->GetType() == ContentType::kOption) {
+		//	std::cout << "option position: " << content_[order_[i]]->GetPosition().x << ", " << content_[order_[i]]->GetPosition().y << std::endl;
+		//	std::cout << "offset: " << offset_ << std::endl;
+		//	if (content_[order_[i]]->GetPosition().y - offset_ < 0.f) {
+		//		std::string str = ""; (void)str;
+		//	}
+		//}
+		if (offset_ != 0.f) {
+			content_[order_[i]]->SetPosition(glm::vec2(content_[order_[i]]->GetPosition().x, content_[order_[i]]->GetPosition().y + offset_));
+		}
 		content_[order_[i]]->Draw();
-		content_[order_[i]]->SetPosition(glm::vec2(content_[order_[i]]->GetPosition().x, content_[order_[i]]->GetPosition().y - offset_));
+		if (offset_ != 0.f) {
+			content_[order_[i]]->SetPosition(glm::vec2(content_[order_[i]]->GetPosition().x, content_[order_[i]]->GetPosition().y - offset_));
+		}
 	}
 	// Restore the scissor box
 	handler.RestoreScissorBox();

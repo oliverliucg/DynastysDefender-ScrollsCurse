@@ -74,6 +74,13 @@ const std::string kControlInstruction4 = "{Pause Game}: Press the {Q Key} to pau
                                             "\n\t{Restart}: Start the game over from the beginning."
                                             "\n\t{Resume}: Resume your current game session."
                                             "\n\t{Stop}: Stop the game and return to the main menu.";
+
+// Introduction for each character
+const std::string kLiuCheIntroduction = "Emperor Wu of Han, Liu Che, was one of the most influential monarchs in Chinese history. His reign marked a period of great strength and prosperity for the Han Dynasty, particularly in terms of territorial expansion, economic development, and cultural flourishing. During a banquet at Princess Pingyang's residence, the assassin Guo Jie suddenly launched an attack and took control of the emperor and other guests.";
+const std::string kWeiZiFuIntroduction = "Wei Zifu, the half-sister of Wei Qing and the beloved second empress of Emperor Wu, Liu Che, was deeply cherished by the emperor. During a banquet at Princess Pingyang's residence, when Guo Jie suddenly attacked, she alertly pushed Liu Che out of the way, saving him from an arrow. However, Guo Jie subsequently took her and Liu Che hostage.";
+const std::string kWeiQingIntroduction = "Wei Qing, a renowned general during the reign of Emperor Wu of the Han Dynasty, played a crucial role in the early Han-Xiongnu Wars, achieving the ranks of Grand General and Grand Marshal. Wei Qing was the half-brother of Wei Zifu, the second empress of Emperor Wu, and the uncle of Crown Prince Liu Ju and the famous general Huo Qubing. When Guo Jie took control over Liu Che and Wei Zifu, Wei Qing quickly stepped forward to the rescue. He needed to break the enchantment of Guo Jie's magical scroll to defeat Guo Jie and rescue Liu Che and Wei Zifu.";
+const std::string kGuoJieIntroduction = "Guo Jie, a knight-errant of the Western Han Dynasty, was directed by Liu Ling, the daughter of Prince Liu An of Huainan, to infiltrate the residence of Princess Pingyang, where Liu Che was attending a banquet, and attempt an assassination. Not only does Guo Jie employ a hidden arrow but also wields a magical scroll capable of producing challenging colorful bubbles.";
+
 const std::string kPromptToMainMenuText = "Press Enter to proceed to the Main Menu";
 
 void SetWindowSize(int width, int height);

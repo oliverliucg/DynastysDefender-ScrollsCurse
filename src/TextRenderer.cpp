@@ -345,6 +345,8 @@ std::pair<float, float> TextRenderer::RenderCenteredText(std::string text, float
 
     std::vector<Character> characters;
     std::vector<float> xpositions, ypositions, widths, heights;
+
+    // Assume the text contains only one line.
     glm::vec2 offset = glm::vec2(0.f, center.y - (y + characterMap[CharStyle::Regular]['H'].Size.y * scale * 0.5f));
 
     while (wordIndex.second > wordIndex.first) {
