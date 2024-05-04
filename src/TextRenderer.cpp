@@ -88,7 +88,7 @@ void TextRenderer::Load(std::string font, unsigned int fontSize, CharStyle charS
     FT_Done_FreeType(ft);
 }
 
-glm::vec3 TextRenderer::GetTextSize(std::string text, float scale, float lineWidth, float lineSpacingFactor, float additionalPadding) {
+std::pair<glm::vec3, bool> TextRenderer::GetTextSize(std::string text, float scale, float lineWidth, float lineSpacingFactor, float additionalPadding) {
     glm::vec2 finalSize = glm::vec2(0.f);
 
     // iterate through all characters
@@ -111,7 +111,11 @@ glm::vec3 TextRenderer::GetTextSize(std::string text, float scale, float lineWid
     // char style
     CharStyle charStyle = CharStyle::Regular;
 
-    std::string lastWord;
+    // last character of the last word of the longest line.
+    char lastCharOfLongestLine = '\n';
+
+    bool hasDescendersInLastLine = false;
+
 
     while (wordIndex.second > wordIndex.first) {
 
@@ -137,17 +141,19 @@ glm::vec3 TextRenderer::GetTextSize(std::string text, float scale, float lineWid
             }
         }
 
-        lastWord = word;
         if (lenOfLine + endX - x > lineWidth) {
             y += lineSpacing;
+            hasDescendersInLastLine = false;
             x = initialX;
             finalSize.x = std::max(finalSize.x, lenOfLine);
             lenOfLine = 0.f;
-            if (firstWord) {
-                std::cout << "word: " << lastWord << " lenOfLine: " << lenOfLine << " endX: " << endX << " x: " << x << " initialX: " << initialX << " lineWidth: " << lineWidth << std::endl;
-            }
             assert(!firstWord && "The width of the line should at least have space for one word.");
             firstWord = true;
+        }
+        else {
+            if (lenOfLine > finalSize.x || lastCharOfLongestLine == '\n') {
+				lastCharOfLongestLine = word.back();
+			}
         }
 
         // Move the end index of the word to the start of the next word.
@@ -158,8 +164,19 @@ glm::vec3 TextRenderer::GetTextSize(std::string text, float scale, float lineWid
         }
         for (c = word.begin(); c != word.end(); ++c)
         {
+            if (isDescender(*c)) {
+				hasDescendersInLastLine = true;
+			}
             charStyle = styles[c - word.begin()];
             Character ch = characterMap[charStyle][*c];
+            //// If it is the last character of the word, then add the bearing.x and size.x to the endX.
+            //if (c == std::prev(word.end())) {
+            //    x += (ch.Bearing.x + ch.Size.x) * scale;
+            //}
+            //else {
+            //    // now advance cursors for next glyph
+            //    x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (1/64th times 2^6 = 64)
+            //}
             // now advance cursors for next glyph
             x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (1/64th times 2^6 = 64)
             lenOfLine = x - initialX;
@@ -170,6 +187,7 @@ glm::vec3 TextRenderer::GetTextSize(std::string text, float scale, float lineWid
         // If it is the end of the line, move to the next line.
         while (wordIndex.second == wordIndex.first && wordIndex.second < text.length() && text[wordIndex.first] == '\n') {
             y += lineSpacing;
+            hasDescendersInLastLine = false;
             x = initialX;
             finalSize.x = std::max(finalSize.x, lenOfLine);
             lenOfLine = 0.f;
@@ -182,8 +200,15 @@ glm::vec3 TextRenderer::GetTextSize(std::string text, float scale, float lineWid
         }
         firstWord = false;
     }
+    if (finalSize.x < lenOfLine) {
+		finalSize.x = lenOfLine;
+	}
+    float lastCharAdvance = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Advance >> 6;
+    float lastCharBearing = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Bearing.x;
+    float lastCharSize = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Size.x;
+    finalSize.x -= (lastCharAdvance - lastCharBearing - lastCharSize) * scale;
     finalSize.y = y + characterMap[CharStyle::Regular]['H'].Size.y * scale;
-    return glm::vec3(finalSize, lineSpacing);
+    return std::make_pair(glm::vec3(finalSize, lineSpacing), hasDescendersInLastLine);
 }
 
 std::pair<float, float> TextRenderer::RenderText(std::string text, float x, float y, float scale, float lineWidth, float lineSpacingFactor, float additionalPadding, glm::vec3 color, float alpha)
@@ -214,8 +239,6 @@ std::pair<float, float> TextRenderer::RenderText(std::string text, float x, floa
     // char style
     CharStyle charStyle = CharStyle::Regular;
 
-    std::string lastWord;
-
     while (wordIndex.second > wordIndex.first) {
 
         std::string word = text.substr(wordIndex.first, wordIndex.second - wordIndex.first);
@@ -240,14 +263,10 @@ std::pair<float, float> TextRenderer::RenderText(std::string text, float x, floa
 			}
         }
 
-        lastWord = word;
         if (lenOfLine + endX - x > lineWidth) {
             y += lineSpacing;
             x = initialX;
             lenOfLine = 0.f;
-            if (firstWord) {
-                std::cout << "word: " << lastWord << " lenOfLine: " << lenOfLine << " endX: " << endX << " x: " << x << " initialX: " << initialX << " lineWidth: " << lineWidth << std::endl;
-            }
             assert(!firstWord && "The width of the line should at least have space for one word.");
             firstWord = true;
 		}

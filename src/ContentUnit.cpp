@@ -41,9 +41,7 @@ void TextUnit::SetTextRenderer(std::shared_ptr<TextRenderer> textRenderer) {
 }
 
 void TextUnit::UpdateHeight() {
-	std::cout << "old height: " << height_ << std::endl;
 	height_ = text_->GetTextSize(text_renderer_).y;
-	std::cout << "new height: " << height_ << std::endl;
 }
 
 void TextUnit::SetPosition(glm::vec2 pos) {
@@ -150,8 +148,15 @@ void ImageUnit::Draw() {
 	sprite_renderer_->DrawSprite(sprite_, position_, size_, rotation_, rotation_pivot_, color_, mode_);
 }
 
-OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, float horizontal_spacing, bool clickable, bool imageOnLeft, bool textOnCenter):
-	ContentUnit(ContentType::kOption, text->GetHeight(), name), icon_(icon), text_(text), horizontal_spacing_(horizontal_spacing), clickable_(clickable), image_on_left_(imageOnLeft), text_on_center_(textOnCenter) {}
+OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, bool clickable, bool imageOnLeft, bool textOnCenter):
+	ContentUnit(ContentType::kOption, text->GetHeight(), name), icon_(icon), text_(text), 
+	horizontal_spacing_(text->GetTextRenderer()->GetTextSize("N", text->GetText()->GetScale(), std::numeric_limits<float>::max()).first.x),
+	clickable_(clickable), image_on_left_(imageOnLeft), text_on_center_(textOnCenter) {
+	horizontal_spacing_ -= text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Bearing.x * text->GetText()->GetScale();
+	char firstChar = text->GetText()->GetParagraph(0)[0];
+	horizontal_spacing_ -= text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at(firstChar).Bearing.x * text->GetText()->GetScale();
+	this->SetPosition(this->GetPosition());
+}
 
 std::shared_ptr<ImageUnit> OptionUnit::GetIcon() {
 	return icon_;

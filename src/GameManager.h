@@ -47,6 +47,7 @@ enum GameState {
 	STORY_END,
 	ACTIVE,
 	CONTROL,
+	DISPLAY_SETTINGS,
 	MENU,
 	PREPARING,
 	WIN,
@@ -305,5 +306,8 @@ private:
 
 	// Check if it is failed to pass the current level.
 	bool IsLevelFailed();
+
+	// Create clickable option units with the image of bubble as the icon.
+	std::shared_ptr<OptionUnit> CreateClickableOptionUnit(const std::string& name, const std::string& text);
 
 };

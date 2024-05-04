@@ -181,6 +181,10 @@ int randomWeightedSelect(std::vector<float> weights) {
 	return weights.size() - 1;
 }
 
+bool isDescender(char c) {
+    return c == 'g' || c == 'j' || c == 'p' || c == 'q' || c == 'y';
+}
+
 bool isPointHigherYThanLine(glm::vec2 point, glm::vec3 lineParams) {
     float A = lineParams.x;
     float B = lineParams.y;

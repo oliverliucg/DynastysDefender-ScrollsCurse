@@ -145,14 +145,15 @@ float Text::GetTargetScale(const std::string& target) const {
 glm::vec2 Text::GetTextSize(std::shared_ptr<TextRenderer> textRenderer) const {
 	glm::vec2 finalSize(0.f);
 	for (int i = 0; i < paragraphs.size(); ++i) {
-		auto paragraphSize = textRenderer->GetTextSize(paragraphs[i], scale, lineWidth, lineSpacingFactor, additionalPadding);
+		const auto& [paragraphSize, hasDescendersInLastLine] = textRenderer->GetTextSize(paragraphs[i], scale, lineWidth, lineSpacingFactor, additionalPadding);
 		finalSize.x = std::max(finalSize.x, paragraphSize.x);
 		finalSize.y += paragraphSize.y;
 		if (i + 1 < paragraphs.size()) { 
-		finalSize.y += 1.5f * paragraphSize.z; 
+			finalSize.y += 1.5f * paragraphSize.z; 
+		} else if (i + 1 == paragraphs.size() && hasDescendersInLastLine) {
+			finalSize.y += (textRenderer->characterMap.at(CharStyle::Regular).at('g').Size.y - textRenderer->characterMap.at(CharStyle::Regular).at('g').Bearing.y) * scale;
 		}
 	}
-	finalSize.y += (textRenderer->characterMap.at(CharStyle::Regular).at('g').Size.y - textRenderer->characterMap.at(CharStyle::Regular).at('g').Bearing.y) * scale;
 	return finalSize;
 }
 

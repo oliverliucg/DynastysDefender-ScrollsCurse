@@ -155,6 +155,9 @@ bool isSameColor(glm::vec3 rgb1, glm::vec3 rgb2);
 // Convert a color to a Color enum
 Color colorToEnum(glm::vec3 rgb);
 
+// Checks if a char is a descender.
+bool isDescender(char c);
+
 // Check if a point has higher y value than a line
 bool isPointHigherYThanLine(glm::vec2 point, glm::vec3 lineParams);
 

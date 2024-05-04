@@ -308,11 +308,13 @@ void GameManager::Init() {
     buttons["restart"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 11.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 9.0f, kBubbleRadius * 3.0f), "Restart");
     buttons["resume"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 2.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 10.0f, kBubbleRadius * 3.0f), "Resume");
     buttons["stop"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f + kBubbleRadius * 7.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 6.0f, kBubbleRadius * 3.0f), "Stop");
+    buttons["displaysettings"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), "Display");
 
     // Create page "story" / "Main Menu"
     auto textUnit = std::make_shared<TextUnit>("storytextunit", texts["story"], textRenderer2);
     auto startButtonUnit = std::make_shared<ButtonUnit>("startbuttonunit", buttons["start"], textRenderer2, colorRenderer);
     auto controlButtonUnit = std::make_shared<ButtonUnit>("controlbuttonunit", buttons["control"], textRenderer2, colorRenderer);
+    auto displaySettingsButtonUnit = std::make_shared<ButtonUnit>("displaysettingsbuttonunit", buttons["displaysettings"], textRenderer2, colorRenderer);
     auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["exit"], textRenderer2, colorRenderer);
     // Create character introduction units
     texts["liucheintro"] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
@@ -371,15 +373,17 @@ void GameManager::Init() {
     textSection->AddContent(weiqingIconTextUnit);
     textSection->AddContent(guojieIconTextUnit);
     textSection->SetScrollIconAllowed(false);
-    auto buttionSection = std::make_shared<PageSection>("storybuttonsection");
-    buttionSection->AddContent(startButtonUnit);
-    buttionSection->AddContent(controlButtonUnit);
-    buttionSection->AddContent(exitButtonUnit);
-    buttionSection->SetInterUnitSpacing("startbuttonunit", "controlbuttonunit", 0.1f * kBubbleRadius);
-    buttionSection->SetInterUnitSpacing("controlbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
+    auto buttonSection = std::make_shared<PageSection>("storybuttonsection");
+    buttonSection->AddContent(startButtonUnit);
+    buttonSection->AddContent(controlButtonUnit);
+    buttonSection->AddContent(displaySettingsButtonUnit);
+    buttonSection->AddContent(exitButtonUnit);
+    buttonSection->SetInterUnitSpacing("startbuttonunit", "controlbuttonunit", 0.1f * kBubbleRadius);
+    buttonSection->SetInterUnitSpacing("controlbuttonunit", "displaysettingsbuttonunit", 0.1f * kBubbleRadius);
+    buttonSection->SetInterUnitSpacing("displaysettingsbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
     pages["story"] = std::make_unique<Page>("story");
     pages["story"]->AddSection(textSection);
-    pages["story"]->AddSection(buttionSection);
+    pages["story"]->AddSection(buttonSection);
     // Set the top, bottom and left spacing of the page "story".
     pages["story"]->SetTopSpacing(0.5f * kBubbleRadius);
     pages["story"]->SetBottomSpacing(0.5f * kBubbleRadius);
@@ -389,15 +393,15 @@ void GameManager::Init() {
 
     glm::vec2 commonButtionPosition = glm::vec2(pages["story"]->GetPosition().x + pages["story"]->GetLeftSpacing(), this->height * 0.84f);
     glm::vec2 commonButtonSize = glm::vec2(gameBoard->GetSize().x - 2 * (commonButtionPosition.x - pages["story"]->GetPosition().x), kBubbleRadius * 2.0f);
-    for (const auto& buttonName : buttionSection->GetOrder()) {
-		std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttionSection->GetContent(buttonName));
+    for (const auto& buttonName : buttonSection->GetOrder()) {
+		std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttonSection->GetContent(buttonName));
 		buttonUnit->SetPosition(commonButtionPosition);
 		buttonUnit->SetSize(commonButtonSize);
 		auto button = buttonUnit->GetButton();
 		button->SetTextOnCenter(true);
 	}
     float interspacingBetweenTextAndButton = pages["story"]->GetInterSectionSpacing("storytextsection", "storybuttonsection");
-    float maxHeightForTextSection = gameBoard->GetSize().y - buttionSection->GetHeight() - pages["story"]->GetBottomSpacing() - pages["story"]->GetTopSpacing() - interspacingBetweenTextAndButton;
+    float maxHeightForTextSection = gameBoard->GetSize().y - buttonSection->GetHeight() - pages["story"]->GetBottomSpacing() - pages["story"]->GetTopSpacing() - interspacingBetweenTextAndButton;
     textSection->SetInterUnitSpacing("storytextunit", "liucheicontextunit", 3.5f * kBubbleRadius);
     textSection->SetInterUnitSpacing("liucheicontextunit", "weizifuicontextunit", 2.f * kBubbleRadius);
     textSection->SetInterUnitSpacing("weizifuicontextunit", "weiqingicontextunit", 2.f * kBubbleRadius);
@@ -424,13 +428,13 @@ void GameManager::Init() {
     /*auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["controlexit"], textRenderer2, colorRenderer);*/
     textSection = std::make_shared<PageSection>("controltextsection");
     textSection->AddContent(textUnit);
-    buttionSection = std::make_shared<PageSection>("controlbuttonsection");
-    buttionSection->AddContent(backButtonUnit);
-    buttionSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit", 0.1f * kBubbleRadius);
-    buttionSection->SetInterUnitSpacing("backbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
+    buttonSection = std::make_shared<PageSection>("controlbuttonsection");
+    buttonSection->AddContent(backButtonUnit);
+    buttonSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit", 0.1f * kBubbleRadius);
+    buttonSection->SetInterUnitSpacing("backbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
     pages["control"] = std::make_unique<Page>("control");
     pages["control"]->AddSection(textSection);
-    pages["control"]->AddSection(buttionSection);
+    pages["control"]->AddSection(buttonSection);
     // Set the top, bottom and left spacing of the page "control".
     pages["control"]->SetTopSpacing(0.5f * kBubbleRadius);
     pages["control"]->SetBottomSpacing(0.5f * kBubbleRadius);
@@ -440,15 +444,15 @@ void GameManager::Init() {
 
     commonButtionPosition = glm::vec2(pages["control"]->GetPosition().x + pages["control"]->GetLeftSpacing(), this->height * 0.84f);
     commonButtonSize = glm::vec2(gameBoard->GetSize().x - 2 * (commonButtionPosition.x - pages["control"]->GetPosition().x), kBubbleRadius * 2.0f);
-    for (const auto& buttonName : buttionSection->GetOrder()) {
-        std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttionSection->GetContent(buttonName));
+    for (const auto& buttonName : buttonSection->GetOrder()) {
+        std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttonSection->GetContent(buttonName));
         buttonUnit->SetPosition(commonButtionPosition);
         buttonUnit->SetSize(commonButtonSize);
         auto button = buttonUnit->GetButton();
         button->SetTextOnCenter(true);
     }
     interspacingBetweenTextAndButton = pages["control"]->GetInterSectionSpacing("controltextsection", "controlbuttonsection");
-    maxHeightForTextSection = gameBoard->GetSize().y - buttionSection->GetHeight() - pages["control"]->GetBottomSpacing() - pages["control"]->GetTopSpacing() - interspacingBetweenTextAndButton;
+    maxHeightForTextSection = gameBoard->GetSize().y - buttonSection->GetHeight() - pages["control"]->GetBottomSpacing() - pages["control"]->GetTopSpacing() - interspacingBetweenTextAndButton;
     textSection->SetMaxHeight(maxHeightForTextSection);
     textSection->SetMaxWidth(gameBoard->GetSize().x - pages["control"]->GetLeftSpacing() - 0.5*kBubbleRadius);
     pages["control"]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y-pages["control"]->GetHeight()*0.5f, this->gameBoard->GetPosition().y)));
@@ -460,9 +464,36 @@ void GameManager::Init() {
             this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x - Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
     }
 
-    // Create page "Screen Settings"
+    // Create page "Display Settings"
+    // Create option texts.
+    //const std::string windowedModeName = "windowedmode";
+    //const std::string fullScreenModeName = "fullscreenmode";
+    //texts[windowedModeName] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+    //texts[windowedModeName]->AddParagraph("Windowed Mode");
+    //texts[windowedModeName]->SetScale(0.0216f / kFontScale);
+    auto displaysetting1 = CreateClickableOptionUnit("fullscreenmode", "Full Screen Mode");
+    auto displaysetting2 = CreateClickableOptionUnit("windowedmode", "Windowed Mode");
+    textSection = std::make_shared<PageSection>("displaysettingtextsection");
+    buttonSection = std::make_shared<PageSection>("displaysettingbuttonsection");
+    textSection->AddContent(displaysetting1);
+    textSection->AddContent(displaysetting2);
+    textSection->SetInterUnitSpacing("fullscreenmode", "windowedmode", 0.5f * kBubbleRadius);
+    buttonSection->AddContent(backButtonUnit);
+    pages["displaysettings"] = std::make_unique<Page>("displaysettings");
+    pages["displaysettings"]->AddSection(textSection);
+    pages["displaysettings"]->AddSection(buttonSection);
+    // Set the top, bottom and left spacing of the page "Display Settings".
+    pages["displaysettings"]->SetTopSpacing(0.5f * kBubbleRadius);
+    pages["displaysettings"]->SetBottomSpacing(0.5f * kBubbleRadius);
+    pages["displaysettings"]->SetLeftSpacing(0.5f * kBubbleRadius);
+    // Set the inter spacing between the sections of the page "Display Settings".
+    pages["displaysettings"]->SetInterSectionSpacing("displaysettingtextsection", "displaysettingbuttonsection", 2.0f * kBubbleRadius);
+    interspacingBetweenTextAndButton = pages["displaysettings"]->GetInterSectionSpacing("displaysettingtextsection", "displaysettingbuttonsection");
+    maxHeightForTextSection = gameBoard->GetSize().y - buttonSection->GetHeight() - pages["displaysettings"]->GetBottomSpacing() - pages["displaysettings"]->GetTopSpacing() - interspacingBetweenTextAndButton;
+    textSection->SetMaxHeight(maxHeightForTextSection);
+    textSection->SetMaxWidth(gameBoard->GetSize().x - pages["displaysettings"]->GetLeftSpacing() - 0.5*kBubbleRadius);
+    pages["displaysettings"]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y - pages["displaysettings"]->GetHeight() * 0.5f, this->gameBoard->GetPosition().y)));
 
-    
     // Initialize the timer
     timer = std::make_shared<Timer>();
 
@@ -723,48 +754,50 @@ void GameManager::ProcessInput(float dt) {
                 if (button->IsPositionInside(mousePosition)) {
                     // Check if the button is pressed
                     if (this->leftMousePressed) {
-                        button->SetState(ButtonState::Pressed);
-                        if (content == "control") {
-                            this->GoToState(GameState::CONTROL);
-                        }
-                        else if (content == "start") {
-                            // print the page story position and all its sections' positions
-                            auto textSection = pages["story"]->GetSection("storytextsection");
-                            auto buttonSection = pages["story"]->GetSection("storybuttonsection");
-
-                            this->GoToState(GameState::PREPARING);
-                            if (gameCharacters["guojie"]->GetState() != GameCharacterState::FIGHTING) {
-                                gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
+                        if (button->GetState() == ButtonState::Hover) {
+                            button->SetState(ButtonState::Pressed);
+                            if (content == "control") {
+                                this->GoToState(GameState::CONTROL);
                             }
-                            // Set the position of guojie to be out of the screen.
-                            gameCharacters["guojie"]->SetPosition(gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
-                            // Set the target position of guojie to be landing
-                            gameCharacters["guojie"]->SetAndMoveToTargetPosition(gameCharacters["guojie"]->GetTargetPosition("landing"));
-                            // Set the initial velocity and acceleration of guojie.
-                            gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f * kBubbleRadius));
-                            gameCharacters["guojie"]->SetAcceleration(glm::vec2(0.0f, 10.0f * 9.8f * kBubbleRadius));
+                            else if (content == "displaysettings") {
+								this->GoToState(GameState::DISPLAY_SETTINGS);
+							}
+                            else if (content == "start") {
+                                // print the page story position and all its sections' positions
+                                auto textSection = pages["story"]->GetSection("storytextsection");
+                                auto buttonSection = pages["story"]->GetSection("storybuttonsection");
 
-                            //// Set the velocity of guojie.
-                            //gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f*kBubbleRadius));
-                        }
-                        else if (content == "exit") {
-                            this->SetState(GameState::EXIT);
-                        }
-                        else if (content == "back") {
-                        	// Go to the last state
-                            this->GoToState(this->lastState);
-                        }
+                                this->GoToState(GameState::PREPARING);
+                                if (gameCharacters["guojie"]->GetState() != GameCharacterState::FIGHTING) {
+                                    gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
+                                }
+                                // Set the position of guojie to be out of the screen.
+                                gameCharacters["guojie"]->SetPosition(gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
+                                // Set the target position of guojie to be landing
+                                gameCharacters["guojie"]->SetAndMoveToTargetPosition(gameCharacters["guojie"]->GetTargetPosition("landing"));
+                                // Set the initial velocity and acceleration of guojie.
+                                gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f * kBubbleRadius));
+                                gameCharacters["guojie"]->SetAcceleration(glm::vec2(0.0f, 10.0f * 9.8f * kBubbleRadius));
 
-                        // Set scroll state to be CLOSING
-                        this->scroll->SetState(ScrollState::CLOSING);
+                                //// Set the velocity of guojie.
+                                //gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f*kBubbleRadius));
+                            }
+                            else if (content == "exit") {
+                                this->SetState(GameState::EXIT);
+                            }
+                            else if (content == "back") {
+                                // Go to the last state
+                                this->GoToState(this->lastState);
+                            }
 
-                        // assume that only one button is pressed at a time, so we break the loop.
-                        break;
+                            // Set scroll state to be CLOSING
+                            this->scroll->SetState(ScrollState::CLOSING);
+
+                            // assume that only one button is pressed at a time, so we break the loop.
+                            break;
+                        }
                     }
                     else {
-                        if (content == "back") {
-                            std::string str = ""; (void)str;
-                        }
                         button->SetState(ButtonState::Hover);
                     }
                 }
@@ -1389,6 +1422,13 @@ void GameManager::Update(float dt)
             }
         }
     }
+    else if (this->state == GameState::DISPLAY_SETTINGS) {
+        if (this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSED) {
+			this->SetToTargetState();
+			this->SetTransitionState(TransitionState::TRANSITION);
+            this->scroll->SetState(ScrollState::OPENING);
+        }
+    }
     // Check if the characters are moving to the target position.
     for (auto& [name, character] : gameCharacters) {
         if (character->IsMoving()) {
@@ -1751,7 +1791,8 @@ void GameManager::Render(){
             explosionSystem->Draw();
         }
     }
-    else if (this->state == GameState::MENU || this->state == GameState::INITIAL || this->state == GameState::STORY || this->state == GameState::CONTROL) {
+    else if (this->state == GameState::MENU || this->state == GameState::INITIAL || this->state == GameState::STORY || this->state == GameState::CONTROL ||
+        this->state == GameState::DISPLAY_SETTINGS) {
         gameCharacters["weizifu"]->Draw(spriteRenderer);
         gameCharacters["liuche"]->Draw(spriteRenderer);
         gameCharacters["weiqing"]->Draw(spriteRenderer);
@@ -1837,6 +1878,8 @@ std::string GameManager::GetPageName(GameState gameState) {
 			return "story";
 		case GameState::CONTROL:
 			return "control";
+        case GameState::DISPLAY_SETTINGS:
+			return "displaysettings";
 		default:
 			return "";
 	}
@@ -1869,6 +1912,8 @@ void GameManager::SetState(GameState newState) {
                 }
             }
         }
+        // Refresh the position of each units in the active page.
+        pages.at(activePage)->UpdatePosition();
     }
                
 }
@@ -2676,9 +2721,31 @@ bool GameManager::IsLevelFailed() {
 			return true;
 		}
 	}
-
     return false;
+}
 
+std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(const std::string& name, const std::string& text) {
+    //auto liucheIconUnit = std::make_shared<ImageUnit>("liucheiconunit",
+    //    /*pos=*/glm::vec2(0.f), /*size=*/gameCharacters.at("liuche")->GetGeneralSize(GameCharacterState::HAPPY) * 0.75f,
+    //    /*texture=*/gameCharacters.at("liuche")->GetGeneralTexture(GameCharacterState::HAPPY), spriteRenderer);
+    //auto liucheTextUnit = std::make_shared<TextUnit>("liuchetextunit", texts["liucheintro"], textRenderer2);
+    //auto liucheIconTextUnit = std::make_shared<OptionUnit>("liucheicontextunit", liucheIconUnit, liucheTextUnit);
+    // Create the image unit
+    std::shared_ptr<ImageUnit> imageUnit = std::make_shared<ImageUnit>("clickableiconunit",
+            /*pos=*/glm::vec2(0.f), /*size=*/kBubbleSize,
+            /*texture=*/ResourceManager::GetInstance().GetTexture("bubble"), this->spriteRenderer);
+    // Create the text unit
+    texts[name] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+    texts[name]->AddParagraph(text);
+    texts[name]->SetScale(0.0018f * imageUnit->GetHeight());
+    std::cout << "imageUnit->GetHeight(): " << imageUnit->GetHeight() << std::endl;
+    std::shared_ptr<TextUnit> textUnit = std::make_shared<TextUnit>(name, texts.at(name), this->textRenderer2);
+    // Create the option unit
+    std::shared_ptr<OptionUnit> optionUnit = std::make_shared<OptionUnit>(name, imageUnit, textUnit);
+    optionUnit->SetTextOnCenter(true);
+    optionUnit->SetPosition(optionUnit->GetPosition());
+
+    return optionUnit;
 }
 
 

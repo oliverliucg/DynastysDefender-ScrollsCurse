@@ -254,10 +254,6 @@ void PageSection::MoveScrollIcon(float scroll_y_offset) {
 	glm::vec3 relation = GetScrollRelationShip();
 	float newOffset = getYOfLine(position.y - lines_[0].y, relation);
 	SetOffset(newOffset);
-
-	std::cout << "relation: " << relation.x << " " << relation.y << " " << relation.z << std::endl;
-	std::cout << "icon offset: " << position.y - lines_[0].y << std::endl;
-	std::cout << "text offset: " << newOffset << std::endl;
 }
 
 bool PageSection::NeedScrollIcon() {
@@ -291,6 +287,11 @@ void PageSection::Draw() {
 		//	if (content_[order_[i]]->GetPosition().y - offset_ < 0.f) {
 		//		std::string str = ""; (void)str;
 		//	}
+		//}
+		// print the size of the content if it is button
+		//if (content_[order_[i]]->GetType() == ContentType::kButton) {
+		//	auto buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(content_[order_[i]]);
+		//	std::cout << "button size: " << buttonUnit->GetSize().x << ", " << buttonUnit->GetSize().y << std::endl;
 		//}
 		float unit_horizontal_offset_ = this->horizontal_offset_.find(order_[i]) != this->horizontal_offset_.end() ? this->horizontal_offset_.at(order_[i]) : 0.f;
 		float original_x = content_[order_[i]]->GetPosition().x;

@@ -93,7 +93,7 @@ private:
 // OptionUnit is a ContentUnit that used to choose an option, such as windowed mode or full screen mode. Each option has one icon image and one line of text.
 class OptionUnit : public ContentUnit {
 public:
-	OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, float horizontal_spacing = 0.7f*kBubbleRadius, bool clickable = true, bool imageOnLeft = true, bool textOnCenter = false);
+	OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, bool clickable = true, bool imageOnLeft = true, bool textOnCenter = false);
 	std::shared_ptr<ImageUnit> GetIcon();
 	void SetIcon(std::shared_ptr<ImageUnit> icon);
 	std::shared_ptr<TextUnit> GetText();

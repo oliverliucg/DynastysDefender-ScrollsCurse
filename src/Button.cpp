@@ -1,7 +1,7 @@
 #include "Button.h"
 
 Button::Button(glm::vec2 position, glm::vec2 size, std::string content, bool textOnCenter, glm::vec4 color, glm::vec3 textColor,  ButtonState state)
-	: position_(position), size_(size), text_on_center_(textOnCenter), text_(std::make_unique<Text>(position+glm::vec2(size.x*0.035f, size.y*0.22f), size.x)), color_(color), state_(state)
+	: position_(position), size_(size), text_on_center_(textOnCenter), text_(std::make_unique<Text>(position+glm::vec2(size.x*0.035f, size.y*0.22f), size.x*0.9f)), color_(color), state_(state)
 {
 	text_->AddParagraph(content);
 	text_->SetColor(textColor);
@@ -59,6 +59,7 @@ void Button::SetSize(glm::vec2 size) {
 	size_ = size;
 	// Set the center of the text.
 	text_->SetCenter(position_ + size_ / 2.0f);
+	text_->SetLineWidth(size_.x*0.9f);
 }
 
 glm::vec2 Button::GetSize() const {
