@@ -203,10 +203,10 @@ std::pair<glm::vec3, bool> TextRenderer::GetTextSize(std::string text, float sca
     if (finalSize.x < lenOfLine) {
 		finalSize.x = lenOfLine;
 	}
-    float lastCharAdvance = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Advance >> 6;
-    float lastCharBearing = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Bearing.x;
-    float lastCharSize = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Size.x;
-    finalSize.x -= (lastCharAdvance - lastCharBearing - lastCharSize) * scale;
+    //float lastCharAdvance = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Advance >> 6;
+    //float lastCharBearing = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Bearing.x;
+    //float lastCharSize = characterMap.at(CharStyle::Regular).at(lastCharOfLongestLine).Size.x;
+    //finalSize.x -= (lastCharAdvance - lastCharBearing - lastCharSize) * scale;
     finalSize.y = y + characterMap[CharStyle::Regular]['H'].Size.y * scale;
     return std::make_pair(glm::vec3(finalSize, lineSpacing), hasDescendersInLastLine);
 }

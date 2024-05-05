@@ -19,10 +19,10 @@ Text& Button::GetText() {
 void Button::SetState(ButtonState state) {
 	this->state_ = state;
 	switch (state) {
-	case ButtonState::Normal: case ButtonState::Pressed: 
+	case ButtonState::kNormal: case ButtonState::kPressed: 
 		color_ = glm::vec4(Button::buttonColor, 1.0f);
 		break;
-	case ButtonState::Hover:
+	case ButtonState::kHovered:
 		// Make the color of the button deeper.
 		color_ = glm::vec4(Button::buttonColor * 0.8f, 1.0f);
 		break;

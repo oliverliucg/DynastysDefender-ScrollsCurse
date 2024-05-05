@@ -12,10 +12,10 @@
 
 // State of the button
 enum class ButtonState {
-	Inactive,
-	Normal,
-	Hover,
-	Pressed
+	kInactive,
+	kNormal,
+	kHovered,
+	kPressed
 };
 
 // A button has a a text and by default a rectangle that wraps the text.
@@ -26,7 +26,7 @@ public:
 	// Default destructor
 	~Button() = default;
 	// Constructs a new Button instance.
-	Button(glm::vec2 position, glm::vec2 size, std::string content, bool textOnCenter = true, glm::vec4 color = glm::vec4(Button::buttonColor, 1.0f), glm::vec3 textColor = Button::buttonTextColor,  ButtonState state = ButtonState::Inactive);
+	Button(glm::vec2 position, glm::vec2 size, std::string content, bool textOnCenter = true, glm::vec4 color = glm::vec4(Button::buttonColor, 1.0f), glm::vec3 textColor = Button::buttonTextColor,  ButtonState state = ButtonState::kInactive);
 
 	// Getters and setters for the button.
 	Text& GetText();

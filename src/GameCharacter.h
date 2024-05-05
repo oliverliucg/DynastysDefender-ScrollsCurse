@@ -6,7 +6,7 @@
 
 // State of the character
 enum class GameCharacterState {
-	Normal,
+	kNormal,
 	HAPPY,
 	SAD,
 	ANGRY,

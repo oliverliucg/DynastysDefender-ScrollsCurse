@@ -50,9 +50,9 @@ void GameManager::Init() {
         buttons["fullscreen"] = std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height * 0.18f), glm::vec2(this->width * 0.7f, this->height * 0.25f), "Full-Screen");
         buttons["windowed"] = std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height * 0.48f), glm::vec2(this->width * 0.7f, this->height * 0.25f), "Windowed");
         buttons["exit"] = std::make_shared<Button>(glm::vec2(this->width * 0.82f + this->height * 0.075f - this->height * 0.01f, this->height * 0.85f - this->height * 0.01f), glm::vec2(this->width * 0.18f, this->height * 0.15f), "Exit");
-        buttons["fullscreen"]->SetState(ButtonState::Normal);
-        buttons["windowed"]->SetState(ButtonState::Normal);
-        buttons["exit"]->SetState(ButtonState::Normal);
+        buttons["fullscreen"]->SetState(ButtonState::kNormal);
+        buttons["windowed"]->SetState(ButtonState::kNormal);
+        buttons["exit"]->SetState(ButtonState::kNormal);
 
         return;
     }
@@ -473,6 +473,7 @@ void GameManager::Init() {
     //texts[windowedModeName]->SetScale(0.0216f / kFontScale);
     auto displaysetting1 = CreateClickableOptionUnit("fullscreenmode", "Full Screen Mode");
     auto displaysetting2 = CreateClickableOptionUnit("windowedmode", "Windowed Mode");
+    displaysetting2->SetState(OptionState::kClicked);
     textSection = std::make_shared<PageSection>("displaysettingtextsection");
     buttonSection = std::make_shared<PageSection>("displaysettingbuttonsection");
     textSection->AddContent(displaysetting1);
@@ -646,13 +647,13 @@ void GameManager::ProcessInput(float dt) {
         while (it != buttons.end()) {
             auto& [content, button] = *it++;
             // continue if the button is not active
-            if (button->GetState() == ButtonState::Inactive) {
+            if (button->GetState() == ButtonState::kInactive) {
                 continue;
             }
             if (button->IsPositionInside(mousePosition)) {
                 // Check if the button is pressed
                 if (this->leftMousePressed) {
-                    button->SetState(ButtonState::Pressed);
+                    button->SetState(ButtonState::kPressed);
                     if (content == "windowed") {
                         this->screenMode = ScreenMode::WINDOWED;
                         this->SetState(GameState::EXIT);
@@ -669,17 +670,17 @@ void GameManager::ProcessInput(float dt) {
      
                     // Deactivate all the buttons.
                     for (auto& [content, button] : buttons) {
-                        button->SetState(ButtonState::Inactive);
+                        button->SetState(ButtonState::kInactive);
                     }
                     // assume that only one button is pressed at a time, so we break the loop.
                     break;
                 }
                 else {
-                    button->SetState(ButtonState::Hover);
+                    button->SetState(ButtonState::kHovered);
                 }
             }
             else {
-                button->SetState(ButtonState::Normal);
+                button->SetState(ButtonState::kNormal);
             }
         }
     }
@@ -748,14 +749,14 @@ void GameManager::ProcessInput(float dt) {
             while (it != buttons.end()) {
                 auto& [content, button] = *it++;
                 // continue if the button is not active
-                if (button->GetState() == ButtonState::Inactive) {
+                if (button->GetState() == ButtonState::kInactive) {
                     continue;
                 }
                 if (button->IsPositionInside(mousePosition)) {
                     // Check if the button is pressed
                     if (this->leftMousePressed) {
-                        if (button->GetState() == ButtonState::Hover) {
-                            button->SetState(ButtonState::Pressed);
+                        if (button->GetState() == ButtonState::kHovered) {
+                            button->SetState(ButtonState::kPressed);
                             if (content == "control") {
                                 this->GoToState(GameState::CONTROL);
                             }
@@ -798,13 +799,76 @@ void GameManager::ProcessInput(float dt) {
                         }
                     }
                     else {
-                        button->SetState(ButtonState::Hover);
+                        button->SetState(ButtonState::kHovered);
                     }
                 }
                 else {
-                    button->SetState(ButtonState::Normal);
+                    button->SetState(ButtonState::kNormal);
                 }
             }
+
+            // Iterate options in the current active page
+            if (!activePage.empty()) {
+                for (size_t sectionIdx = 0; sectionIdx < pages.at(activePage)->GetOrder().size(); ++sectionIdx) {
+					auto sectionName = pages.at(activePage)->GetOrder()[sectionIdx];
+					auto section = pages.at(activePage)->GetSection(sectionName);
+                    std::string optionToBeClicked = "";
+                    std::string optionAlreadyClicked = "";
+                    for (size_t unitIdx = 0; unitIdx < section->GetOrder().size(); ++unitIdx) {
+						auto unitName = section->GetOrder()[unitIdx];
+						auto contentUnit = section->GetContent(unitName);
+                        auto option = std::dynamic_pointer_cast<OptionUnit>(contentUnit);
+                        if (option == nullptr) {
+							continue;
+						}
+                        assert(option->GetType() == ContentType::kOption && "The content type should be an option.");
+                        if (option->GetState() == OptionState::kUnclickable) {
+                            continue;
+                        }
+                        else if (option->GetState() == OptionState::kClicked) {
+							optionAlreadyClicked = option->GetName();
+						}
+                        if (option->IsPositionInsideIcon(mousePosition) && option->GetState() != OptionState::kClicked) {
+                            if (this->leftMousePressed) {
+                                optionToBeClicked = option->GetName();
+                                if (option->GetState() == OptionState::kHovered) {
+                                    option->SetState(OptionState::kClicked);
+                                    if (activePage == "displaysettings") {
+                                        if (optionToBeClicked == "fullscreenmode") {
+                                            this->screenMode = ScreenMode::FULLSCREEN;
+                                        }
+                                        else if (optionToBeClicked == "windowedmode") {
+                                            this->screenMode = ScreenMode::WINDOWED;
+                                        }
+									}
+                                    continue;
+								}
+							}
+                            else {
+                                if (option->GetState() != OptionState::kClicked) {
+									option->SetState(OptionState::kHovered);
+								}
+							}
+						}
+                        else {
+                            if (option->GetState() != OptionState::kClicked) {
+                                option->SetState(OptionState::kNormal);
+                            }
+						}
+					}
+					// Set the state of the unclicked options to be kNormal if there's any option been clicked.
+                    if (!optionToBeClicked.empty()) {
+                        auto option = std::dynamic_pointer_cast<OptionUnit>(section->GetContent(optionAlreadyClicked));
+                        assert(option != nullptr && "The option should not be nullptr.");
+                        assert(option->GetType() == ContentType::kOption && "The content type should be an option.");
+                        assert(option->GetState() != OptionState::kUnclickable && "The option should be clickable.");
+                        if (option->GetState() == OptionState::kClicked) {
+                            option->SetState(OptionState::kNormal);
+                        }
+                    }
+				}
+            }
+
         }
     }
 }
@@ -1386,23 +1450,23 @@ void GameManager::Update(float dt)
     if (this->state == GameState::CONTROL) {
         if (this->transitionState == TransitionState::TRANSITION) {
 
-			// Set the button "Start", "Story", and "Exit" to from inactive to normal.
-            if (this->lastState == GameState::STORY && buttons["start"]->GetState() == ButtonState::Inactive) {
+			// Set the button "Start", "Story", and "Exit" to from kInactive to kNormal.
+            if (this->lastState == GameState::STORY && buttons["start"]->GetState() == ButtonState::kInactive) {
     //            auto buttonSection = pages["control"]->GetSection("controlbuttonsection");
     //            for (const auto& buttonName : buttonSection->GetOrder()) {
     //                std::shared_ptr<ButtonUnit> buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(buttonSection->GetContent(buttonName));
-				//	buttonUnit->GetButton()->SetState(ButtonState::Normal);
+				//	buttonUnit->GetButton()->SetState(ButtonState::kNormal);
 
 				//}
 
                 /*AdjustButtonsHorizontalPosition({ "back", "exit" });*/
-            } else if (this->lastState == GameState::ACTIVE && buttons["restart"]->GetState() == ButtonState::Inactive) {
-                    buttons["restart"]->SetState(ButtonState::Normal);
-                    buttons["resume"]->SetState(ButtonState::Normal);
-                    buttons["stop"]->SetState(ButtonState::Normal);
+            } else if (this->lastState == GameState::ACTIVE && buttons["restart"]->GetState() == ButtonState::kInactive) {
+                    buttons["restart"]->SetState(ButtonState::kNormal);
+                    buttons["resume"]->SetState(ButtonState::kNormal);
+                    buttons["stop"]->SetState(ButtonState::kNormal);
                     /*AdjustButtonsHorizontalPosition({ "restart", "resume", "stop" });*/
             }else{
-                if (this->scroll->GetState() == ScrollState::OPENED && (buttons["back"]->GetState() != ButtonState::Inactive || buttons["restart"]->GetState() != ButtonState::Inactive)) {
+                if (this->scroll->GetState() == ScrollState::OPENED && (buttons["back"]->GetState() != ButtonState::kInactive || buttons["restart"]->GetState() != ButtonState::kInactive)) {
 					this->SetTransitionState(TransitionState::END);
 				}
 				
@@ -1571,7 +1635,7 @@ void GameManager::Render(){
         auto it = buttons.begin();
         while (it != buttons.end())
         {
-            if (it->second->GetState() != ButtonState::Inactive) {
+            if (it->second->GetState() != ButtonState::kInactive) {
                 it->second->Draw(textRenderer2, colorRenderer);
             }
             ++it;
@@ -1825,7 +1889,7 @@ void GameManager::Render(){
         //    auto it = buttons.begin();
         //    while (it != buttons.end())
         //    {
-        //        if (it->second->GetState() != ButtonState::Inactive) {
+        //        if (it->second->GetState() != ButtonState::kInactive) {
         //            it->second->Draw(textRenderer2, colorRenderer);
         //        }
         //        ++it;
@@ -1897,7 +1961,7 @@ void GameManager::SetState(GameState newState) {
 		    auto section = pages.at(lastPage)->GetSection(sectionName);
 			for (const auto& contentName : section->GetOrder()) {
 				if (auto buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(section->GetContent(contentName))) {
-					buttonUnit->GetButton()->SetState(ButtonState::Inactive);
+					buttonUnit->GetButton()->SetState(ButtonState::kInactive);
 				}
 			}
 		}
@@ -1908,7 +1972,7 @@ void GameManager::SetState(GameState newState) {
             auto section = pages.at(activePage)->GetSection(sectionName);
             for (const auto& contentName : section->GetOrder()) {
                 if (auto buttonUnit = std::dynamic_pointer_cast<ButtonUnit>(section->GetContent(contentName))) {
-                    buttonUnit->GetButton()->SetState(ButtonState::Normal);
+                    buttonUnit->GetButton()->SetState(ButtonState::kNormal);
                 }
             }
         }
@@ -2741,7 +2805,7 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(const std::st
     std::cout << "imageUnit->GetHeight(): " << imageUnit->GetHeight() << std::endl;
     std::shared_ptr<TextUnit> textUnit = std::make_shared<TextUnit>(name, texts.at(name), this->textRenderer2);
     // Create the option unit
-    std::shared_ptr<OptionUnit> optionUnit = std::make_shared<OptionUnit>(name, imageUnit, textUnit);
+    std::shared_ptr<OptionUnit> optionUnit = std::make_shared<OptionUnit>(name, imageUnit, textUnit, OptionState::kNormal);
     optionUnit->SetTextOnCenter(true);
     optionUnit->SetPosition(optionUnit->GetPosition());
 

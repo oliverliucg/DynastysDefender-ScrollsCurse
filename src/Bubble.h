@@ -15,7 +15,7 @@
 // State of the bubble
 
 enum class BubbleState {
-	Normal,
+	kNormal,
 	Moving,
 	Static,
 	Falling,

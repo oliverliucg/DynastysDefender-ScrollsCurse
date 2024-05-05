@@ -136,6 +136,14 @@ glm::vec2 ImageUnit::GetSize() const {
 	return size_;
 }
 
+void ImageUnit::SetColor(glm::vec4 color) {
+	color_ = color;
+}
+
+glm::vec4 ImageUnit::GetColor() const {
+	return color_;
+}
+
 void ImageUnit::SetTextureRenderingMode(TextureRenderingMode mode) {
 	mode_ = mode;
 }
@@ -148,11 +156,19 @@ void ImageUnit::Draw() {
 	sprite_renderer_->DrawSprite(sprite_, position_, size_, rotation_, rotation_pivot_, color_, mode_);
 }
 
-OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, bool clickable, bool imageOnLeft, bool textOnCenter):
+OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon, std::shared_ptr<TextUnit> text, OptionState state, bool imageOnLeft, bool textOnCenter):
 	ContentUnit(ContentType::kOption, text->GetHeight(), name), icon_(icon), text_(text), 
-	horizontal_spacing_(text->GetTextRenderer()->GetTextSize("N", text->GetText()->GetScale(), std::numeric_limits<float>::max()).first.x),
-	clickable_(clickable), image_on_left_(imageOnLeft), text_on_center_(textOnCenter) {
-	horizontal_spacing_ -= text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Bearing.x * text->GetText()->GetScale();
+	horizontal_spacing_(text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Size.x * text->GetText()->GetScale()),
+	state_(state), image_on_left_(imageOnLeft), text_on_center_(textOnCenter) {
+	//horizontal_spacing_ -= text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Bearing.x * text->GetText()->GetScale();
+	//float AdvanceN = text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Advance >> 6;
+	//float BearingN = text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Bearing.x;
+	//float charSizeN = text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Size.x;
+	//horizontal_spacing_ -= (AdvanceN - BearingN - charSizeN) * text->GetText()->GetScale();
+	//std::cout << "horizontal spacing: " << horizontal_spacing_ << std::endl;
+	//float horizontal_spacing2 = charSizeN * text->GetText()->GetScale();
+	//std::cout << "horizontal spacing2: " << horizontal_spacing2 << std::endl;
+	/*this->SetState(this->state_);*/
 	char firstChar = text->GetText()->GetParagraph(0)[0];
 	horizontal_spacing_ -= text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at(firstChar).Bearing.x * text->GetText()->GetScale();
 	this->SetPosition(this->GetPosition());
@@ -227,12 +243,28 @@ float OptionUnit::GetHorizontalSpacing() const {
 	return horizontal_spacing_;
 }
 
-void OptionUnit::SetClickable(bool clickable) {
-	clickable_ = clickable;
+void OptionUnit::SetState(OptionState state) {
+	state_ = state;
+	switch (state_) {
+		case OptionState::kClicked:
+			// Set color to green
+			icon_->SetColor(glm::vec4(colorMap.at(Color::Green), 1.0f));
+			break;
+		case OptionState::kHovered:
+			// Set color to yellow
+			icon_->SetColor(glm::vec4(colorMap.at(Color::Yellow), 1.0f));
+			break;
+		default:
+			// Set color to white
+			icon_->SetColor(glm::vec4(colorMap.at(Color::White), 1.0f));
+			break;
+	}
+
+
 }
 
-bool OptionUnit::IsClickable() const {
-	return clickable_;
+OptionState OptionUnit::GetState() const {
+	return state_;
 }
 
 void OptionUnit::SetImageOnLeft(bool imageOnLeft) {
@@ -249,6 +281,14 @@ void OptionUnit::SetTextOnCenter(bool textOnCenter) {
 
 bool OptionUnit::IsTextOnCenter() const {
 	return text_on_center_;
+}
+
+bool OptionUnit::IsPositionInsideIcon(glm::vec2 position) const {
+	// Assume the icon is a bubble
+	glm::vec2 center = icon_->GetPosition() + icon_->GetSize() / 2.0f;
+	float distance = glm::length(position - center);
+	float radius = icon_->GetSize().x / 2.0f;
+	return !areFloatsGreater(distance, radius);
 }
 
 void OptionUnit::Draw() {
