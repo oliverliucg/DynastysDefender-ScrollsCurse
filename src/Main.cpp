@@ -68,8 +68,6 @@ void SetWindowSize(int width, int height) {
 	/*kBubbleSize = glm::vec2(kBubbleRadius * 2, kBubbleRadius * 2);*/
 	kFontScale = 0.2f;
 	kFontSize = kWindowSize.y * kFontScale;
-
-	Renderer::SetScaleRendering(1.f);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
