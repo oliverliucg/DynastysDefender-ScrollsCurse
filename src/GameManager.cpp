@@ -1,11 +1,9 @@
 #include "GameManager.h"
 #include <cstring>
 
-int GameManager::frameCount = 0;
-
 GameManager::GameManager(unsigned int width, unsigned int height)
 	: state(GameState::INITIAL), lastState(GameState::UNDEFINED), targetState(GameState::UNDEFINED), transitionState(TransitionState::START), 
-    screenMode(ScreenMode::WINDOWED), width(static_cast<float>(width)), height(static_cast<float>(height)), level(1), activePage("")
+    screenMode(ScreenMode::FULLSCREEN), targetScreenMode(ScreenMode::UNDEFINED), width(static_cast<float>(width)), height(static_cast<float>(height)), level(1), activePage("")
 {
     // Initialize all key states to false
     memset(keys, false, sizeof(keys));
@@ -26,36 +24,36 @@ GameManager::~GameManager() {
 }
 void GameManager::Init() {
 
-    if (this->state == GameState::OPTION) {
-        ResourceManager& resourceManager = ResourceManager::GetInstance();
-        /*resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt", "C:/Users/xiaod/resources/shaders/sprite.fs.txt", nullptr, "sprite");*/
-        resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/pure_color.vs.txt", "C:/Users/xiaod/resources/shaders/pure_color.fs.txt", nullptr, "purecolor");
-        resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/text_2d.vs.txt", "C:/Users/xiaod/resources/shaders/text_2d.fs.txt", nullptr, "text");
-        // configure shaders
-        glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width),
-            static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
-        resourceManager.GetShader("purecolor").Use().SetMatrix4("projection", projection);
-        colorRenderer = std::make_shared<ColorRenderer>(resourceManager.GetShader("purecolor"));
-        circleRenderer = std::make_shared<CircleRenderer>(resourceManager.GetShader("purecolor"), 0.5f);
-        textRenderer2 = std::make_shared<TextRenderer>(resourceManager.GetShader("text"), this->width, this->height);
-        // Initialize text renderer
-        textRenderer = std::make_shared<TextRenderer>(resourceManager.GetShader("text"), this->width, this->height);
-        textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-MediumItalic.TTF", this->height * 0.03f);
-        textRenderer2 = std::make_shared<TextRenderer>(resourceManager.GetShader("text"), this->width, this->height);
-        textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF", kFontSize, CharStyle::Regular);
-        //textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF", kFontSize, CharStyle::Bold);
-        //textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF", kFontSize, CharStyle::Italic);
-        //textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF", kFontSize, CharStyle::BoldItalic);
+    //if (this->state == GameState::OPTION) {
+    //    ResourceManager& resourceManager = ResourceManager::GetInstance();
+    //    /*resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt", "C:/Users/xiaod/resources/shaders/sprite.fs.txt", nullptr, "sprite");*/
+    //    resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/pure_color.vs.txt", "C:/Users/xiaod/resources/shaders/pure_color.fs.txt", nullptr, "purecolor");
+    //    resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/text_2d.vs.txt", "C:/Users/xiaod/resources/shaders/text_2d.fs.txt", nullptr, "text");
+    //    // configure shaders
+    //    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->width),
+    //        static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
+    //    resourceManager.GetShader("purecolor").Use().SetMatrix4("projection", projection);
+    //    colorRenderer = std::make_shared<ColorRenderer>(resourceManager.GetShader("purecolor"));
+    //    circleRenderer = std::make_shared<CircleRenderer>(resourceManager.GetShader("purecolor"), 0.5f);
+    //    textRenderer2 = std::make_shared<TextRenderer>(resourceManager.GetShader("text"), this->width, this->height);
+    //    // Initialize text renderer
+    //    textRenderer = std::make_shared<TextRenderer>(resourceManager.GetShader("text"), this->width, this->height);
+    //    textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-MediumItalic.TTF", this->height * 0.03f);
+    //    textRenderer2 = std::make_shared<TextRenderer>(resourceManager.GetShader("text"), this->width, this->height);
+    //    textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF", kFontSize, CharStyle::Regular);
+    //    //textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF", kFontSize, CharStyle::Bold);
+    //    //textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF", kFontSize, CharStyle::Italic);
+    //    //textRenderer2->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF", kFontSize, CharStyle::BoldItalic);
 
-        buttons["fullscreen"] = std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height * 0.18f), glm::vec2(this->width * 0.7f, this->height * 0.25f), "Full-Screen");
-        buttons["windowed"] = std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height * 0.48f), glm::vec2(this->width * 0.7f, this->height * 0.25f), "Windowed");
-        buttons["exit"] = std::make_shared<Button>(glm::vec2(this->width * 0.82f + this->height * 0.075f - this->height * 0.01f, this->height * 0.85f - this->height * 0.01f), glm::vec2(this->width * 0.18f, this->height * 0.15f), "Exit");
-        buttons["fullscreen"]->SetState(ButtonState::kNormal);
-        buttons["windowed"]->SetState(ButtonState::kNormal);
-        buttons["exit"]->SetState(ButtonState::kNormal);
+    //    buttons["fullscreen"] = std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height * 0.18f), glm::vec2(this->width * 0.7f, this->height * 0.25f), "Full-Screen");
+    //    buttons["windowed"] = std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height * 0.48f), glm::vec2(this->width * 0.7f, this->height * 0.25f), "Windowed");
+    //    buttons["exit"] = std::make_shared<Button>(glm::vec2(this->width * 0.82f + this->height * 0.075f - this->height * 0.01f, this->height * 0.85f - this->height * 0.01f), glm::vec2(this->width * 0.18f, this->height * 0.15f), "Exit");
+    //    buttons["fullscreen"]->SetState(ButtonState::kNormal);
+    //    buttons["windowed"]->SetState(ButtonState::kNormal);
+    //    buttons["exit"]->SetState(ButtonState::kNormal);
 
-        return;
-    }
+    //    return;
+    //}
     this->SetState(GameState::INITIAL);
     this->GoToState(GameState::STORY);
 
@@ -119,7 +117,7 @@ void GameManager::Init() {
     resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/scroll_upper.png", true, "scrollupper");
     resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/scroll_lower.png", true, "scrolllower");
     // Create game board
-    gameBoard = std::make_unique<GameBoard>(glm::vec2(this->width / 3, this->height*0.05), glm::vec2(this->width / 3, this->height*0.9), glm::vec4(GameBoardColorMap[GameBoardColor::ORIGINAL], 0.9f), resourceManager.GetTexture("scrollpaper"));
+    gameBoard = std::make_unique<GameBoard>(glm::vec2(this->width / 3, this->height*0.09), glm::vec2(this->width / 3, this->height*0.82), glm::vec4(GameBoardColorMap[GameBoardColor::ORIGINAL], 0.9f), resourceManager.GetTexture("scrollpaper"));
 
     // Create scroll    
     scroll = std::make_unique<Scroll>(glm::vec2(
@@ -473,7 +471,10 @@ void GameManager::Init() {
     //texts[windowedModeName]->SetScale(0.0216f / kFontScale);
     auto displaysetting1 = CreateClickableOptionUnit("fullscreenmode", "Full Screen Mode");
     auto displaysetting2 = CreateClickableOptionUnit("windowedmode", "Windowed Mode");
-    displaysetting2->SetState(OptionState::kClicked);
+    if(this->GetScreenMode() == ScreenMode::FULLSCREEN)
+		displaysetting1->SetState(OptionState::kClicked);
+    else
+        displaysetting2->SetState(OptionState::kClicked);
     textSection = std::make_shared<PageSection>("displaysettingtextsection");
     buttonSection = std::make_shared<PageSection>("displaysettingbuttonsection");
     textSection->AddContent(displaysetting1);
@@ -515,6 +516,21 @@ void GameManager::Init() {
 }
 
 void GameManager::ProcessInput(float dt) {
+    // If 'F' is pressed, then we toggle the full screen mode.
+    if (this->keys[GLFW_KEY_F] && this->keysLocked[GLFW_KEY_F] == false) {
+		this->keysLocked[GLFW_KEY_F] = true;
+		if (this->GetScreenMode() != ScreenMode::FULLSCREEN) {
+			this->GoToScreenMode(ScreenMode::FULLSCREEN);
+		}
+	}
+    // If 'W' is pressed, then we toggle the windowed mode.
+    if (this->keys[GLFW_KEY_W] && this->keysLocked[GLFW_KEY_W] == false) {
+        this->keysLocked[GLFW_KEY_W] = true;
+        if (this->GetScreenMode() != ScreenMode::WINDOWED) {
+			this->GoToScreenMode(ScreenMode::WINDOWED);
+		}
+    }
+
     if (this->state == GameState::ACTIVE) {
         // move shooter
         if (this->keys[GLFW_KEY_LEFT])
@@ -835,10 +851,10 @@ void GameManager::ProcessInput(float dt) {
                                     option->SetState(OptionState::kClicked);
                                     if (activePage == "displaysettings") {
                                         if (optionToBeClicked == "fullscreenmode") {
-                                            this->screenMode = ScreenMode::FULLSCREEN;
+                                            this->GoToScreenMode(ScreenMode::FULLSCREEN);
                                         }
                                         else if (optionToBeClicked == "windowedmode") {
-                                            this->screenMode = ScreenMode::WINDOWED;
+                                            this->GoToScreenMode(ScreenMode::WINDOWED);
                                         }
 									}
                                     continue;
@@ -1630,29 +1646,32 @@ void GameManager::Render(){
         return;
     }
 
-    if (this->state == GameState::OPTION) {
-        // Render the buttons that is active
-        auto it = buttons.begin();
-        while (it != buttons.end())
-        {
-            if (it->second->GetState() != ButtonState::kInactive) {
-                it->second->Draw(textRenderer2, colorRenderer);
-            }
-            ++it;
-        }
-       /* texts["prompttomainmenu"]->Draw(textRenderer2, true);*/
-        return;
-    }
+    //if (this->state == GameState::OPTION) {
+    //    // Render the buttons that is active
+    //    auto it = buttons.begin();
+    //    while (it != buttons.end())
+    //    {
+    //        if (it->second->GetState() != ButtonState::kInactive) {
+    //            it->second->Draw(textRenderer2, colorRenderer);
+    //        }
+    //        ++it;
+    //    }
+    //   /* texts["prompttomainmenu"]->Draw(textRenderer2, true);*/
+    //    return;
+    //}
 
     // Background
     ResourceManager& resourceManager = ResourceManager::GetInstance();
 
     postProcessor->BeginRender();
     
+    //if (!areFloatsEqual(glm::vec2(this->width, this->height), kFullScreenSize)) {
+    //    std::string str = "";
+    //}
+
     spriteRenderer->DrawSprite(resourceManager.GetTexture("background"), glm::vec2(0, 0), glm::vec2(this->width, this->height), 0.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
     // Draw shadow particles
-    /*std::cout << "frame count while drawing shadow: " << this->frameCount << std::endl;*/
     shadowTrailSystem->Draw(/*isDarkBackGround=*/true);
 
     if (this->state == GameState::ACTIVE || this->state == GameState::PREPARING || this->state == GameState::WIN || this->state == GameState::LOSE) {
@@ -1693,7 +1712,6 @@ void GameManager::Render(){
 
         if(gameCharacters["guojie"]->IsMoving()){
             // Do not draw health bar when guojie is moving.
-            /*std::cout << "frame count while drawing guojie moving: " << this->frameCount << std::endl;*/
             gameCharacters["guojie"]->Draw(spriteRenderer);
             gameCharacters["weiqing"]->Draw(spriteRenderer);
         }
@@ -1709,7 +1727,7 @@ void GameManager::Render(){
             this->timer->CleanEvent("guojieshaking");
 		}
 
-        // Render the arrows
+  //       Render the arrows
   //      for (auto& [id, carriedObject] : gameCharacters["guojie"]->GetCarriedObjects()) {
   //          if (auto arrow = std::dynamic_pointer_cast<Arrow>(carriedObject)) {
   //              if (arrow->IsPenetrating() || arrow->IsStopped()) {
@@ -1728,9 +1746,7 @@ void GameManager::Render(){
                 arrow->Draw(spriteRenderer);
             }
         }
-        
-        // Draw scroll
-        /*scroll->GetState() != ScrollState::DISABLED*/
+      
         
         if (this->state == GameState::ACTIVE || this->state == GameState::PREPARING) {
            
@@ -1861,7 +1877,6 @@ void GameManager::Render(){
         gameCharacters["liuche"]->Draw(spriteRenderer);
         gameCharacters["weiqing"]->Draw(spriteRenderer);
         if (this->targetState == GameState::PREPARING) {
-            /*std::cout << "frame count while drawing guojie moving: " << this->frameCount << std::endl;*/
             gameCharacters["guojie"]->Draw(spriteRenderer);
         }
         // Draw scroll
@@ -1884,17 +1899,17 @@ void GameManager::Render(){
 			pages.at(activePage)->Draw();
 		}
 
-        //// Render the buttons that is active
-        //if (this->state != GameState::CONTROL) {
-        //    auto it = buttons.begin();
-        //    while (it != buttons.end())
-        //    {
-        //        if (it->second->GetState() != ButtonState::kInactive) {
-        //            it->second->Draw(textRenderer2, colorRenderer);
-        //        }
-        //        ++it;
-        //    }
-        //}
+  //      //// Render the buttons that is active
+  //      //if (this->state != GameState::CONTROL) {
+  //      //    auto it = buttons.begin();
+  //      //    while (it != buttons.end())
+  //      //    {
+  //      //        if (it->second->GetState() != ButtonState::kInactive) {
+  //      //            it->second->Draw(textRenderer2, colorRenderer);
+  //      //        }
+  //      //        ++it;
+  //      //    }
+  //      //}
 
         // Disable scissor test
    /*     glDisable(GL_SCISSOR_TEST);*/
@@ -1923,7 +1938,6 @@ void GameManager::Render(){
     postProcessor->Render(glfwGetTime());
   
     if (this->state == GameState::WIN || this->state == GameState::LOSE) {
-
         if (this->state == GameState::WIN) {
             texts["victory"]->Draw(textRenderer2, true);
         }
@@ -1994,6 +2008,24 @@ GameState GameManager::GetState() {
 void GameManager::GoToState(GameState newState) {
     this->targetState = newState;
     this->transitionState = TransitionState::START;
+}
+
+void GameManager::GoToScreenMode(ScreenMode newScreenMode) {
+	this->targetScreenMode = newScreenMode;
+}
+
+void GameManager::SetScreenMode(ScreenMode newScreenMode) {
+    assert(newScreenMode != ScreenMode::UNDEFINED && "The screen mode is not defined.");
+	this->screenMode = newScreenMode;
+}
+
+ScreenMode GameManager::GetScreenMode() {
+	return this->screenMode;
+}
+
+void GameManager::SetToTargetScreenMode() {
+	SetScreenMode(this->targetScreenMode);
+	this->targetScreenMode = ScreenMode::UNDEFINED;
 }
 
 void GameManager::SetTransitionState(TransitionState newTransitionState) {

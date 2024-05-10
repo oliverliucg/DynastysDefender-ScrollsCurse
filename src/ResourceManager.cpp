@@ -24,21 +24,12 @@ std::unordered_map<Color, glm::vec3> colorMap = {
 //const int SCREEN_HEIGHT = (mode->height * 7) / 8;
 //const glm::vec2 kWindowSize = glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 
+float screenScale = 1.0f;
 float kBubbleRadius = kWindowSize.y / 42.f;
 float kVelocityUnit = 2 * kBubbleRadius;
 glm::vec2 kBubbleSize = glm::vec2(kBubbleRadius*2, kBubbleRadius*2);
 float kFontScale = 0.2f;
 float kFontSize = kWindowSize.y * kFontScale;
-
-
-void SetWindowSize(int width, int height) {
-	kWindowSize = glm::vec2(width, height);
-	kBubbleRadius = kWindowSize.y / 42.f;
-	kVelocityUnit = 2 * kBubbleRadius;
-	kBubbleSize = glm::vec2(kBubbleRadius * 2, kBubbleRadius * 2);
-	kFontScale = 0.2f;
-	kFontSize = kWindowSize.y * kFontScale;
-}
 
 bool areFloatsEqual(float a, float b, float epsilon) {
     return std::abs(a - b) < epsilon;
@@ -314,13 +305,37 @@ std::pair<int, int> findWord(std::string text, int startIndex) {
     return std::make_pair(startIndex, it - text.begin());
 }
 
-glm::vec4 MixBoundaries(glm::vec4 boundary1, glm::vec4 boundary2){
+glm::vec4 mixBoundaries(glm::vec4 boundary1, glm::vec4 boundary2){
 	glm::vec4 result;
 	result.x = std::max(boundary1.x, boundary2.x);
 	result.y = std::max(boundary1.y, boundary2.y);
 	result.z = std::min(boundary1.z, boundary2.z);
 	result.w = std::min(boundary1.w, boundary2.w);
 	return result;
+}
+
+SizePadding adjustToAspectRatio(int width, int height, int standardWidth, int standardHeight) {
+ //   float aspectRatio = (float)standardWidth / standardHeight;
+	//float currentAspectRatio = (float)width / height;
+	int newWidth = width;
+	int newHeight = height;
+    int padTop = 0, padBottom = 0, padLeft = 0, padRight = 0;
+    if (width * standardHeight > height*standardWidth) {
+		newWidth = height * standardWidth / standardHeight;
+        padLeft = (width - newWidth)/2;
+        padRight = width - newWidth - padLeft;
+
+	}
+    else if (width * standardHeight < height * standardWidth) {
+		newHeight = width * standardHeight / standardWidth;
+		padTop = (height - newHeight) / 2;
+		padBottom = height - newHeight - padTop;
+    }
+    else {
+        // The aspect ratio is the same
+        return SizePadding(width, height, 0, 0, 0, 0);
+    }
+	return SizePadding(newWidth, newHeight, padTop, padBottom, padLeft, padRight);
 }
 
 ResourceManager& ResourceManager::GetInstance() {

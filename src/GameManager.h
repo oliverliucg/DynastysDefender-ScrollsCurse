@@ -39,7 +39,7 @@
 #include "Page.h"
 #include "Timer.h"
 
-enum GameState {
+enum class GameState {
 	UNDEFINED,
 	OPTION,
 	INITIAL,
@@ -55,13 +55,14 @@ enum GameState {
 	EXIT
 };
 
-enum ScreenMode {
+enum class ScreenMode {
+	UNDEFINED,
 	WINDOWED,
 	FULLSCREEN
 };
 
 // Transition between states
-enum TransitionState {
+enum class TransitionState {
 	START,
 	TRANSITION,
 	END
@@ -102,7 +103,7 @@ class GameManager {
 public:
 	GameState state, lastState, targetState;
 	TransitionState transitionState;
-	ScreenMode screenMode;
+	ScreenMode screenMode, targetScreenMode;
 	bool keys[1024];
 	bool keysLocked[1024];
 	bool leftMousePressed;
@@ -116,12 +117,11 @@ public:
 	int level;
 	GameManager(unsigned int width, unsigned int height);
 	~GameManager();
+	std::shared_ptr<PostProcessor> GetPostProcessor() { return postProcessor; }
 	void Init();
 	void ProcessInput(float dt);
 	void Update(float dt);
 	void Render();
-
-	static int frameCount;
 private:
 	std::shared_ptr<SpriteRenderer> spriteRenderer;
 	std::shared_ptr<SpriteDynamicRenderer> spriteDynamicRenderer;
@@ -210,6 +210,18 @@ private:
 
 	// Go to the state of the game.
 	void GoToState(GameState newState);
+
+	// Go to screen mode.
+	void GoToScreenMode(ScreenMode newScreenMode);
+
+	// Get the screen mode of the game.
+	ScreenMode GetScreenMode();
+
+	// Set the screen mode of the game.
+	void SetScreenMode(ScreenMode newScreenMode);
+
+	// Set to the target screen mode of the game.
+	void SetToTargetScreenMode();
 
 	// Set the transition state of the game.
 	void SetTransitionState(TransitionState newTransitionState);

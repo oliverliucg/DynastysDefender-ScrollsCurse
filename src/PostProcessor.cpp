@@ -171,3 +171,23 @@ void PostProcessor::initRenderData() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
+
+void PostProcessor::Resize(unsigned int width, unsigned int height) {
+	this->width = width;
+	this->height = height;
+	// resize renderbuffer storage
+	glBindRenderbuffer(GL_RENDERBUFFER, this->RBO);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, width, height);
+	// resize framebuffer by unbinding the framebuffer and binding it again
+	glBindFramebuffer(GL_FRAMEBUFFER, this->MSFBO);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, this->RBO);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
+	// resize texture attachment
+	this->texture.Generate(width, height, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->texture.ID, 0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}

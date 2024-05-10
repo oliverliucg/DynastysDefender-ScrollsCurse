@@ -28,13 +28,37 @@ enum class Color {
     LightBlue,
 };
 
+struct SizePadding {
+    int width;
+    int height;
+    int padTop;
+    int padBottom;
+    int padLeft;
+    int padRight;
+
+    SizePadding() : width(3840), height(2160), padTop(0), padBottom(0), padLeft(0), padRight(0) {}
+    SizePadding(int width, int height, int padTop, int padBottom, int padLeft, int padRight) : width(width), height(height), padTop(padTop), padBottom(padBottom), padLeft(padLeft), padRight(padRight) {}
+    
+    int GetPaddedWidth() const {
+		return width + padLeft + padRight;
+	}
+
+    int GetPaddedHeight() const {
+		return height + padTop + padBottom;
+	}
+};
+
 extern std::unordered_map<Color, glm::vec3> colorMap;
 
-// Small window for choosing game mode
-extern glm::vec2 kOptionWindowSize;
+//// Small window for choosing game mode
+//extern glm::vec2 kOptionWindowSize;
+
+// Virtual screen size that the game is designed for
+extern glm::vec2 kVirtualScreenSize;
 
 // Full screen window size
 extern glm::vec2 kFullScreenSize;
+extern SizePadding kFullScreenSizePadding;
 
 // Not full screen window size
 extern glm::vec2 kWindowedModeSize;
@@ -44,6 +68,7 @@ extern glm::vec2 kWindowSize;
 
 //// scale of width to make the proportion of game objects consistent
 //const float kWidthScale = 27/28.0f;
+extern float screenScale;
 
 // Regular bubbble's radius and size.
 extern float kBubbleRadius;
@@ -82,8 +107,6 @@ const std::string kWeiQingIntroduction = "Wei Qing, a renowned general during th
 const std::string kGuoJieIntroduction = "Guo Jie, a knight-errant of the Western Han Dynasty, was directed by Liu Ling, the daughter of Prince Liu An of Huainan, to infiltrate the residence of Princess Pingyang, where Liu Che was attending a banquet, and attempt an assassination. Not only does Guo Jie employ a hidden arrow but also wields a magical scroll capable of producing challenging colorful bubbles.";
 
 const std::string kPromptToMainMenuText = "Press Enter to proceed to the Main Menu";
-
-void SetWindowSize(int width, int height);
 
 bool areFloatsEqual(float a, float b, float epsilon = 1e-4);
 
@@ -198,7 +221,10 @@ glm::vec2 calculateVelocity(glm::vec2 initialVelocity, glm::vec2 acceleration, f
 std::pair<int, int> findWord(std::string text, int startIndex);
 
 // Mix two boundaries.
-glm::vec4 MixBoundaries(glm::vec4 boundary1, glm::vec4 boundary2);
+glm::vec4 mixBoundaries(glm::vec4 boundary1, glm::vec4 boundary2);
+
+// Adjust the size of a rectangle to fit the aspect ratio of a standard size
+SizePadding adjustToAspectRatio(int width, int height, int standardWidth, int standardHeight);
 
 struct Circle {
     glm::vec2 center;

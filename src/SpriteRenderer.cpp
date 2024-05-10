@@ -26,7 +26,7 @@ void SpriteRenderer::DrawSprite(const Texture2D& texture, glm::vec2 position, gl
 	model = glm::translate(model, glm::vec3(-rotationPivot.x * size.x, -rotationPivot.y* size.y, 0.0f));
 
 	// Last scale
-	model = glm::scale(model, glm::vec3(size, 1.0f)); 
+	model = glm::scale(model, glm::vec3(size, 1.0f));
 
 	this->shader.SetMatrix4("model", model);
 

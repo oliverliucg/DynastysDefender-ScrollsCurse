@@ -24,6 +24,8 @@ public:
 	float GetSampleOffsets();
 	bool HasBeganRender();
 	bool HasEndedRender();
+	// Resize the framebuffer
+	void Resize(unsigned int width, unsigned int height);
 private:
 	// state
 	Texture2D texture;

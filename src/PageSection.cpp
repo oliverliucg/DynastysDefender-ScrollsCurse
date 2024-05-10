@@ -279,6 +279,18 @@ void PageSection::Draw() {
 	GLsizei scissorBoxHeight = std::ceil(boundingBox.w - boundingBox.y);
 	ScissorBoxHandler::ScissorBox sectionScissorBox(boundingBox.x, kWindowSize.y-boundingBox.w, scissorBoxWidth, scissorBoxHeight);
 	handler.SetIntersectedScissorBox(sectionScissorBox);
+	//// Get the current scissor box
+	//ScissorBoxHandler::ScissorBox curScissorBox = handler.GetScissorBox();
+	//// Get the previous scissor box
+	//ScissorBoxHandler::ScissorBox prevScissorBox = handler.GetPrevScissorBox();
+	//// if the first content unit is button, print the scissor box
+	//if (content_[order_[0]]->GetType() == ContentType::kButton) {
+	//	std::cout << "button section scissor box: " << sectionScissorBox.x << " " << sectionScissorBox.y << " " << sectionScissorBox.width << " " << sectionScissorBox.height << std::endl;
+	//	std::cout << "intersect scissor box: " << curScissorBox.x << " " << curScissorBox.y << " " << curScissorBox.width << " " << curScissorBox.height << std::endl;
+	//	std::cout << "actual intersect scissor box: " << actualIntersectedBox.x << " " << actualIntersectedBox.y << " " << actualIntersectedBox.width << " " << actualIntersectedBox.height << std::endl;
+	//	std::cout << "previous scissor box: " << prevScissorBox.x << " " << prevScissorBox.y << " " << prevScissorBox.width << " " << prevScissorBox.height << std::endl;
+	//}
+
 	for (size_t i = 0; i < order_.size(); ++i) {
 		assert(content_.find(order_[i]) != content_.end() && "Content not found in PageSection!");
 		//if (content_[order_[i]]->GetType() == ContentType::kOption) {
