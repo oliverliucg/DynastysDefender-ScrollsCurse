@@ -13,11 +13,13 @@
 #include <bit>
 #include <cstdint>
 #include <memory>
+#include <fstream>
 
 #include "Bubble.h"
 #include "Shooter.h"
 #include "Arrow.h"
 #include "ResourceManager.h"
+#include "ConfigManager.h"
 #include "SpriteRenderer.h"
 #include "SpriteDynamicRenderer.h"
 #include "PartialTextureRenderer.h"
@@ -53,12 +55,6 @@ enum class GameState {
 	WIN,
 	LOSE,
 	EXIT
-};
-
-enum class ScreenMode {
-	UNDEFINED,
-	WINDOWED,
-	FULLSCREEN
 };
 
 // Transition between states
@@ -118,6 +114,9 @@ public:
 	GameManager(unsigned int width, unsigned int height);
 	~GameManager();
 	std::shared_ptr<PostProcessor> GetPostProcessor() { return postProcessor; }
+	// Set to the target screen mode of the game.
+	void SetToTargetScreenMode();
+
 	void Init();
 	void ProcessInput(float dt);
 	void Update(float dt);
@@ -219,9 +218,6 @@ private:
 
 	// Set the screen mode of the game.
 	void SetScreenMode(ScreenMode newScreenMode);
-
-	// Set to the target screen mode of the game.
-	void SetToTargetScreenMode();
 
 	// Set the transition state of the game.
 	void SetTransitionState(TransitionState newTransitionState);

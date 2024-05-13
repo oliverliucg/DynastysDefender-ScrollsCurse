@@ -6,7 +6,7 @@
 #include "SpriteRenderer.h"
 #include "Shader.h"
 
-// PostProcessor hosts all PostProcessing effects for the Puzzle Bobble Game.
+// PostProcessor hosts all PostProcessing effects for the DynastysDefender-ScrollsCurse Game.
 class PostProcessor{
 public:
 	PostProcessor(Shader shader, unsigned int width, unsigned int height);

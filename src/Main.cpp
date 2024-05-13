@@ -7,7 +7,6 @@
 #include <iostream>
 
 // window dimensions
-glm::vec2 kVirtualScreenSize = glm::vec2(3840, 2160);
 glm::vec2 kWindowedModeSize = glm::vec2(3840, 2160);
 glm::vec2 kFullScreenSize = glm::vec2(3840, 2160);
 SizePadding kFullScreenSizePadding = SizePadding();
@@ -63,9 +62,9 @@ void switchToWindowedMode(GLFWwindow* window, int width, int height) {
 void SetWindowSize(int width, int height) {
 	kWindowSize = glm::vec2(width, height);
 	screenScale = width / kFullScreenSize.x;
-	/*kBubbleRadius = kWindowSize.y / 42.f;*/
+	kBubbleRadius = kWindowSize.y / 42.f;
 	kVelocityUnit = 2 * kBubbleRadius;
-	/*kBubbleSize = glm::vec2(kBubbleRadius * 2, kBubbleRadius * 2);*/
+	kBubbleSize = glm::vec2(kBubbleRadius * 2, kBubbleRadius * 2);
 	kFontScale = 0.2f;
 	kFontSize = kWindowSize.y * kFontScale;
 }
@@ -143,9 +142,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	gameManager->mouseY = static_cast<float>(virtualMouseY);
 }
 
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+void reconfigureWindowSize(GLFWwindow* window, int width, int height) {
 	// Adjust the window size to match the aspect ratio of the virtual screen size, which is 16:9
 	SizePadding adjustedSizes = adjustToAspectRatio(width, height, kVirtualScreenSize.x, kVirtualScreenSize.y);
 
@@ -156,17 +153,31 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	int vpWidth = width - (adjustedSizes.padLeft + adjustedSizes.padRight);
 	int vpHeight = height - (adjustedSizes.padTop + adjustedSizes.padBottom);
 	glViewport(vpX, vpY, vpWidth, vpHeight);
-
+	if (vpWidth == 0 || vpHeight == 0) {
+		return;
+	}
 	// Retrieve the pointer to gamemanager
 	GameManager* gameManager = static_cast<GameManager*>(glfwGetWindowUserPointer(window));
 	// Resize PostProcessing FBO
-	gameManager->GetPostProcessor()->Resize(width, height);
+	if (gameManager->GetPostProcessor() != nullptr) {
+		gameManager->GetPostProcessor()->Resize(width, height);
+	}
 	// Resize the scissor box handler
 	ScissorBoxHandler::GetInstance().SetActualWindowSizePadding(adjustedSizes);
 }
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	reconfigureWindowSize(window, width, height);
+}
+
 int main()
 {	
+	// load configurations
+	ConfigManager& configManager = ConfigManager::GetInstance();
+	configManager.SetConfigPath("C:/Users/xiaod/resources/settings/display.txt");
+	assert(configManager.LoadConfig() && "Failed to load configurations.");
+
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -188,18 +199,32 @@ int main()
 
 	auto kWindowedModeSizePadding = adjustToAspectRatio((mode->width * 7) / 8, (mode->height * 7) / 8, kVirtualScreenSize.x, kVirtualScreenSize.y);
 	kWindowedModeSize = glm::vec2(kWindowedModeSizePadding.width, kWindowedModeSizePadding.height);
-	/*kOptionWindowSize = glm::vec2(OPTION_WINDOW_WIDTH, OPTION_WINDOW_HEIGHT);*/
-	SetWindowSize(kFullScreenSize.x, kFullScreenSize.y);
+	SetWindowSize(kVirtualScreenSize.x, kVirtualScreenSize.y);
 	std::cout << "Resolution: " << mode->width << "x" << mode->height << std::endl;
-	std::cout << "SCREEN_WIDTH: " << std::endl;
 	std::cout << "WINDOWED_MODE_SCREEN_WIDTH: " << kWindowedModeSize.x << " WINDOWED_MODE_SCREEN_HEIGHT: " << kWindowedModeSize.y << std::endl;
 	std::cout << "FULL_SCREEN_WINDOW_WIDTH: " << kFullScreenSize.x << " FULL_SCREEN_WINDOW_HEIGHT: " << kFullScreenSize.y << std::endl;
-	/*std::cout << "OPTION_WINDOW_WIDTH: " << OPTION_WINDOW_WIDTH << " OPTION_WINDOW_HEIGHT: " << OPTION_WINDOW_HEIGHT << std::endl;*/
-	
+	ScreenMode initialScreenMode = configManager.GetScreenMode();
+
+	// By default, the screen mode is set to full screen mode
 	SizePadding SCREEN_SIZE_PADDING = kFullScreenSizePadding;
 	int SCREEN_WIDTH = SCREEN_SIZE_PADDING.GetPaddedWidth(), SCREEN_HEIGHT = SCREEN_SIZE_PADDING.GetPaddedHeight();
-	// Create the window
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Puzzle Bobble", NULL, NULL);
+	GLFWwindow* window;
+	if (initialScreenMode == ScreenMode::FULLSCREEN) {
+		// Create the window
+	    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "DynastysDefender-ScrollsCurse", primaryMonitor, NULL);
+	}
+	else {
+		SCREEN_SIZE_PADDING = kWindowedModeSizePadding;
+		// No padding for windowed mode
+		SCREEN_WIDTH = kWindowedModeSize.x;
+		SCREEN_HEIGHT = kWindowedModeSize.y;
+		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "DynastysDefender-ScrollsCurse", NULL, NULL);
+		// Set the position of window to the center of the screen
+		int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
+		int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
+		glfwSetWindowPos(window, windowPosX, windowPosY);
+	}
+
 	/*glfwSetWindowMonitor(window, primaryMonitor, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, mode->refreshRate);*/
 	if (window == NULL)
 	{
@@ -216,23 +241,29 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	// Set the position of window to the center of the screen
-	int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
-	int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
-	glfwSetWindowPos(window, windowPosX, windowPosY);
 
 	// OpenGL configuration
-	// --------------------
-	glViewport(windowPosX, windowPosY, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// initialize game
-	assert(SCREEN_WIDTH > 0 && SCREEN_HEIGHT > 0 && "Invalid screen size!");
-	GameManager gameManager(SCREEN_WIDTH, SCREEN_HEIGHT);
-	ScissorBoxHandler::GetInstance().SetExpectedWindowSizePadding(SCREEN_SIZE_PADDING);
+	int GAME_AREA_WIDTH = kVirtualScreenSize.x;
+	int GAME_AREA_HEIGHT = kVirtualScreenSize.y;
+	assert(GAME_AREA_WIDTH > 0 && GAME_AREA_HEIGHT > 0 && "Invalid screen size!");
+	// Clear the resources
+	ResourceManager::GetInstance().Clear();
+	GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
+	gameManager.Init();
+	ScissorBoxHandler::GetInstance().SetExpectedWindowSizePadding(kVirtualScreenSizePadding);
 	ScissorBoxHandler::GetInstance().SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
+	std::cout << "Screen width: " << SCREEN_WIDTH << " Screen height: " << SCREEN_HEIGHT << std::endl;
+
 	glfwSetWindowUserPointer(window, &gameManager);
+
+	int framebufferWidth, framebufferHeight;
+	glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+	reconfigureWindowSize(window, framebufferWidth, framebufferHeight);
+
 
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -246,7 +277,7 @@ int main()
 
 	// Option window to choose between windowed mode and full screen mode
 	/*gameManager.state = GameState::OPTION;*/
-	gameManager.Init();
+	/*gameManager.Init();*/
 	//// Set the background color to (0.988f, 0.928f, 0.828f, 1.0f) which is a pale yellow
 	//glClearColor(0.988f, 0.928f, 0.828f, 1.0f);
 	// Start a loop that runs until the user chooses which mode to play
@@ -273,8 +304,8 @@ int main()
 	//	glfwSwapBuffers(window);
 	//}
 
-	// Clear the resources
-	ResourceManager::GetInstance().Clear();
+	//// Clear the resources
+	//ResourceManager::GetInstance().Clear();
 
 	//if (gameManager.screenMode == ScreenMode::WINDOWED) {
 	//	SCREEN_WIDTH = WINDOWED_MODE_SCREEN_WIDTH;
@@ -308,8 +339,6 @@ int main()
 //	gameManager.height = SCREEN_HEIGHT;
 
 
-	// Main game loop
-	gameManager.Init();
 	// Start a loop that runs until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
@@ -323,7 +352,7 @@ int main()
 
 		// Render
 		// Clear the colorbuffer
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Default pale blue from LearnOpenGL
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Process input
@@ -335,16 +364,14 @@ int main()
 			int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
 			int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
 			glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, SCREEN_WIDTH, SCREEN_HEIGHT, GLFW_DONT_CARE);
-			gameManager.screenMode = gameManager.targetScreenMode;
-			gameManager.targetScreenMode = ScreenMode::UNDEFINED;
+			gameManager.SetToTargetScreenMode();
 		}
 		else if (gameManager.targetScreenMode == ScreenMode::FULLSCREEN) {
-			SCREEN_WIDTH = kFullScreenSize.x;
-			SCREEN_HEIGHT = kFullScreenSize.y;
+			SCREEN_WIDTH = kFullScreenSize.x + kFullScreenSizePadding.padLeft + kFullScreenSizePadding.padRight;
+			SCREEN_HEIGHT = kFullScreenSize.y + kFullScreenSizePadding.padTop + kFullScreenSizePadding.padBottom;
 			GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-			glfwSetWindowMonitor(window, NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, mode->refreshRate);
-			gameManager.screenMode = gameManager.targetScreenMode;
-			gameManager.targetScreenMode = ScreenMode::UNDEFINED;
+			glfwSetWindowMonitor(window, primaryMonitor, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, mode->refreshRate);
+			gameManager.SetToTargetScreenMode();
 		}
 
 		// Update game state

@@ -3,7 +3,7 @@
 
 GameManager::GameManager(unsigned int width, unsigned int height)
 	: state(GameState::INITIAL), lastState(GameState::UNDEFINED), targetState(GameState::UNDEFINED), transitionState(TransitionState::START), 
-    screenMode(ScreenMode::FULLSCREEN), targetScreenMode(ScreenMode::UNDEFINED), width(static_cast<float>(width)), height(static_cast<float>(height)), level(1), activePage("")
+    screenMode(ConfigManager::GetInstance().GetScreenMode()), targetScreenMode(ScreenMode::UNDEFINED), width(static_cast<float>(width)), height(static_cast<float>(height)), level(1), activePage("")
 {
     // Initialize all key states to false
     memset(keys, false, sizeof(keys));
@@ -23,7 +23,19 @@ GameManager::GameManager(unsigned int width, unsigned int height)
 GameManager::~GameManager() {
 }
 void GameManager::Init() {
-
+    std::cout << "bubble radius: " << kBubbleRadius << std::endl;
+    std::cout << "bubble size: " << kBubbleSize.x << " x " << kBubbleSize.y << std::endl;
+    std::cout << "game window size: " << this->width << " x " << this->height << std::endl;
+    std::cout << "full window size: " << kFullScreenSize.x << " x " << kFullScreenSize.y << std::endl;
+    std::cout << "windowed mode size: " << kWindowedModeSize.x << " x " << kWindowedModeSize.y << std::endl;
+    std::cout << "full window paddings: " << kFullScreenSizePadding.padLeft << ", " << kFullScreenSizePadding.padRight << ", " << kFullScreenSizePadding.padTop << ", " << kFullScreenSizePadding.padBottom << std::endl;
+    std::cout << "scissor box expected window paddings: " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().width << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().height
+        << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padLeft << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padRight
+        << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padTop << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padBottom << std::endl;
+    std::cout << "scissor box actual window paddings: " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().width << ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().height
+		<< ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padLeft << ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padRight
+		<< ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padTop << ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padBottom << std::endl;
+    
     //if (this->state == GameState::OPTION) {
     //    ResourceManager& resourceManager = ResourceManager::GetInstance();
     //    /*resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt", "C:/Users/xiaod/resources/shaders/sprite.fs.txt", nullptr, "sprite");*/
@@ -87,6 +99,13 @@ void GameManager::Init() {
     circleRenderer = std::make_shared<CircleRenderer>(resourceManager.GetShader("purecolor"), 0.5f);
     rayRenderer = std::make_shared<RayRenderer>(resourceManager.GetShader("ray"));
     lineRenderer = std::make_shared<LineRenderer>(resourceManager.GetShader("ray"));
+    
+ //   int paddedWidth = this->width, paddedHeight = this->height;
+ //   if (this->screenMode == ScreenMode::FULLSCREEN) {
+ //       paddedWidth += kFullScreenSizePadding.padLeft + kFullScreenSizePadding.padRight;
+	//	paddedHeight += kFullScreenSizePadding.padTop + kFullScreenSizePadding.padBottom;
+	//}
+ //   std::cout << "padded width: " << paddedWidth << ", padded height: " << paddedHeight << std::endl;
     postProcessor = std::make_shared<PostProcessor>(resourceManager.GetShader("postprocessing"), this->width, this->height);
 
     // load textures
@@ -2017,6 +2036,9 @@ void GameManager::GoToScreenMode(ScreenMode newScreenMode) {
 void GameManager::SetScreenMode(ScreenMode newScreenMode) {
     assert(newScreenMode != ScreenMode::UNDEFINED && "The screen mode is not defined.");
 	this->screenMode = newScreenMode;
+    // Store the screen mode to the global config.
+    ConfigManager& configManager = ConfigManager::GetInstance();
+    configManager.SetScreenMode(this->screenMode);
 }
 
 ScreenMode GameManager::GetScreenMode() {
@@ -2843,6 +2865,3 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(const std::st
 
     return optionUnit;
 }
-
-
-

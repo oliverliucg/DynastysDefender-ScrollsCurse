@@ -9,6 +9,7 @@
 
 #include "GameManager.h"
 #include "ResourceManager.h"
+#include "ConfigManager.h"
 
 // TODO: Reference additional headers your program requires here.
 // GLFW function declarations

@@ -173,6 +173,8 @@ void PostProcessor::initRenderData() {
 }
 
 void PostProcessor::Resize(unsigned int width, unsigned int height) {
+	if(this->width == width && this->height == height)
+		return;
 	this->width = width;
 	this->height = height;
 	// resize renderbuffer storage

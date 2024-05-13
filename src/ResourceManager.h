@@ -54,7 +54,8 @@ extern std::unordered_map<Color, glm::vec3> colorMap;
 //extern glm::vec2 kOptionWindowSize;
 
 // Virtual screen size that the game is designed for
-extern glm::vec2 kVirtualScreenSize;
+const glm::vec2 kVirtualScreenSize = glm::vec2(3840, 2160);
+const SizePadding kVirtualScreenSizePadding = SizePadding(3840, 2160, 0, 0, 0, 0);
 
 // Full screen window size
 extern glm::vec2 kFullScreenSize;
@@ -83,6 +84,9 @@ extern float kVelocityUnit;
 
 // number of directions of a neighbor bubble
 const int kNumNeighborDirections = 12;
+
+// File paths
+const std::string kDisplaySettingsPath = "C:/Users/xiaod/resources/settings/display.txt";
 
 
 // background story of the game
