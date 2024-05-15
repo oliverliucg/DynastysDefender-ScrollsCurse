@@ -23,12 +23,6 @@ GameManager::GameManager(unsigned int width, unsigned int height)
 GameManager::~GameManager() {
 }
 void GameManager::Init() {
-    std::cout << "bubble radius: " << kBubbleRadius << std::endl;
-    std::cout << "bubble size: " << kBubbleSize.x << " x " << kBubbleSize.y << std::endl;
-    std::cout << "game window size: " << this->width << " x " << this->height << std::endl;
-    std::cout << "full window size: " << kFullScreenSize.x << " x " << kFullScreenSize.y << std::endl;
-    std::cout << "windowed mode size: " << kWindowedModeSize.x << " x " << kWindowedModeSize.y << std::endl;
-    std::cout << "full window paddings: " << kFullScreenSizePadding.padLeft << ", " << kFullScreenSizePadding.padRight << ", " << kFullScreenSizePadding.padTop << ", " << kFullScreenSizePadding.padBottom << std::endl;
   
     //if (this->state == GameState::OPTION) {
     //    ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -529,6 +523,7 @@ void GameManager::Init() {
 }
 
 void GameManager::ProcessInput(float dt) {
+    std::lock_guard<std::mutex> lock(inputMutex);
     // If 'F' is pressed, then we toggle the full screen mode.
     if (this->keys[GLFW_KEY_F] && this->keysLocked[GLFW_KEY_F] == false) {
 		this->keysLocked[GLFW_KEY_F] = true;

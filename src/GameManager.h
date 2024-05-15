@@ -111,6 +111,7 @@ public:
 	float mouseX, mouseY, mouseLastX, mouseLastY;
 	float width, height;
 	int level;
+	std::mutex inputMutex;  // Mutex to protect input handling
 	GameManager(unsigned int width, unsigned int height);
 	~GameManager();
 	std::shared_ptr<PostProcessor> GetPostProcessor() { return postProcessor; }
