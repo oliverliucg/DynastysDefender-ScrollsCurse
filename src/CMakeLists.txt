@@ -28,4 +28,5 @@ target_include_directories(DynastysDefender-ScrollsCurse PRIVATE
     "${LIB_PATH}/include/glm"
     "${LIB_PATH}/include/GLFW"
     "${LIB_PATH}/include/freetype"
+    "${LIB_PATH}/include/nlohmann"
 )

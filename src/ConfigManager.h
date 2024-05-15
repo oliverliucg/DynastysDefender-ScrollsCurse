@@ -3,6 +3,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <json.hpp>
+
 enum class ScreenMode {
 	UNDEFINED,
 	WINDOWED,

@@ -192,39 +192,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	reconfigureWindowSize(window, width, height);
 }
 
-//void window_focus_callback(GLFWwindow* window, int focused) {
-//	if (focused) {
-//		// Window gained focus
-//		lastFrame = glfwGetTime();  // Reset last frame time
-//	}
-//}
-
-//void gameLoop(GLFWwindow* window, GameManager& gameManager) {
-//
-//	// deltaTime variables
-//	// -------------------
-//	float deltaTime = 0.0f;
-//	float lastFrame = 0.0f;
-//
-//	while (!windowShouldClose.load()) {
-//		float currentFrame = static_cast<float>(glfwGetTime());
-//		float deltaTime = currentFrame - lastFrame;
-//		lastFrame = currentFrame;
-//
-//		gameManager.ProcessInput(deltaTime);  // Process input
-//
-//		gameManager.Update(deltaTime);  // Update game state
-//
-//		// Render
-//		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//		glClear(GL_COLOR_BUFFER_BIT);
-//
-//		gameManager.Render();  // Draw the game scene
-//
-//		glfwSwapBuffers(window);  // Swap the front and back buffers
-//	}
-//}
-
 
 int main()
 {	
@@ -268,13 +235,6 @@ int main()
 	if (initialScreenMode == ScreenMode::FULLSCREEN) {
 		// Create the window
 	    window = glfwCreateWindow(mode->width, mode->height, "DynastysDefender-ScrollsCurse", primaryMonitor, NULL);
-		//// Update the screen size padding
-		//int framebufferWidth, framebufferHeight;
-		//glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
-		//kFullScreenSizePadding = adjustToAspectRatio(framebufferWidth, framebufferHeight, kVirtualScreenSize.x, kVirtualScreenSize.y);
-		//SCREEN_SIZE_PADDING = kFullScreenSizePadding;
-		//SCREEN_WIDTH = SCREEN_SIZE_PADDING.GetPaddedWidth();
-		//SCREEN_HEIGHT = SCREEN_SIZE_PADDING.GetPaddedHeight();
 	}
 	else {
 		SCREEN_SIZE_PADDING = kWindowedModeSizePadding;
@@ -400,8 +360,6 @@ int main()
 //	gameManager.width = SCREEN_WIDTH;
 //	gameManager.height = SCREEN_HEIGHT;
 
-	/*std::thread gameThread(gameLoop, window, std::ref(gameManager));*/
-	float maxdeltaTime = 0.f;
 	// fixed time step
 	const float kTimeStep = 1.f / 120.f;
 	float accumulator = 0.f;
@@ -416,9 +374,6 @@ int main()
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-/*		maxdeltaTime = std::max(deltaTime, maxdeltaTime);
-		std::cout << "delta time: " << deltaTime << std::endl;
-		std::cout << "max delta time: " << maxdeltaTime << std::endl*/;
 
 		accumulator += deltaTime;
 
@@ -466,8 +421,6 @@ int main()
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
-
-	/*gameThread.join();*/
 
 	// Delete all resources.
 	ResourceManager::GetInstance().Clear();

@@ -523,7 +523,7 @@ void GameManager::Init() {
 }
 
 void GameManager::ProcessInput(float dt) {
-    std::lock_guard<std::mutex> lock(inputMutex);
+    //std::lock_guard<std::mutex> lock(inputMutex);
     // If 'F' is pressed, then we toggle the full screen mode.
     if (this->keys[GLFW_KEY_F] && this->keysLocked[GLFW_KEY_F] == false) {
 		this->keysLocked[GLFW_KEY_F] = true;
