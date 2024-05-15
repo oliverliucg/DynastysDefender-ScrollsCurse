@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "SpriteRenderer.h"
 #include "Shader.h"
+#include "ResourceManager.h"
 
 // PostProcessor hosts all PostProcessing effects for the DynastysDefender-ScrollsCurse Game.
 class PostProcessor{
@@ -22,15 +23,18 @@ public:
 	void SetBlur(bool blur);
 	void SetSampleOffsets(float offset);
 	float GetSampleOffsets();
-	bool HasBeganRender();
-	bool HasEndedRender();
+	void SetSrcViewPort(const ViewPortInfo& viewPortInfo);
+	void SetDstViewPort(const ViewPortInfo& viewPortInfo);
 	// Resize the framebuffer
-	void Resize(unsigned int width, unsigned int height);
+	void Resize(SizePadding sizePadding);
 private:
 	// state
 	Texture2D texture;
 	Shader postProcessingShader;
 	unsigned int width, height;
+	// view port
+	ViewPortInfo srcViewPort, dstViewPort;
+
 	// options
 	bool confuse, chaos, shake, grayscale, blur;
 	// paremeters

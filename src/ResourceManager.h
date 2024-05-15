@@ -48,6 +48,16 @@ struct SizePadding {
 	}
 };
 
+struct ViewPortInfo{
+    GLint x;
+    GLint y;
+    GLsizei width;
+    GLsizei height;
+    ViewPortInfo() : x(0), y(0), width(3840), height(2160) {}
+    ViewPortInfo(GLint x, GLint y, GLsizei width, GLsizei height) : x(x), y(y), width(width), height(height) {}
+};
+
+
 extern std::unordered_map<Color, glm::vec3> colorMap;
 
 //// Small window for choosing game mode

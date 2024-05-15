@@ -330,6 +330,9 @@ SizePadding adjustToAspectRatio(int width, int height, int standardWidth, int st
 		newHeight = width * standardHeight / standardWidth;
 		padTop = (height - newHeight) / 2;
 		padBottom = height - newHeight - padTop;
+        std::cout << "width: " << width << " height: " << height << " newWidth: " << newWidth << " newHeight: " << newHeight << std::endl;
+        std::cout << "padTop: " << padTop << " padBottom: " << padBottom << " padLeft: " << padLeft << " padRight: " << padRight << std::endl;
+        std::cout << "standardWidth: " << standardWidth << " standardHeight: " << standardHeight << std::endl;
     }
     else {
         // The aspect ratio is the same

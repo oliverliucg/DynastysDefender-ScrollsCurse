@@ -127,19 +127,26 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	GameManager* gameManager = static_cast<GameManager*>(glfwGetWindowUserPointer(window));
-	double mouseX, mouseY;
-	glfwGetCursorPos(window, &mouseX, &mouseY);
+	//double mouseX, mouseY;
+	//glfwGetCursorPos(window, &mouseX, &mouseY);
 
 	// Get the mouse position in the virtual screen
-	int windowWidth, windowHeight;
-	glfwGetWindowSize(window, &windowWidth, &windowHeight);
-	SizePadding actualWindowSizePadding = ScissorBoxHandler::GetInstance().GetActualWindowSizePadding();
-	SizePadding expectedWindowSizePadding = ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding();
-	float virtualMouseX = (mouseX - actualWindowSizePadding.padLeft) * expectedWindowSizePadding.width / actualWindowSizePadding.width + expectedWindowSizePadding.padLeft;
-	float virtualMouseY = (mouseY - actualWindowSizePadding.padTop) * expectedWindowSizePadding.height / actualWindowSizePadding.height + expectedWindowSizePadding.padTop;
+	SizePadding actualWindowSizePadding = Renderer::GetActualWindowSizePadding();
+	SizePadding expectedWindowSizePadding = Renderer::GetExpectedWindowSizePadding();
+	
+	float virtualMouseX = (xpos - actualWindowSizePadding.padLeft) * expectedWindowSizePadding.width / actualWindowSizePadding.width;
+	float virtualMouseY = (ypos - actualWindowSizePadding.padTop) * expectedWindowSizePadding.height / actualWindowSizePadding.height;
+	
+	//float expectedWidth = expectedWindowSizePadding.GetPaddedWidth();
+	//float expectedHeight = expectedWindowSizePadding.GetPaddedHeight();
+	//float actualWidth = actualWindowSizePadding.GetPaddedWidth();
+	//float actualHeight = actualWindowSizePadding.GetPaddedHeight();
 
-	gameManager->mouseX = static_cast<float>(virtualMouseX);
-	gameManager->mouseY = static_cast<float>(virtualMouseY);
+	//float virtualMouseX = xpos/actualWidth * expectedWidth;
+	//float virtualMouseY = ypos/actualHeight * expectedHeight;
+
+	gameManager->mouseX = virtualMouseX;
+	gameManager->mouseY = virtualMouseY;
 }
 
 void reconfigureWindowSize(GLFWwindow* window, int width, int height) {
@@ -160,10 +167,20 @@ void reconfigureWindowSize(GLFWwindow* window, int width, int height) {
 	GameManager* gameManager = static_cast<GameManager*>(glfwGetWindowUserPointer(window));
 	// Resize PostProcessing FBO
 	if (gameManager->GetPostProcessor() != nullptr) {
-		gameManager->GetPostProcessor()->Resize(width, height);
+		/*gameManager->GetPostProcessor()->Resize(adjustedSizes);*/
+		ViewPortInfo newDstViewPortInfo = { vpX, vpY, vpWidth, vpHeight };
+		gameManager->GetPostProcessor()->SetDstViewPort(newDstViewPortInfo);
 	}
-	// Resize the scissor box handler
-	ScissorBoxHandler::GetInstance().SetActualWindowSizePadding(adjustedSizes);
+	//// Resize the scissor box handler
+	//ScissorBoxHandler::GetInstance().SetActualWindowSizePadding(adjustedSizes);
+
+	// memorize the actual window size padding
+	Renderer::SetActualWindowSizePadding(adjustedSizes);
+
+	//auto expectedWindowSizePadding = ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding();
+	//auto actualWindowSizePadding = ScissorBoxHandler::GetInstance().GetActualWindowSizePadding();
+	auto expectedWindowSizePadding = Renderer::GetExpectedWindowSizePadding();
+	auto actualWindowSizePadding = Renderer::GetActualWindowSizePadding();
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -198,6 +215,7 @@ int main()
 	kFullScreenSize = glm::vec2(kFullScreenSizePadding.width, kFullScreenSizePadding.height);
 
 	auto kWindowedModeSizePadding = adjustToAspectRatio((mode->width * 7) / 8, (mode->height * 7) / 8, kVirtualScreenSize.x, kVirtualScreenSize.y);
+	kWindowedModeSizePadding.padBottom = kWindowedModeSizePadding.padTop = kWindowedModeSizePadding.padLeft = kWindowedModeSizePadding.padRight = 0;
 	kWindowedModeSize = glm::vec2(kWindowedModeSizePadding.width, kWindowedModeSizePadding.height);
 	SetWindowSize(kVirtualScreenSize.x, kVirtualScreenSize.y);
 	std::cout << "Resolution: " << mode->width << "x" << mode->height << std::endl;
@@ -211,7 +229,14 @@ int main()
 	GLFWwindow* window;
 	if (initialScreenMode == ScreenMode::FULLSCREEN) {
 		// Create the window
-	    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "DynastysDefender-ScrollsCurse", primaryMonitor, NULL);
+	    window = glfwCreateWindow(mode->width, mode->height, "DynastysDefender-ScrollsCurse", primaryMonitor, NULL);
+		//// Update the screen size padding
+		//int framebufferWidth, framebufferHeight;
+		//glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+		//kFullScreenSizePadding = adjustToAspectRatio(framebufferWidth, framebufferHeight, kVirtualScreenSize.x, kVirtualScreenSize.y);
+		//SCREEN_SIZE_PADDING = kFullScreenSizePadding;
+		//SCREEN_WIDTH = SCREEN_SIZE_PADDING.GetPaddedWidth();
+		//SCREEN_HEIGHT = SCREEN_SIZE_PADDING.GetPaddedHeight();
 	}
 	else {
 		SCREEN_SIZE_PADDING = kWindowedModeSizePadding;
@@ -219,11 +244,12 @@ int main()
 		SCREEN_WIDTH = kWindowedModeSize.x;
 		SCREEN_HEIGHT = kWindowedModeSize.y;
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "DynastysDefender-ScrollsCurse", NULL, NULL);
-		// Set the position of window to the center of the screen
-		int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
-		int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
-		glfwSetWindowPos(window, windowPosX, windowPosY);
 	}
+
+	// Set the position of window to the center of the screen
+	int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
+	int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
+	glfwSetWindowPos(window, windowPosX, windowPosY);
 
 	/*glfwSetWindowMonitor(window, primaryMonitor, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, mode->refreshRate);*/
 	if (window == NULL)
@@ -252,10 +278,12 @@ int main()
 	assert(GAME_AREA_WIDTH > 0 && GAME_AREA_HEIGHT > 0 && "Invalid screen size!");
 	// Clear the resources
 	ResourceManager::GetInstance().Clear();
+	//ScissorBoxHandler::GetInstance().SetExpectedWindowSizePadding(kVirtualScreenSizePadding);
+	//ScissorBoxHandler::GetInstance().SetActualWindowSizePadding(kVirtualScreenSizePadding);
+	Renderer::SetExpectedWindowSizePadding(kVirtualScreenSizePadding);
+	Renderer::SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
 	GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
 	gameManager.Init();
-	ScissorBoxHandler::GetInstance().SetExpectedWindowSizePadding(kVirtualScreenSizePadding);
-	ScissorBoxHandler::GetInstance().SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
 	std::cout << "Screen width: " << SCREEN_WIDTH << " Screen height: " << SCREEN_HEIGHT << std::endl;
 
 	glfwSetWindowUserPointer(window, &gameManager);

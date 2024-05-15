@@ -29,13 +29,7 @@ void GameManager::Init() {
     std::cout << "full window size: " << kFullScreenSize.x << " x " << kFullScreenSize.y << std::endl;
     std::cout << "windowed mode size: " << kWindowedModeSize.x << " x " << kWindowedModeSize.y << std::endl;
     std::cout << "full window paddings: " << kFullScreenSizePadding.padLeft << ", " << kFullScreenSizePadding.padRight << ", " << kFullScreenSizePadding.padTop << ", " << kFullScreenSizePadding.padBottom << std::endl;
-    std::cout << "scissor box expected window paddings: " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().width << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().height
-        << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padLeft << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padRight
-        << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padTop << ", " << ScissorBoxHandler::GetInstance().GetExpectedWindowSizePadding().padBottom << std::endl;
-    std::cout << "scissor box actual window paddings: " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().width << ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().height
-		<< ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padLeft << ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padRight
-		<< ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padTop << ", " << ScissorBoxHandler::GetInstance().GetActualWindowSizePadding().padBottom << std::endl;
-    
+  
     //if (this->state == GameState::OPTION) {
     //    ResourceManager& resourceManager = ResourceManager::GetInstance();
     //    /*resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt", "C:/Users/xiaod/resources/shaders/sprite.fs.txt", nullptr, "sprite");*/
@@ -1681,6 +1675,7 @@ void GameManager::Render(){
 
     // Background
     ResourceManager& resourceManager = ResourceManager::GetInstance();
+
 
     postProcessor->BeginRender();
     

@@ -1,6 +1,6 @@
 #include "PostProcessor.h"
 
-PostProcessor::PostProcessor(Shader shader, unsigned int width, unsigned int height) : texture(), postProcessingShader(shader), width(width), height(height), confuse(false), chaos(false), shake(false), grayscale(false), blur(false), hasBeganRender(false), hasEndedRender(false), shakingStrength(0.01f), timeMultiplierForX(10.0f), timeMultiplierForY(15.0f), offset(offset){
+PostProcessor::PostProcessor(Shader shader, unsigned int width, unsigned int height) : texture(), postProcessingShader(shader), width(width), height(height), srcViewPort(0, 0, width, height), dstViewPort(0, 0, width, height), confuse(false), chaos(false), shake(false), grayscale(false), blur(false), hasBeganRender(false), hasEndedRender(false), shakingStrength(0.01f), timeMultiplierForX(10.0f), timeMultiplierForY(15.0f), offset(offset){
     // initialize renderbuffer/framebuffer object
     glGenFramebuffers(1, &this->MSFBO);
     glGenFramebuffers(1, &this->FBO);
@@ -111,6 +111,7 @@ float PostProcessor::GetSampleOffsets() {
 void PostProcessor::BeginRender() {
     assert(!this->hasBeganRender && !this->hasEndedRender);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->MSFBO);
+	glViewport(0, 0, this->width, this->height);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // clear all relevant buffers
 	glClear(GL_COLOR_BUFFER_BIT);
     this->hasBeganRender = true;
@@ -121,8 +122,14 @@ void PostProcessor::EndRender() {
 	// now resolve multisampled color-buffer into intermediate FBO to store to texture
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->MSFBO);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->FBO);
+	int vpX = this->dstViewPort.x;
+	int vpY = this->dstViewPort.y;
+	int vpWidth = this->dstViewPort.width;
+	int vpHeight = this->dstViewPort.height;
+	/*glBlitFramebuffer(0, 0, this->width, this->height, vpX, vpY, vpX + vpWidth, vpY + vpHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);*/
 	glBlitFramebuffer(0, 0, this->width, this->height, 0, 0, this->width, this->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind default framebuffer
+	glViewport(vpX, vpY, vpWidth, vpHeight);
     this->hasEndedRender = true;
 }
 
@@ -172,24 +179,61 @@ void PostProcessor::initRenderData() {
 	glBindVertexArray(0);
 }
 
-void PostProcessor::Resize(unsigned int width, unsigned int height) {
-	if(this->width == width && this->height == height)
-		return;
+void PostProcessor::Resize(SizePadding sizePadding) {
+	unsigned int width = sizePadding.width;
+	unsigned int height = sizePadding.height;
+	//if (this->width == width && this->height == height)
+	//	return;
+	std::cout << "-------------------post processor resize----------------" << std::endl;
+	std::cout << "width: " << width << " height: " << height << std::endl;
+	std::cout << "this->width: " << this->width << " this->height: " << this->height << std::endl;
 	this->width = width;
 	this->height = height;
-	// resize renderbuffer storage
+
+	//if (height == 1440) {
+	//	height = 1559;
+	//}
+
+	// Resize renderbuffer storage
 	glBindRenderbuffer(GL_RENDERBUFFER, this->RBO);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, width, height);
-	// resize framebuffer by unbinding the framebuffer and binding it again
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, this->width, this->height);
+
+	// Resize multisampled framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, this->MSFBO);
+
+	int vpX = sizePadding.padLeft;
+	int vpY = sizePadding.padTop;
+	int vpWidth = width;
+	int vpHeight = height;
+	glViewport(vpX, vpY, vpWidth, vpHeight);
+	std::cout << "vpX: " << vpX << " vpY: " << vpY << " vpWidth: " << vpWidth << " vpHeight: " << vpHeight << std::endl;
+
+	// read view port
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	std::cout << "viewport: " << viewport[0] << " " << viewport[1] << " " << viewport[2] << " " << viewport[3] << std::endl;
+
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, this->RBO);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO" << std::endl;
+
+	// Resize intermediate framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
-	// resize texture attachment
-	this->texture.Generate(width, height, NULL);
+	// read view port
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	std::cout << "viewport: " << viewport[0] << " " << viewport[1] << " " << viewport[2] << " " << viewport[3] << std::endl;
+	this->texture.Generate(this->width, this->height, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->texture.ID, 0);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void PostProcessor::SetSrcViewPort(const ViewPortInfo& viewPortInfo) {
+	this->srcViewPort.x = viewPortInfo.x;
+}
+
+void PostProcessor::SetDstViewPort(const ViewPortInfo& viewPortInfo) {
+	this->dstViewPort = viewPortInfo;
 }

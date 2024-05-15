@@ -26,10 +26,10 @@ public:
 		return instance;
 	}
 
-	// Set the expected window size.
-	void SetExpectedWindowSizePadding(SizePadding sizePadding);
-	// Set the actual window size.
-	void SetActualWindowSizePadding(SizePadding sizePadding);
+	//// Set the expected window size.
+	//void SetExpectedWindowSizePadding(SizePadding sizePadding);
+	//// Set the actual window size.
+	//void SetActualWindowSizePadding(SizePadding sizePadding);
 
 
 
@@ -40,13 +40,13 @@ public:
 	// Set scissor box that is the intersection of the current scissor box and the specified scissor box.
 	void SetIntersectedScissorBox(GLint x, GLint y, GLsizei width, GLsizei height);
 	void SetIntersectedScissorBox(const ScissorBox& scissorBox);
-	
-	int GetExpectedWindowWidth() const;
-	int GetExpectedWindowHeight() const;
-	int GetActualWindowWidth() const;
-	int GetActualWindowHeight() const;
-	SizePadding GetExpectedWindowSizePadding() const;
-	SizePadding GetActualWindowSizePadding() const;
+	//
+	//int GetExpectedWindowWidth() const;
+	//int GetExpectedWindowHeight() const;
+	//int GetActualWindowWidth() const;
+	//int GetActualWindowHeight() const;
+	//SizePadding GetExpectedWindowSizePadding() const;
+	//SizePadding GetActualWindowSizePadding() const;
 
 	// Get scissor box
 	ScissorBox GetScissorBox();
@@ -77,9 +77,9 @@ private:
 	ScissorBox prev_scissor_box_;
 	bool scissor_test_enabled_;
 
-	// Expected window size and paddings.
-	SizePadding expected_window_size_padding_;
+	//// Expected window size and paddings.
+	//SizePadding expected_window_size_padding_;
 
-	// Actual window size and padding.
-	SizePadding actual_window_size_padding_;
+	//// Actual window size and padding.
+	//SizePadding actual_window_size_padding_;
 };
