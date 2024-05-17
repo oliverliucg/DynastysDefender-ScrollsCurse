@@ -12,49 +12,75 @@ void ConfigManager::SetConfigPath(const std::string& file_path) {
 }
 
 bool ConfigManager::LoadConfig() {
-    std::ifstream file(config_path_);
-    std::string line;
 
-    if (file.is_open() && std::getline(file, line)) {
-        file.close();  // Close the file early
-
-        if (line == "F") {
-            screen_mode_ = ScreenMode::FULLSCREEN;
-            return true;
-        }
-        else if (line == "W") {
-            screen_mode_ = ScreenMode::WINDOWED;
-            return true;
-        }
-        else {
-            std::cerr << "Invalid screen mode flag in file. Defaulting to windowed mode." << std::endl;
-        }
-    }
-    else {
-        std::cerr << "Unable to open the file or file is empty. Defaulting to windowed mode." << std::endl;
+    std::ifstream config_file(config_path_);
+    if (!config_file.is_open()) {
+        std::cerr << "Failed to open configuration file: " << config_path_ << std::endl;
+        return false;
     }
 
-    return false; // Default to windowed mode
+    config_file >> config_;
+
+    return true;
 }
 
 void ConfigManager::SetScreenMode(ScreenMode screen_mode) {
-    screen_mode_ = screen_mode;
-	std::ofstream file(config_path_);
-    assert(file.is_open() && "Unable to open the file to save screen mode.");
-    switch (screen_mode_) {
-    case ScreenMode::WINDOWED:
-        file << "W";
-        break;
-    case ScreenMode::FULLSCREEN:
-        file << "F";
-        break;
-    default:
-        break;
+    // Set the screen mode in the JSON object
+    if (screen_mode == ScreenMode::FULLSCREEN) {
+        config_["screenMode"] = "fullscreen";
     }
-    file.close();
+    else if (screen_mode == ScreenMode::WINDOWED) {
+        config_["screenMode"] = "windowed";
+    }
+    else {
+		std::cerr << "Invalid screen mode value: " << static_cast<int>(screen_mode) << std::endl;
+		return;
+	}
+    // Write JSON object to file
+    std::ofstream config_file(config_path_);
+    if (!config_file.is_open()) {
+        std::cerr << "Failed to open configuration file for writing: " << config_path_ << std::endl;
+        return;
+    }
+    config_file << config_.dump(4); // 4 spaces for pretty print
 }
 
 ScreenMode ConfigManager::GetScreenMode() const {
-    assert(screen_mode_ != ScreenMode::UNDEFINED && "Screen mode is not set.");
-	return screen_mode_;
+    std::string screenMode = config_.at("screenMode");
+    if (screenMode == "fullscreen") {
+        return ScreenMode::FULLSCREEN;
+    }
+    else if (screenMode == "windowed") {
+        return ScreenMode::WINDOWED;
+    }
+    else {
+        std::cerr << "Invalid screen mode value in configuration file: " << screenMode << std::endl;
+        return ScreenMode::FULLSCREEN;
+    }
+}
+
+Language ConfigManager::GetLanguage() const {
+	std::string language = config_.at("language");
+    if (language == "en") {
+		return Language::ENGLISH;
+    }
+    else if (language == "fr") {
+        return Language::FRENCH;
+    }
+    else if (language == "ja") {
+        return Language::JAPANESE;
+    }
+    else if (language == "ko") {
+        return Language::KOREAN;
+	}
+    else if (language == "zh-Hant") {
+		return Language::CHINESE_TRADITIONAL;
+	}
+    else if (language == "zh-Hans") {
+		return Language::CHINESE_SIMPLIFIED;
+	}
+    else {
+        std::cerr << "Invalid language value in configuration file: " << language << std::endl;
+		return Language::ENGLISH;
+	}
 }

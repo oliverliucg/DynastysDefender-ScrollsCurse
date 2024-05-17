@@ -314,12 +314,14 @@ void GameManager::Init() {
     buttons["resume"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 2.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 10.0f, kBubbleRadius * 3.0f), "Resume");
     buttons["stop"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f + kBubbleRadius * 7.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 6.0f, kBubbleRadius * 3.0f), "Stop");
     buttons["displaysettings"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), "Display");
+    buttons["languagepreference"] = std::make_shared<Button>(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f), glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), "Language");
 
     // Create page "story" / "Main Menu"
     auto textUnit = std::make_shared<TextUnit>("storytextunit", texts["story"], textRenderer2);
     auto startButtonUnit = std::make_shared<ButtonUnit>("startbuttonunit", buttons["start"], textRenderer2, colorRenderer);
     auto controlButtonUnit = std::make_shared<ButtonUnit>("controlbuttonunit", buttons["control"], textRenderer2, colorRenderer);
     auto displaySettingsButtonUnit = std::make_shared<ButtonUnit>("displaysettingsbuttonunit", buttons["displaysettings"], textRenderer2, colorRenderer);
+    auto languagePreferenceButtonUnit = std::make_shared<ButtonUnit>("languagepreferencebuttonunit", buttons["languagepreference"], textRenderer2, colorRenderer);
     auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit", buttons["exit"], textRenderer2, colorRenderer);
     // Create character introduction units
     texts["liucheintro"] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
@@ -370,6 +372,8 @@ void GameManager::Init() {
     horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() + liucheIconSize.x - guojieIconUnit->GetSize().x - guojieIconOffset;
     guojieIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
 
+    const std::string textSectionBaseName = "textsection";
+    const std::string buttonSectionBaseName = "buttonsection";
 
     auto textSection = std::make_shared<PageSection>("storytextsection");
     textSection->AddContent(textUnit);
@@ -382,10 +386,12 @@ void GameManager::Init() {
     buttonSection->AddContent(startButtonUnit);
     buttonSection->AddContent(controlButtonUnit);
     buttonSection->AddContent(displaySettingsButtonUnit);
+    buttonSection->AddContent(languagePreferenceButtonUnit);
     buttonSection->AddContent(exitButtonUnit);
     buttonSection->SetInterUnitSpacing("startbuttonunit", "controlbuttonunit", 0.1f * kBubbleRadius);
     buttonSection->SetInterUnitSpacing("controlbuttonunit", "displaysettingsbuttonunit", 0.1f * kBubbleRadius);
-    buttonSection->SetInterUnitSpacing("displaysettingsbuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
+    buttonSection->SetInterUnitSpacing("displaysettingsbuttonunit", "languagepreferencebuttonunit", 0.1f * kBubbleRadius);
+    buttonSection->SetInterUnitSpacing("languagepreferencebuttonunit", "exitbuttonunit", 0.1f * kBubbleRadius);
     pages["story"] = std::make_unique<Page>("story");
     pages["story"]->AddSection(textSection);
     pages["story"]->AddSection(buttonSection);
@@ -470,12 +476,6 @@ void GameManager::Init() {
     }
 
     // Create page "Display Settings"
-    // Create option texts.
-    //const std::string windowedModeName = "windowedmode";
-    //const std::string fullScreenModeName = "fullscreenmode";
-    //texts[windowedModeName] = std::make_shared<Text>(/*pos=*/glm::vec2(0.f), /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-    //texts[windowedModeName]->AddParagraph("Windowed Mode");
-    //texts[windowedModeName]->SetScale(0.0216f / kFontScale);
     auto displaysetting1 = CreateClickableOptionUnit("fullscreenmode", "Full Screen Mode");
     auto displaysetting2 = CreateClickableOptionUnit("windowedmode", "Windowed Mode");
     if(this->GetScreenMode() == ScreenMode::FULLSCREEN)
@@ -515,6 +515,85 @@ void GameManager::Init() {
     scroll->SetVelocityForNarrowing(kBubbleRadius);
     scroll->SetVelocityForClosing(48*kBubbleRadius);
     scroll->SetVelocityForOpening(96*kBubbleRadius);
+    // Set the target position for scroll retracting, deploying, and attacking
+    scroll->SetTargetPositionForRetracting(glm::vec2(this->width * 0.16f, this->height * 0.83f));
+    scroll->SetTargetPositionForDeploying(glm::vec2(this->width / 2.0f, this->height / 2.0f));
+    scroll->SetTargetPositionForAttacking(glm::vec2(this->width * 0.785f, this->height * 0.73f));
+
+
+    // Create page "Language Preference"
+    auto languagepreference1 = CreateClickableOptionUnit(language_map[Language::CHINESE_TRADITIONAL], "Chinese (Traditional)");
+    auto languagepreference2 = CreateClickableOptionUnit(language_map[Language::CHINESE_SIMPLIFIED], "Chinese (Simplified)");
+    auto languagepreference3 = CreateClickableOptionUnit(language_map[Language::ENGLISH], "English");
+    auto languagepreference4 = CreateClickableOptionUnit(language_map[Language::FRENCH], "French");
+    auto languagepreference5 = CreateClickableOptionUnit(language_map[Language::JAPANESE], "Japanese");
+    auto languagepreference6 = CreateClickableOptionUnit(language_map[Language::KOREAN], "Korean");
+
+    switch (ConfigManager::GetInstance().GetLanguage()) {
+    case Language::CHINESE_TRADITIONAL:
+        languagepreference1->SetState(OptionState::kClicked);
+        break;
+    case Language::CHINESE_SIMPLIFIED:
+        languagepreference2->SetState(OptionState::kClicked);
+        break;
+    case Language::ENGLISH:
+        languagepreference3->SetState(OptionState::kClicked);
+        break;
+    case Language::FRENCH:
+        languagepreference4->SetState(OptionState::kClicked);
+        break;
+    case Language::JAPANESE:
+        languagepreference5->SetState(OptionState::kClicked);
+        break;
+    case Language::KOREAN:
+        languagepreference6->SetState(OptionState::kClicked);
+        break;
+    default:
+        languagepreference1->SetState(OptionState::kClicked);
+    }
+
+    const std::string languagePreferencePageName = "languagepreference";
+    textSection = std::make_shared<PageSection>(languagePreferencePageName + textSectionBaseName);
+    buttonSection = std::make_shared<PageSection>(languagePreferencePageName + buttonSectionBaseName);
+    textSection->AddContent(languagepreference1);
+    textSection->AddContent(languagepreference2);
+    textSection->AddContent(languagepreference3);
+    textSection->AddContent(languagepreference4);
+    textSection->AddContent(languagepreference5);
+    textSection->AddContent(languagepreference6);
+    textSection->SetInterUnitSpacing(language_map[Language::CHINESE_TRADITIONAL], language_map[Language::CHINESE_SIMPLIFIED], 0.5f * kBubbleRadius);
+    textSection->SetInterUnitSpacing(language_map[Language::CHINESE_SIMPLIFIED], language_map[Language::ENGLISH], 0.5f * kBubbleRadius);
+    textSection->SetInterUnitSpacing(language_map[Language::ENGLISH], language_map[Language::FRENCH], 0.5f * kBubbleRadius);
+    textSection->SetInterUnitSpacing(language_map[Language::FRENCH], language_map[Language::JAPANESE], 0.5f * kBubbleRadius);
+    textSection->SetInterUnitSpacing(language_map[Language::JAPANESE], language_map[Language::KOREAN], 0.5f * kBubbleRadius);
+    buttonSection->AddContent(backButtonUnit);
+    pages[languagePreferencePageName] = std::make_unique<Page>(languagePreferencePageName);
+    pages[languagePreferencePageName]->AddSection(textSection);
+    pages[languagePreferencePageName]->AddSection(buttonSection);
+    // Set the top, bottom and left spacing of the page "Display Settings".
+    pages[languagePreferencePageName]->SetTopSpacing(0.5f * kBubbleRadius);
+    pages[languagePreferencePageName]->SetBottomSpacing(0.5f * kBubbleRadius);
+    pages[languagePreferencePageName]->SetLeftSpacing(0.5f * kBubbleRadius);
+    // Set the inter spacing between the sections of the page "Display Settings".
+    pages[languagePreferencePageName]->SetInterSectionSpacing(languagePreferencePageName + textSectionBaseName, languagePreferencePageName + buttonSectionBaseName, 2.0f * kBubbleRadius);
+    interspacingBetweenTextAndButton = pages[languagePreferencePageName]->GetInterSectionSpacing(languagePreferencePageName + textSectionBaseName, languagePreferencePageName + buttonSectionBaseName);
+    maxHeightForTextSection = gameBoard->GetSize().y - buttonSection->GetHeight() - pages[languagePreferencePageName]->GetBottomSpacing() - pages[languagePreferencePageName]->GetTopSpacing() - interspacingBetweenTextAndButton;
+    textSection->SetMaxHeight(maxHeightForTextSection);
+    textSection->SetMaxWidth(gameBoard->GetSize().x - pages[languagePreferencePageName]->GetLeftSpacing() - 0.5 * kBubbleRadius);
+    pages[languagePreferencePageName]->SetPosition(glm::vec2(this->gameBoard->GetPosition().x, std::max(this->gameBoard->GetCenter().y - pages[languagePreferencePageName]->GetHeight() * 0.5f, this->gameBoard->GetPosition().y)));
+
+    // Initialize the timer
+    timer = std::make_shared<Timer>();
+
+    // Set the target silk length for closing and opening the scroll
+    scroll->SetTargetSilkLenForClosing(0.f);
+    scroll->SetTargetSilkLenForOpening(gameBoard->GetSize().y);
+    scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForOpening());
+    scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
+    // Set the narrowing, closing, and opening velocity of the scroll
+    scroll->SetVelocityForNarrowing(kBubbleRadius);
+    scroll->SetVelocityForClosing(48 * kBubbleRadius);
+    scroll->SetVelocityForOpening(96 * kBubbleRadius);
     // Set the target position for scroll retracting, deploying, and attacking
     scroll->SetTargetPositionForRetracting(glm::vec2(this->width * 0.16f, this->height * 0.83f));
     scroll->SetTargetPositionForDeploying(glm::vec2(this->width / 2.0f, this->height / 2.0f));
@@ -786,6 +865,9 @@ void GameManager::ProcessInput(float dt) {
                             }
                             else if (content == "displaysettings") {
 								this->GoToState(GameState::DISPLAY_SETTINGS);
+							}
+                            else if (content == "languagepreference") {
+								this->GoToState(GameState::LANGUAGE_PREFERENCE);
 							}
                             else if (content == "start") {
                                 // print the page story position and all its sections' positions
@@ -1510,7 +1592,7 @@ void GameManager::Update(float dt)
             }
         }
     }
-    else if (this->state == GameState::DISPLAY_SETTINGS) {
+    else if (this->state == GameState::DISPLAY_SETTINGS || this->state == GameState::LANGUAGE_PREFERENCE) {
         if (this->targetState != GameState::UNDEFINED && this->scroll->GetState() == ScrollState::CLOSED) {
 			this->SetToTargetState();
 			this->SetTransitionState(TransitionState::TRANSITION);
@@ -1881,7 +1963,7 @@ void GameManager::Render(){
         }
     }
     else if (this->state == GameState::MENU || this->state == GameState::INITIAL || this->state == GameState::STORY || this->state == GameState::CONTROL ||
-        this->state == GameState::DISPLAY_SETTINGS) {
+        this->state == GameState::DISPLAY_SETTINGS || this->state == GameState::LANGUAGE_PREFERENCE) {
         gameCharacters["weizifu"]->Draw(spriteRenderer);
         gameCharacters["liuche"]->Draw(spriteRenderer);
         gameCharacters["weiqing"]->Draw(spriteRenderer);
@@ -1967,6 +2049,8 @@ std::string GameManager::GetPageName(GameState gameState) {
 			return "control";
         case GameState::DISPLAY_SETTINGS:
 			return "displaysettings";
+        case GameState::LANGUAGE_PREFERENCE:
+            return "languagepreference";
 		default:
 			return "";
 	}

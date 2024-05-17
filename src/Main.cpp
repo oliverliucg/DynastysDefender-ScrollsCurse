@@ -197,7 +197,7 @@ int main()
 {	
 	// load configurations
 	ConfigManager& configManager = ConfigManager::GetInstance();
-	configManager.SetConfigPath("C:/Users/xiaod/resources/settings/display.txt");
+	configManager.SetConfigPath("C:/Users/xiaod/resources/settings/config.json");
 	assert(configManager.LoadConfig() && "Failed to load configurations.");
 
 	// Initialize GLFW
@@ -361,7 +361,7 @@ int main()
 //	gameManager.height = SCREEN_HEIGHT;
 
 	// fixed time step
-	const float kTimeStep = 1.f / 120.f;
+	const float kTimeStep = 1.f / 240.f;
 	float accumulator = 0.f;
 	// deltaTime variables
 	// -------------------
