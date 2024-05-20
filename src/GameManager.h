@@ -1,323 +1,358 @@
 #pragma once
 #include <glad/glad.h>
 #include <glfw3.h>
-#include <glm/glm.hpp>
+
 #include <algorithm>
-#include <random> 
-#include <chrono> 
+#include <bit>
+#include <chrono>
+#include <cstdint>
+#include <fstream>
+#include <glm/glm.hpp>
+#include <memory>
 #include <queue>
+#include <random>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include <set>
 #include <utility>
-#include <bit>
-#include <cstdint>
-#include <memory>
-#include <fstream>
 
-#include "Bubble.h"
-#include "Shooter.h"
 #include "Arrow.h"
-#include "ResourceManager.h"
-#include "ConfigManager.h"
-#include "SpriteRenderer.h"
-#include "SpriteDynamicRenderer.h"
-#include "PartialTextureRenderer.h"
-#include "ColorRenderer.h"
-#include "PostProcessor.h"
-#include "GameBoard.h"
-#include "ShadowTrailSystem.h"
-#include "ExplosionSystem.h"
-#include "TextRenderer.h"
-#include "RayRenderer.h"
-#include "LineRenderer.h"
+#include "Bubble.h"
+#include "Button.h"
+#include "Capsule.h"
 #include "CircleRenderer.h"
+#include "ColorRenderer.h"
+#include "ConfigManager.h"
+#include "ExplosionSystem.h"
+#include "GameBoard.h"
 #include "GameCharacter.h"
+#include "LineRenderer.h"
+#include "Page.h"
+#include "PartialTextureRenderer.h"
+#include "PostProcessor.h"
+#include "RayRenderer.h"
+#include "ResourceManager.h"
 #include "ScissorBoxHandler.h"
 #include "Scroll.h"
+#include "ShadowTrailSystem.h"
+#include "Shooter.h"
+#include "SpriteDynamicRenderer.h"
+#include "SpriteRenderer.h"
 #include "Text.h"
-#include "Capsule.h"
-#include "Button.h"
-#include "Page.h"
+#include "TextRenderer.h"
 #include "Timer.h"
 
 enum class GameState {
-	UNDEFINED,
-	OPTION,
-	INITIAL,
-	STORY,
-	STORY_END,
-	ACTIVE,
-	CONTROL,
-	DISPLAY_SETTINGS,
-	LANGUAGE_PREFERENCE,
-	MENU,
-	PREPARING,
-	WIN,
-	LOSE,
-	EXIT
+  UNDEFINED,
+  OPTION,
+  INITIAL,
+  STORY,
+  STORY_END,
+  ACTIVE,
+  CONTROL,
+  DISPLAY_SETTINGS,
+  LANGUAGE_PREFERENCE,
+  MENU,
+  PREPARING,
+  WIN,
+  LOSE,
+  EXIT
 };
 
 // Transition between states
-enum class TransitionState {
-	START,
-	TRANSITION,
-	END
-};
-
+enum class TransitionState { START, TRANSITION, END };
 
 // GameState to string
 static std::unordered_map<GameState, std::string> GameStateMap = {
-	{GameState::INITIAL, "INITIAL"},
-	{GameState::STORY, "STORY"},
-	{GameState::ACTIVE, "ACTIVE"},
-	{GameState::CONTROL, "CONTROL"},
-	{GameState::MENU, "MENU"},
-	{GameState::PREPARING, "PREPARING"},
-	{GameState::WIN, "WIN"},
-	{GameState::LOSE, "LOSE"},
-	{GameState::STORY_END, "STORY_END"},
-	{GameState::EXIT, "EXIT"},
-	{GameState::UNDEFINED, "UNDEFINED"},
+    {GameState::INITIAL, "INITIAL"},
+    {GameState::STORY, "STORY"},
+    {GameState::ACTIVE, "ACTIVE"},
+    {GameState::CONTROL, "CONTROL"},
+    {GameState::MENU, "MENU"},
+    {GameState::PREPARING, "PREPARING"},
+    {GameState::WIN, "WIN"},
+    {GameState::LOSE, "LOSE"},
+    {GameState::STORY_END, "STORY_END"},
+    {GameState::EXIT, "EXIT"},
+    {GameState::UNDEFINED, "UNDEFINED"},
 };
 
 struct GameLevel {
-	// Num of colors
-	int numColors;
-	// The number of bubbles that are generated at the beginning of the game
-	int numInitialBubbles;
-	// The maximum depth that the initial bubbles can reach
-	float maxInitialBubbleDepth;
-	// Probability that a new bubble is generated adjacent to the most recently added bubble
-	float probabilityNewBubbleIsNeighborOfLastAdded;
-	// Probability that a new bubble is generated as a neighbor of an existing bubble
-	float probabilityNewBubbleIsNeighborOfBubble;
-	// Probability that a new bubble is generated as a neighbor of an existing bubble of the same color
-	float probabilityNewBubbleIsNeighborOfBubbleOfSameColor;
+  // Num of colors
+  int numColors;
+  // The number of bubbles that are generated at the beginning of the game
+  int numInitialBubbles;
+  // The maximum depth that the initial bubbles can reach
+  float maxInitialBubbleDepth;
+  // Probability that a new bubble is generated adjacent to the most recently
+  // added bubble
+  float probabilityNewBubbleIsNeighborOfLastAdded;
+  // Probability that a new bubble is generated as a neighbor of an existing
+  // bubble
+  float probabilityNewBubbleIsNeighborOfBubble;
+  // Probability that a new bubble is generated as a neighbor of an existing
+  // bubble of the same color
+  float probabilityNewBubbleIsNeighborOfBubbleOfSameColor;
 };
 
 class GameManager {
-public:
-	GameState state, lastState, targetState;
-	TransitionState transitionState;
-	ScreenMode screenMode, targetScreenMode;
-	bool keys[1024];
-	bool keysLocked[1024];
-	bool leftMousePressed;
-	bool isReadyToDrag;
-	bool isDragging;
-	bool gameArenaShaking;
-	float scrollYOffset;
-	float scrollSensitivity;
-	float mouseX, mouseY, mouseLastX, mouseLastY;
-	float width, height;
-	int level;
-	//std::mutex inputMutex;  // Mutex to protect input handling
-	GameManager(unsigned int width, unsigned int height);
-	~GameManager();
-	std::shared_ptr<PostProcessor> GetPostProcessor() { return postProcessor; }
-	// Set to the target screen mode of the game.
-	void SetToTargetScreenMode();
+ public:
+  GameState state, lastState, targetState;
+  TransitionState transitionState;
+  ScreenMode screenMode, targetScreenMode;
+  Language language;
+  bool keys[1024];
+  bool keysLocked[1024];
+  bool leftMousePressed;
+  bool isReadyToDrag;
+  bool isDragging;
+  bool gameArenaShaking;
+  float scrollYOffset;
+  float scrollSensitivity;
+  float mouseX, mouseY, mouseLastX, mouseLastY;
+  float width, height;
+  int level;
+  // std::mutex inputMutex;  // Mutex to protect input handling
+  GameManager(unsigned int width, unsigned int height);
+  ~GameManager();
+  std::shared_ptr<PostProcessor> GetPostProcessor() { return postProcessor; }
+  // Set to the target screen mode of the game.
+  void SetToTargetScreenMode();
 
-	void Init();
-	void ProcessInput(float dt);
-	void Update(float dt);
-	void Render();
-private:
-	std::shared_ptr<SpriteRenderer> spriteRenderer;
-	std::shared_ptr<SpriteDynamicRenderer> spriteDynamicRenderer;
-	std::shared_ptr<PartialTextureRenderer> partialTextureRenderer;
-	std::shared_ptr<ColorRenderer> colorRenderer;
-	std::shared_ptr<CircleRenderer> circleRenderer;
-	std::shared_ptr<RayRenderer> rayRenderer;
-	std::shared_ptr<LineRenderer> lineRenderer;
-	std::shared_ptr<TextRenderer> textRenderer;
-	std::shared_ptr<TextRenderer> textRenderer2;
-	std::shared_ptr<PostProcessor> postProcessor;
-	std::shared_ptr<Timer> timer;
+  void Init();
+  void ProcessInput(float dt);
+  void Update(float dt);
+  void Render();
 
-	// Gameboard
-	std::unique_ptr<GameBoard> gameBoard;
+ private:
+  std::shared_ptr<SpriteRenderer> spriteRenderer;
+  std::shared_ptr<SpriteDynamicRenderer> spriteDynamicRenderer;
+  std::shared_ptr<PartialTextureRenderer> partialTextureRenderer;
+  std::shared_ptr<ColorRenderer> colorRenderer;
+  std::shared_ptr<CircleRenderer> circleRenderer;
+  std::shared_ptr<RayRenderer> rayRenderer;
+  std::shared_ptr<LineRenderer> lineRenderer;
+  // std::shared_ptr<TextRenderer> textRenderer;
+  std::shared_ptr<TextRenderer> textRenderer;
+  std::shared_ptr<PostProcessor> postProcessor;
+  std::shared_ptr<Timer> timer;
 
-	// Scroll
-	std::unique_ptr<Scroll> scroll;
+  // Gameboard
+  std::unique_ptr<GameBoard> gameBoard;
 
-	// Shooter
-	std::unique_ptr<Shooter> shooter;
+  // Scroll
+  std::unique_ptr<Scroll> scroll;
 
-	// Particles
-	std::unique_ptr<ShadowTrailSystem> shadowTrailSystem;
-	std::unique_ptr<ExplosionSystem> explosionSystem;
+  // Shooter
+  std::unique_ptr<Shooter> shooter;
 
-	// Characters
-	std::unordered_map<std::string, std::shared_ptr<GameCharacter>> gameCharacters;
+  // Particles
+  std::unique_ptr<ShadowTrailSystem> shadowTrailSystem;
+  std::unique_ptr<ExplosionSystem> explosionSystem;
 
-	// Bubbbles that are moving.
-	std::unordered_map<int, std::unique_ptr<Bubble>> moves;
+  // Characters
+  std::unordered_map<std::string, std::shared_ptr<GameCharacter>>
+      gameCharacters;
 
-	// Bubbles that are static.
-	std::unordered_map<int, std::unique_ptr<Bubble>> statics;
+  // Bubbbles that are moving.
+  std::unordered_map<int, std::unique_ptr<Bubble>> moves;
 
-	// Bubbles that are falling.
-	std::unordered_map<int, std::unique_ptr<Bubble>> fallings;
+  // Bubbles that are static.
+  std::unordered_map<int, std::unique_ptr<Bubble>> statics;
 
-	// Bubbles that are exploding.
-	std::unordered_map<int, std::unique_ptr<Bubble>> explodings;
+  // Bubbles that are falling.
+  std::unordered_map<int, std::unique_ptr<Bubble>> fallings;
 
-	// Arrows
-	std::vector<std::shared_ptr<Arrow> > arrows;
+  // Bubbles that are exploding.
+  std::unordered_map<int, std::unique_ptr<Bubble>> explodings;
 
-	// Texts
-	std::unordered_map<std::string, std::shared_ptr<Text>> texts;
+  // Arrows
+  std::vector<std::shared_ptr<Arrow>> arrows;
 
-	// Buttons
-	std::unordered_map<std::string, std::shared_ptr<Button>> buttons;
+  // Texts
+  std::unordered_map<std::string, std::shared_ptr<Text>> texts;
 
-	// Pages
-	std::unordered_map<std::string, std::unique_ptr<Page>> pages;
+  // Buttons
+  std::unordered_map<std::string, std::shared_ptr<Button>> buttons;
 
-	// Active page
-	std::string activePage;
+  // Pages
+  std::unordered_map<std::string, std::unique_ptr<Page>> pages;
 
-	// Free slots on the game board.
-	std::vector<glm::vec2> freeSlots;
+  // Active page
+  std::string activePage;
 
-	// Count of bubbles of each color.
-	std::unordered_map<Color, int> colorCount;
+  // Free slots on the game board.
+  std::vector<glm::vec2> freeSlots;
 
-	// original positions for shaking.
-	std::unordered_map<std::string, glm::vec2> originalPositionsForShaking;
+  // Count of bubbles of each color.
+  std::unordered_map<Color, int> colorCount;
 
-	// objects that gradually become transparent. strucutre: <object name, <object, speedToBeTransparent>>
-	std::map<std::string, std::pair<std::shared_ptr<GameObject>, float> > graduallyTransparentObjects;
+  // original positions for shaking.
+  std::unordered_map<std::string, glm::vec2> originalPositionsForShaking;
 
-	// objects that gradually become opaque. strucutre: <object name, <object, speedToBeOpaque>>
-	std::map<std::string, std::pair<std::shared_ptr<GameObject>, float> > graduallyOpaqueObjects;
+  // objects that gradually become transparent. strucutre: <object name,
+  // <object, speedToBeTransparent>>
+  std::map<std::string, std::pair<std::shared_ptr<GameObject>, float>>
+      graduallyTransparentObjects;
 
-	// total number of game levels
-	const int numGameLevels = 2;
+  // objects that gradually become opaque. strucutre: <object name, <object,
+  // speedToBeOpaque>>
+  std::map<std::string, std::pair<std::shared_ptr<GameObject>, float>>
+      graduallyOpaqueObjects;
 
-	// Get the page name for a given game state.
-	std::string GetPageName(GameState gameState);
+  // total number of game levels
+  const int numGameLevels = 2;
 
-	// Set the state of the game.
-	void SetState(GameState newState);
+  // Get the page name for a given game state.
+  std::string GetPageName(GameState gameState);
 
-	// Set to the target state of the game.
-	void SetToTargetState();
+  // Set the state of the game.
+  void SetState(GameState newState);
 
-	// Get the state of the game.
-	GameState GetState();
+  // Set to the target state of the game.
+  void SetToTargetState();
 
-	// Go to the state of the game.
-	void GoToState(GameState newState);
+  // Get the state of the game.
+  GameState GetState();
 
-	// Go to screen mode.
-	void GoToScreenMode(ScreenMode newScreenMode);
+  // Go to the state of the game.
+  void GoToState(GameState newState);
 
-	// Get the screen mode of the game.
-	ScreenMode GetScreenMode();
+  // Go to screen mode.
+  void GoToScreenMode(ScreenMode newScreenMode);
 
-	// Set the screen mode of the game.
-	void SetScreenMode(ScreenMode newScreenMode);
+  // Get the screen mode of the game.
+  ScreenMode GetScreenMode() const;
 
-	// Set the transition state of the game.
-	void SetTransitionState(TransitionState newTransitionState);
+  // Set the screen mode of the game.
+  void SetScreenMode(ScreenMode newScreenMode);
 
-	// Get the transition state of the game.
-	TransitionState GetTransitionState();
+  // Get the language of the game.
+  Language GetLanguage() const;
 
-	// Set Scroll state
-	void SetScrollState(ScrollState newScrollState);
+  // Set the language of the game.
+  void SetLanguage(Language newLanguage);
 
-	// Get Scroll state
-	ScrollState GetScrollState();
+  // Load text based from resource file.
+  void LoadTexts();
 
-	// Check if the bubble collides with the existing static bubbles
-	std::vector<int> IsCollidingWithStaticBubbles(std::unique_ptr<Bubble>& bubble);
+  // Set the transition state of the game.
+  void SetTransitionState(TransitionState newTransitionState);
 
-	// Check if the bubble is neighbor with the given free slot.
-	bool IsNeighbor(glm::vec2 bubbleCenter, glm::vec2 slotCenter, float absError = 1e-2);
+  // Get the transition state of the game.
+  TransitionState GetTransitionState();
 
-	// Get common neighbor free slots among the given bubbles.
-	std::vector<glm::vec2> GetCommonFreeSlots(std::vector<std::unique_ptr<Bubble>>& bubbles, std::vector<glm::vec2> candidateFreeSlots);
+  // Set Scroll state
+  void SetScrollState(ScrollState newScrollState);
 
-	// Get common neighbor free slots among the given bubbles.
-	std::vector<glm::vec2> GetCommonFreeSlots(std::vector<int>& bubbleIds, std::vector<glm::vec2> candidateFreeSlots);
+  // Get Scroll state
+  ScrollState GetScrollState();
 
-	// Given the bubble's color, get the weight of a free slot. The weight is calculated by counting the number of neighbors. If a neighbor has the same color, the weight is 1. Otherwise, the weight is 0.1.
-	float GetFreeSlotWeight(glm::vec3 color, glm::vec2 slotCenter);
+  // Check if the bubble collides with the existing static bubbles
+  std::vector<int> IsCollidingWithStaticBubbles(
+      std::unique_ptr<Bubble>& bubble);
 
-	// Get the unique id of all neighbor static bubbles of the given bubble.
-	std::vector<int> GetNeighborIds(std::unique_ptr<Bubble>& bubble, float absError = 1e-2);
+  // Check if the bubble is neighbor with the given free slot.
+  bool IsNeighbor(glm::vec2 bubbleCenter, glm::vec2 slotCenter,
+                  float absError = 1e-2);
 
-	// Get the unique id of all neighbor static bubbles of the given group of bubbles.
-	std::vector<int> GetNeighborIds(std::vector<Bubble*>& bubbles);
+  // Get common neighbor free slots among the given bubbles.
+  std::vector<glm::vec2> GetCommonFreeSlots(
+      std::vector<std::unique_ptr<Bubble>>& bubbles,
+      std::vector<glm::vec2> candidateFreeSlots);
 
-	// Get the unique id of all neighbor static bubbles of the given group of bubbles.
-	std::vector<int> GetNeighborIds(std::unordered_map<int, std::unique_ptr<Bubble> >& bubbles);
+  // Get common neighbor free slots among the given bubbles.
+  std::vector<glm::vec2> GetCommonFreeSlots(
+      std::vector<int>& bubbleIds, std::vector<glm::vec2> candidateFreeSlots);
 
-	// Check if a poistion is at the upper boundary of the game board.
-	bool IsAtUpperBoundary(glm::vec2 pos);
+  // Given the bubble's color, get the weight of a free slot. The weight is
+  // calculated by counting the number of neighbors. If a neighbor has the same
+  // color, the weight is 1. Otherwise, the weight is 0.1.
+  float GetFreeSlotWeight(glm::vec3 color, glm::vec2 slotCenter);
 
-	// Find all the bubbles that have no path to the top of the game board.
-	std::vector<int> FindAllFallingBubbles();
-	
-	// Find a group of bubbles that are connected to the given bubble and have the same color as the given bubble.
-	std::vector<int> FindConnectedBubblesOfSameColor(int bubbleId);
+  // Get the unique id of all neighbor static bubbles of the given bubble.
+  std::vector<int> GetNeighborIds(std::unique_ptr<Bubble>& bubble,
+                                  float absError = 1e-2);
 
-	// Find all the bubbles that have path to the given bubble ids.
-	std::vector<int> FindConnectedBubbles(std::vector<int>& bubbleIds);
+  // Get the unique id of all neighbor static bubbles of the given group of
+  // bubbles.
+  std::vector<int> GetNeighborIds(std::vector<Bubble*>& bubbles);
 
-	// Find all the statics bubbles that are at the upper boundary of the game board and close to the given bubble.
-	std::vector<int> FindCloseUpperBubbles(std::unique_ptr<Bubble>& bubble);
- 
-	// Fine tune the position of the collided moving bubble to a free slot neighboring a neighbor of the colliding static bubble.
-	bool FineTuneToNeighbor(int bubbleId, int staticBubbleId);
+  // Get the unique id of all neighbor static bubbles of the given group of
+  // bubbles.
+  std::vector<int> GetNeighborIds(
+      std::unordered_map<int, std::unique_ptr<Bubble>>& bubbles);
 
-	// Fine tune the position of the collided moving bubble to a free slot neighboring both the colliding static bubble and a close static bubble.
-	bool FineTuneToClose(int bubbleId, int staticBubbleId);
+  // Check if a poistion is at the upper boundary of the game board.
+  bool IsAtUpperBoundary(glm::vec2 pos);
 
-	// Fine tune the position of the collided moving bubble to a free slot neighboring a close static bubble at the upper boundary of the game board.
-	bool FineTuneToCloseUpper(int bubbleId);
+  // Find all the bubbles that have no path to the top of the game board.
+  std::vector<int> FindAllFallingBubbles();
 
-	// Helper function of IsConnectedToTop
-	bool IsConnectedToTopHelper(std::unique_ptr<Bubble>& bubble, bool* visited, bool* isConnectToTop);
+  // Find a group of bubbles that are connected to the given bubble and have the
+  // same color as the given bubble.
+  std::vector<int> FindConnectedBubblesOfSameColor(int bubbleId);
 
-	// Check if the given bubble is connected to the top of the game board.
-	bool IsConnectedToTop(std::unique_ptr<Bubble>& bubble);
+  // Find all the bubbles that have path to the given bubble ids.
+  std::vector<int> FindConnectedBubbles(std::vector<int>& bubbleIds);
 
-	// Get the common free slots of the given two free slot vectors.
-	std::vector<glm::vec2> GetCommonFreeSlots(std::vector<glm::vec2> freeSlots1, std::vector<glm::vec2> freeSlots2);
+  // Find all the statics bubbles that are at the upper boundary of the game
+  // board and close to the given bubble.
+  std::vector<int> FindCloseUpperBubbles(std::unique_ptr<Bubble>& bubble);
 
-	// Check if a free slot center is a neighbor of static bubbles.
-	bool IsNeighborOfStaticBubbles(glm::vec2 freeSlotCenter);
+  // Fine tune the position of the collided moving bubble to a free slot
+  // neighboring a neighbor of the colliding static bubble.
+  bool FineTuneToNeighbor(int bubbleId, int staticBubbleId);
 
-	// Get potential neighbor free slots of the given bubble.
-	std::vector<glm::vec2> GetPotentialNeighborFreeSlots(glm::vec2 bubbleCenter);
+  // Fine tune the position of the collided moving bubble to a free slot
+  // neighboring both the colliding static bubble and a close static bubble.
+  bool FineTuneToClose(int bubbleId, int staticBubbleId);
 
-	// Update the free slots of the game board after inserting a new bubble.
-	void UpdateFreeSlots(std::unique_ptr<Bubble>& bubble);
+  // Fine tune the position of the collided moving bubble to a free slot
+  // neighboring a close static bubble at the upper boundary of the game board.
+  bool FineTuneToCloseUpper(int bubbleId);
 
-	// Generate random static bubbles on the free slots of the game board.
-	void GenerateRandomStaticBubblesHelper(GameLevel gameLevel);
+  // Helper function of IsConnectedToTop
+  bool IsConnectedToTopHelper(std::unique_ptr<Bubble>& bubble, bool* visited,
+                              bool* isConnectToTop);
 
-	// Generate random static bubbles on the game board.
-	void GenerateRandomStaticBubbles();
+  // Check if the given bubble is connected to the top of the game board.
+  bool IsConnectedToTop(std::unique_ptr<Bubble>& bubble);
 
-	// Get the time interval for narrowing the game board vertically in the current game level.
-	float GetNarrowingTimeInterval();
+  // Get the common free slots of the given two free slot vectors.
+  std::vector<glm::vec2> GetCommonFreeSlots(std::vector<glm::vec2> freeSlots1,
+                                            std::vector<glm::vec2> freeSlots2);
 
-	// Determine the color of the next bubble.
-	glm::vec4 GetNextBubbleColor();
-	
-	// Adjust the horizontal position of the buttons.
-	void AdjustButtonsHorizontalPosition(const std::vector<std::string>& buttonName, float interval = 0.f);
+  // Check if a free slot center is a neighbor of static bubbles.
+  bool IsNeighborOfStaticBubbles(glm::vec2 freeSlotCenter);
 
-	// Check if it is failed to pass the current level.
-	bool IsLevelFailed();
+  // Get potential neighbor free slots of the given bubble.
+  std::vector<glm::vec2> GetPotentialNeighborFreeSlots(glm::vec2 bubbleCenter);
 
-	// Create clickable option units with the image of bubble as the icon.
-	std::shared_ptr<OptionUnit> CreateClickableOptionUnit(const std::string& name, const std::string& text);
+  // Update the free slots of the game board after inserting a new bubble.
+  void UpdateFreeSlots(std::unique_ptr<Bubble>& bubble);
 
+  // Generate random static bubbles on the free slots of the game board.
+  void GenerateRandomStaticBubblesHelper(GameLevel gameLevel);
+
+  // Generate random static bubbles on the game board.
+  void GenerateRandomStaticBubbles();
+
+  // Get the time interval for narrowing the game board vertically in the
+  // current game level.
+  float GetNarrowingTimeInterval();
+
+  // Determine the color of the next bubble.
+  glm::vec4 GetNextBubbleColor();
+
+  // Adjust the horizontal position of the buttons.
+  void AdjustButtonsHorizontalPosition(
+      const std::vector<std::string>& buttonName, float interval = 0.f);
+
+  // Check if it is failed to pass the current level.
+  bool IsLevelFailed();
+
+  // Create clickable option units with the image of bubble as the icon.
+  std::shared_ptr<OptionUnit> CreateClickableOptionUnit(
+      const std::string& name, const std::string& text);
 };
