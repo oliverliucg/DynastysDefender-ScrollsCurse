@@ -1,6 +1,6 @@
 #pragma once
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include <cmath>  // for std::abs
 #include <functional>
@@ -316,7 +316,6 @@ class ResourceManager {
   // resource storage
   std::unordered_map<std::string, Shader> Shaders;
   std::unordered_map<std::string, Texture2D> Textures;
-
   // text storage
   nlohmann::json texts;
 

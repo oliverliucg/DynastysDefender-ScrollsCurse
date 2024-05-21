@@ -144,7 +144,7 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
       icon_(icon),
       text_(text),
       horizontal_spacing_(text->GetTextRenderer()
-                              ->characterMap.at(CharStyle::Regular)
+                              ->characterMap.at(CharStyle::REGULAR)
                               .at('N')
                               .Size.x *
                           text->GetText()->GetScale()),
@@ -152,13 +152,13 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
       image_on_left_(imageOnLeft),
       text_on_center_(textOnCenter) {
   // horizontal_spacing_ -=
-  // text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Bearing.x
+  // text->GetTextRenderer()->characterMap.at(CharStyle::REGULAR).at('N').Bearing.x
   // * text->GetText()->GetScale(); float AdvanceN =
-  // text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Advance
+  // text->GetTextRenderer()->characterMap.at(CharStyle::REGULAR).at('N').Advance
   // >> 6; float BearingN =
-  // text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Bearing.x;
+  // text->GetTextRenderer()->characterMap.at(CharStyle::REGULAR).at('N').Bearing.x;
   // float charSizeN =
-  // text->GetTextRenderer()->characterMap.at(CharStyle::Regular).at('N').Size.x;
+  // text->GetTextRenderer()->characterMap.at(CharStyle::REGULAR).at('N').Size.x;
   // horizontal_spacing_ -= (AdvanceN - BearingN - charSizeN) *
   // text->GetText()->GetScale(); std::cout << "horizontal spacing: " <<
   // horizontal_spacing_ << std::endl; float horizontal_spacing2 = charSizeN *
@@ -167,7 +167,7 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
   /*this->SetState(this->state_);*/
   char firstChar = text->GetText()->GetParagraph(0)[0];
   horizontal_spacing_ -= text->GetTextRenderer()
-                             ->characterMap.at(CharStyle::Regular)
+                             ->characterMap.at(CharStyle::REGULAR)
                              .at(firstChar)
                              .Bearing.x *
                          text->GetText()->GetScale();

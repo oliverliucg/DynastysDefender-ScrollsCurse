@@ -8,6 +8,8 @@
 
 enum class ScreenMode { UNDEFINED, WINDOWED, FULLSCREEN };
 
+enum class CharStyle  { UNDEFINED, REGULAR, BOLD, ITALIC, BOLD_ITALIC };
+
 enum class Language {
   UNDEFINED,
   ENGLISH,
@@ -53,6 +55,8 @@ class ConfigManager {
   void SetLanguage(Language language);
   // Get the language preference
   Language GetLanguage() const;
+  // Get path to font file for the given language
+  std::string GetFontFilePath(CharStyle style) const;
   // Get path to text file for the given language
   std::string GetTextFilePath() const;
 

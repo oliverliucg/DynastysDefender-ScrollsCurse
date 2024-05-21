@@ -129,8 +129,8 @@ glm::vec2 Text::GetTextSize(std::shared_ptr<TextRenderer> textRenderer) const {
       finalSize.y += 1.5f * paragraphSize.z;
     } else if (i + 1 == paragraphs.size() && hasDescendersInLastLine) {
       finalSize.y +=
-          (textRenderer->characterMap.at(CharStyle::Regular).at('g').Size.y -
-           textRenderer->characterMap.at(CharStyle::Regular)
+          (textRenderer->characterMap.at(CharStyle::REGULAR).at('g').Size.y -
+           textRenderer->characterMap.at(CharStyle::REGULAR)
                .at('g')
                .Bearing.y) *
           scale;

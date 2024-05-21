@@ -40,6 +40,8 @@
 #include "SpriteRenderer.h"
 #include "Text.h"
 #include "TextRenderer.h"
+#include "WesternTextRenderer.h"
+#include "CJKTextRenderer.h"
 #include "Timer.h"
 
 enum class GameState {
@@ -132,8 +134,7 @@ class GameManager {
   std::shared_ptr<CircleRenderer> circleRenderer;
   std::shared_ptr<RayRenderer> rayRenderer;
   std::shared_ptr<LineRenderer> lineRenderer;
-  // std::shared_ptr<TextRenderer> textRenderer;
-  std::shared_ptr<TextRenderer> textRenderer;
+  std::unordered_map<Language, std::shared_ptr<TextRenderer>> textRenderers;
   std::shared_ptr<PostProcessor> postProcessor;
   std::shared_ptr<Timer> timer;
 
@@ -233,8 +234,14 @@ class GameManager {
   // Set the language of the game.
   void SetLanguage(Language newLanguage);
 
+  // Load the font based on the language.
+  void LoadFont();
+
   // Load text based from resource file.
   void LoadTexts();
+
+  // Get the text renderer of the game.
+  std::shared_ptr<TextRenderer> GetTextRenderer();
 
   // Set the transition state of the game.
   void SetTransitionState(TransitionState newTransitionState);

@@ -1,4 +1,4 @@
-#include "GameManager.h"
+﻿#include "GameManager.h"
 
 #include <cstring>
 
@@ -49,25 +49,25 @@ void GameManager::Init() {
   //     std::make_shared<ColorRenderer>(resourceManager.GetShader("purecolor"));
   //     circleRenderer =
   //     std::make_shared<CircleRenderer>(resourceManager.GetShader("purecolor"),
-  //     0.5f); textRenderer =
+  //     0.5f); TextRenderer =
   //     std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
   //     this->width, this->height);
   //     // Initialize text renderer
-  //     textRenderer =
+  //     TextRenderer =
   //     std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
   //     this->width, this->height);
   //     textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-MediumItalic.TTF",
-  //     this->height * 0.03f); textRenderer =
+  //     this->height * 0.03f); TextRenderer =
   //     std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
   //     this->width, this->height);
   //     textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF",
-  //     kFontSize, CharStyle::Regular);
+  //     kFontSize, CharStyle::REGULAR);
   //     //textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF",
-  //     kFontSize, CharStyle::Bold);
+  //     kFontSize, CharStyle::BOLD);
   //     //textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",
-  //     kFontSize, CharStyle::Italic);
+  //     kFontSize, CharStyle::ITALIC);
   //     //textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF",
-  //     kFontSize, CharStyle::BoldItalic);
+  //     kFontSize, CharStyle::BOLD_ITALIC);
 
   //    buttons["fullscreen"] = std::make_shared<Button>(glm::vec2(this->width *
   //    0.15f, this->height * 0.18f), glm::vec2(this->width * 0.7f, this->height
@@ -390,86 +390,13 @@ void GameManager::Init() {
       resourceManager.GetShader("particle"),
       resourceManager.GetTexture("particle1"), 3000);
 
-  // Initialize text renderer
-  // textRenderer =
-  // std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
-  // this->width, this->height);
-  // textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-MediumItalic.TTF",
-  // this->height * 0.03f);
-  textRenderer = std::make_shared<TextRenderer>(
-      resourceManager.GetShader("text"), this->width, this->height);
-  textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF",
-                     kFontSize, CharStyle::Regular);
-  textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF",
-                     kFontSize, CharStyle::Bold);
-  textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",
-                     kFontSize, CharStyle::Italic);
-  textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF",
-                     kFontSize, CharStyle::BoldItalic);
-
-  // Initialize text box
+  // Initialize text renderer and text box
+  this->LoadFont();
   this->LoadTexts();
+  auto textRenderer = textRenderers.at(language);
 
-  // texts["story"] =
-  // std::make_shared<Text>(/*pos=*/glm::vec2(gameBoard->GetPosition().x +
-  // kBubbleRadius / 2.0f, gameBoard->GetPosition().y + kBubbleRadius / 2.0f),
-  //     /*lineWidth=*/gameBoard->GetSize().x - 2 * kBubbleRadius);
-  // texts["story"]->AddParagraph(resourceManager.GetText("story", "1"));
-  // texts["story"]->AddParagraph(resourceManager.GetText("story", "2"));
-  // texts["story"]->SetScale(0.03f/kFontScale);
-
-  // texts["control"] =
-  // std::make_shared<Text>(/*pos=*/glm::vec2(gameBoard->GetPosition().x +
-  // kBubbleRadius / 2.0f, gameBoard->GetPosition().y + kBubbleRadius / 2.0f),
-  //     		/*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-  // texts["control"]->AddParagraph(resourceManager.GetText("control", "1"));
-  // texts["control"]->AddParagraph(resourceManager.GetText("control", "2"));
-  // texts["control"]->AddParagraph(resourceManager.GetText("control", "3"));
-  // texts["control"]->AddParagraph(resourceManager.GetText("control", "4"));
-  // texts["control"]->SetScale(0.0216f/kFontScale);
-
-  // texts["victory"] = std::make_shared<Text>(/*pos=*/glm::vec2(0,0),
-  //     		/*lineWidth=*/std::numeric_limits<float>::max(),
-  //     /*boxBounds=*/glm::vec4(0.f, 0.f, std::numeric_limits<float>::max(),
-  //     std::numeric_limits<float>::max()));
-  // texts["victory"]->AddParagraph(resourceManager.GetText("victory"));
-  // texts["victory"]->SetColor(glm::vec3(1.f, 0.f, 0.f));
-  // texts["victory"]->SetTargetScale("max", 2.f / kFontScale);
-  // texts["victory"]->SetScale(texts["victory"]->GetTargetScale("max"));
-  // texts["victory"]->SetCenter(glm::vec2(this->width / 2.0f, this->height
-  // / 2.0f));
-
-  // texts["defeated"] = std::make_shared<Text>(/*pos=*/glm::vec2(0, 0),
-  //     				/*lineWidth=*/std::numeric_limits<float>::max(),
-  //     /*boxBounds=*/glm::vec4(0.f, 0.f, std::numeric_limits<float>::max(),
-  //     std::numeric_limits<float>::max()));
-  // texts["defeated"]->AddParagraph(resourceManager.GetText("defeated"));
-  // texts["defeated"]->SetColor(glm::vec3(0.5f, 0.5f, 0.5f));
-  // texts["defeated"]->SetTargetScale("max", 2.f / kFontScale);
-  // texts["defeated"]->SetScale(texts["defeated"]->GetTargetScale("max"));
-  // texts["defeated"]->SetCenter(glm::vec2(this->width / 2.0f, this->height
-  // / 2.0f));
-
-  // texts["prompttomainmenu"] =
-  // std::make_shared<Text>(/*pos=*/glm::vec2(this->width * 0.4f, this->height *
-  // 0.65f), /*lineWidth=*/std::numeric_limits<float>::max());
-  // texts["prompttomainmenu"]->AddParagraph(resourceManager.GetText("prompttomainmenu"));
-  // texts["prompttomainmenu"]->SetColor(glm::vec3(1.f, 1.f, 1.f));
-  // texts["prompttomainmenu"]->SetScale(0.025f / kFontScale);
-  // texts["prompttomainmenu"]->SetCenter(glm::vec2(this->width / 2.0f,
-  // this->height * 0.65f));
-
-  // texts["time"] =
-  // std::make_shared<Text>(/*pos=*/glm::vec2(gameBoard->GetPosition().x +
-  // gameBoard->GetSize().x - 2*kBubbleRadius, gameBoard->GetPosition().y -
-  // kBubbleRadius),
-  //     /*lineWidth=*/gameBoard->GetSize().x);
-  // texts["time"]->AddParagraph("30");
-  // texts["time"]->SetScale(0.025f / kFontScale);
   //  Create buttons
-  /*Button menuButton = Button(glm::vec2(this->width / 2.0f - kBubbleRadius
-   * * 4.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 8.f, kBubbleRadius
-   * * 3.0f), "Menu");*/
+  // Button menuButton = Button(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 8.f, kBubbleRadius* 3.0f), "Menu");
   // glm::vec2 commonButtionPosition = glm::vec2(this->width / 2.0f -
   // kBubbleRadius * 4.5f, this->height * 0.84f); glm::vec2 commonButtonSize =
   // glm::vec2(gameBoard->GetSize().x-2*(commonButtionPosition.x-gameBoard->GetPosition().x),
@@ -2238,6 +2165,8 @@ void GameManager::Render() {
   //     return;
   // }
 
+  auto textRenderer = textRenderers.at(language);
+
   // Background
   ResourceManager& resourceManager = ResourceManager::GetInstance();
 
@@ -2661,11 +2590,46 @@ void GameManager::SetLanguage(Language newLanguage) {
   // Store the language to the global config.
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetLanguage(this->language);
+  LoadFont();
   LoadTexts();
+}
+
+void GameManager::LoadFont(){
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+  // Load the text renderer based on the language.
+  switch (this->language) {
+	case Language::ENGLISH : case Language::FRENCH :
+	    textRenderers[this->language] = std::make_shared<WesternTextRenderer>(
+		    resourceManager.GetShader("text"), this->width, this->height);
+	    break;
+	default:
+		textRenderers[this->language] = std::make_shared<CJKTextRenderer>(
+			resourceManager.GetShader("text"), this->width, this->height);
+  }
+
+  auto textRenderer = textRenderers.at(language);
+  textRenderer->LoadPreferredLanguage(kFontSize,CharStyle::REGULAR);
+  textRenderer->LoadPreferredLanguage(kFontSize, CharStyle::BOLD);
+  textRenderer->LoadPreferredLanguage(kFontSize, CharStyle::ITALIC);
+  textRenderer->LoadPreferredLanguage(kFontSize, CharStyle::BOLD_ITALIC);
+  //auto westernTextRenderer = std::dynamic_pointer_cast<WesternTextRenderer>(textRenderer);
+  //auto cjkTextRenderer = std::dynamic_pointer_cast<CJKTextRenderer>(textRenderer);
+  //if (westernTextRenderer) {
+  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF", kFontSize,CharStyle::REGULAR, language);
+  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF", kFontSize, CharStyle::BOLD, language);
+  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",kFontSize, CharStyle::ITALIC, language);
+  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF", kFontSize, CharStyle::BOLD_ITALIC, language);
+  //} else if (cjkTextRenderer) {
+  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF", kFontSize,CharStyle::REGULAR, language);
+  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF", kFontSize, CharStyle::BOLD, language);
+  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",kFontSize, CharStyle::ITALIC, language);
+  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF", kFontSize, CharStyle::BOLD_ITALIC, language);
+  //}
 }
 
 void GameManager::LoadTexts() {
   ResourceManager& resourceManager = ResourceManager::GetInstance();
+
   // Load the texts for the game
   resourceManager.LoadText(
       ConfigManager::GetInstance().GetTextFilePath().c_str());
@@ -2756,6 +2720,10 @@ void GameManager::LoadTexts() {
   texts["guojieintro"]->AddParagraph(
       resourceManager.GetText("characterintro", "guojie"));
   texts["guojieintro"]->SetScale(0.0216f / kFontScale);
+}
+
+std::shared_ptr<TextRenderer> GameManager::GetTextRenderer() {
+  return textRenderers.at(language);
 }
 
 void GameManager::SetTransitionState(TransitionState newTransitionState) {
@@ -3674,7 +3642,7 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
   std::cout << "imageUnit->GetHeight(): " << imageUnit->GetHeight()
             << std::endl;
   std::shared_ptr<TextUnit> textUnit =
-      std::make_shared<TextUnit>(name, texts.at(name), this->textRenderer);
+      std::make_shared<TextUnit>(name, texts.at(name), this->GetTextRenderer());
   // Create the option unit
   std::shared_ptr<OptionUnit> optionUnit = std::make_shared<OptionUnit>(
       name, imageUnit, textUnit, OptionState::kNormal);

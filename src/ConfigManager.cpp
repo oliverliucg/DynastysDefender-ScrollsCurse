@@ -92,7 +92,31 @@ Language ConfigManager::GetLanguage() const {
   }
 }
 
+std::string ConfigManager::GetFontFilePath(CharStyle style) const {
+  std::string preference = config_.at("language").at("preference");
+  std::string style_str;
+  switch (style) {
+	case CharStyle::REGULAR:
+	  style_str = "regular";
+	  break;
+	case CharStyle::BOLD:
+	  style_str = "bold";
+	  break;
+	case CharStyle::ITALIC:
+	  style_str = "italic";
+	  break;
+	case CharStyle::BOLD_ITALIC:
+	  style_str = "boldItalic";
+	  break;
+	default:
+	  std::cerr << "Invalid font style value: " << static_cast<int>(style)
+				<< std::endl;
+	  return "";
+  }
+  return config_.at("language").at(preference).at("font").at(style_str);
+}
+
 std::string ConfigManager::GetTextFilePath() const {
   std::string preference = config_.at("language").at("preference");
-  return config_.at("language").at(preference);
+  return config_.at("language").at(preference).at("text");
 }
