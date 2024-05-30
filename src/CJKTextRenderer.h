@@ -6,10 +6,7 @@ class CJKTextRenderer : public TextRenderer {
   CJKTextRenderer(const Shader& shader, unsigned int width, unsigned int height,
                   char32_t benchmarkChar = U'힣')
       : TextRenderer(shader, width, height, benchmarkChar) {}
-  // void LoadLanguage(std::string font, unsigned int fontSize, CharStyle =
-  // CharStyle::REGULAR, Language language = Language::CHINESE_TRADITIONAL);
-  // void LoadPreferredLanguage(unsigned int fontSize, CharStyle =
-  // CharStyle::REGULAR);
+
   //  Get the height and width of the text
   std::pair<glm::vec3, bool> GetTextSize(
       std::u32string text, float scale, float lineWidth,

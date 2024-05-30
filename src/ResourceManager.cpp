@@ -300,19 +300,19 @@ std::u32string intToU32String(int64_t num) {
 }
 
 std::string u32StringToString(std::u32string u32str) {
-    boost::locale::generator gen;
-    std::locale loc = gen(""); // Create a system default locale
-    std::locale::global(loc); // Make it the global locale
-    // Convert from UTF-32 to UTF-8
-    return boost::locale::conv::utf_to_utf<char>(u32str);
+  boost::locale::generator gen;
+  std::locale loc = gen("");  // Create a system default locale
+  std::locale::global(loc);   // Make it the global locale
+  // Convert from UTF-32 to UTF-8
+  return boost::locale::conv::utf_to_utf<char>(u32str);
 }
 
 std::u32string stringToU32String(std::string str) {
-    boost::locale::generator gen;
-    std::locale loc = gen("");  // Create a system default locale
-    std::locale::global(loc);   // Make it the global locale
-    // Convert from UTF-8 to UTF-32
-    return boost::locale::conv::utf_to_utf<char32_t>(str);
+  boost::locale::generator gen;
+  std::locale loc = gen("");  // Create a system default locale
+  std::locale::global(loc);   // Make it the global locale
+  // Convert from UTF-8 to UTF-32
+  return boost::locale::conv::utf_to_utf<char32_t>(str);
 }
 
 std::pair<int, int> findWord(std::u32string text, int startIndex) {
@@ -421,24 +421,6 @@ bool ResourceManager::LoadText(const char* jsonFile) {
   text_file >> texts;
   return true;
 }
-
-// std::string ResourceManager::GetText(const std::vector<std::string> keys)
-// const
-//{
-//     nlohmann::json res;
-//	for(const auto& key : keys)
-//	{
-//		assert(texts.count(key) > 0 && "Key not found in texts");
-//         res = texts.at(key);
-//	}
-//     assert(res.is_string() && "Value is not a string");
-//     return res;
-// }
-
-// std::string ResourceManager::GetText(const std::string key) const
-//{
-//	return GetText(std::vector<std::string>{key});
-// }
 
 void ResourceManager::Clear() {
   for (auto iter : Shaders) glDeleteProgram(iter.second.ID);

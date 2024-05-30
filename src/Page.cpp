@@ -24,7 +24,8 @@ void Page::UpdateComponentsHeight() {
   }
 }
 
-void Page::SetCompenentsTextRenderer(std::shared_ptr<TextRenderer> textRenderer) {
+void Page::SetCompenentsTextRenderer(
+    std::shared_ptr<TextRenderer> textRenderer) {
   for (size_t i = 0; i < order_.size(); ++i) {
     assert(sections_.find(order_[i]) != sections_.end() && "Section not found");
     sections_[order_[i]]->SetCompenentsTextRenderer(textRenderer);

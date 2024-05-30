@@ -107,9 +107,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
   //// Swtich the screen mode.
   // if (gameManager->targetScreenMode != ScreenMode::UNDEFINED &&
   // gameManager->targetScreenMode != gameManager->screenMode) { 	int
-  //SCREEN_WIDTH = -1; 	int SCREEN_HEIGHT = -1; 	if (gameManager->targetScreenMode
-  //== ScreenMode::WINDOWED) { 		SCREEN_WIDTH = kWindowedModeSize.x; 		SCREEN_HEIGHT
-  //= kWindowedModeSize.y;
+  // SCREEN_WIDTH = -1; 	int SCREEN_HEIGHT = -1; 	if
+  // (gameManager->targetScreenMode
+  //== ScreenMode::WINDOWED) { 		SCREEN_WIDTH = kWindowedModeSize.x;
+  //SCREEN_HEIGHT = kWindowedModeSize.y;
   //	}
   //	else if (gameManager->targetScreenMode == ScreenMode::FULLSCREEN) {
   //		SCREEN_WIDTH = kFullScreenSize.x;
@@ -128,7 +129,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
   //	//glfwSetWindowShouldClose(window, false);
 
   //	// Reconfigure the attibutes in the game that are affected by the change
-  //of screen size. 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  // of screen size. 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
   //	SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
   //	gameManager->width = SCREEN_WIDTH;
   //	gameManager->height = SCREEN_HEIGHT;
@@ -308,8 +309,8 @@ int main() {
   Renderer::SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
   GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
   gameManager.Init();
-  //std::cout << "rturn at this point." << std::endl;
-  //return 0;
+  // std::cout << "rturn at this point." << std::endl;
+  // return 0;
   std::cout << "Screen width: " << SCREEN_WIDTH
             << " Screen height: " << SCREEN_HEIGHT << std::endl;
 
@@ -329,7 +330,7 @@ int main() {
   /*gameManager.state = GameState::OPTION;*/
   /*gameManager.Init();*/
   //// Set the background color to (0.988f, 0.928f, 0.828f, 1.0f) which is a
-  ///pale yellow
+  /// pale yellow
   // glClearColor(0.988f, 0.928f, 0.828f, 1.0f);
   //  Start a loop that runs until the user chooses which mode to play
   // while(!glfwWindowShouldClose(window)) {
@@ -343,7 +344,7 @@ int main() {
   //	lastFrame = currentFrame;
 
   //	// Check if any events have been activiated (key pressed, mouse moved
-  //etc.) and call corresponding response functions 	glfwPollEvents();
+  // etc.) and call corresponding response functions 	glfwPollEvents();
 
   //	// Process input
   //	gameManager.ProcessInput(deltaTime);
@@ -376,18 +377,18 @@ int main() {
   //	/*glfwSetWindowSize(window, SCREEN_WIDTH, SCREEN_HEIGHT);*/
   //	if (gameManager.screenMode == ScreenMode::FULLSCREEN) {
   //		glfwSetWindowMonitor(window, NULL, 0, 0, SCREEN_WIDTH,
-  //SCREEN_HEIGHT, mode->refreshRate);
+  // SCREEN_HEIGHT, mode->refreshRate);
   //	}
   //	else {
   //		glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY,
-  //SCREEN_WIDTH, SCREEN_HEIGHT, GLFW_DONT_CARE);
+  // SCREEN_WIDTH, SCREEN_HEIGHT, GLFW_DONT_CARE);
   //	}
   //	std::cout << "refresh rate: " << mode->refreshRate << std::endl;
   //	std::cout << "screen size: " << SCREEN_WIDTH << "x" << SCREEN_HEIGHT <<
-  //std::endl; 	glfwSetWindowShouldClose(window, false);
+  // std::endl; 	glfwSetWindowShouldClose(window, false);
   //
   //	// Reconfigure the attibutes in the game that are affected by the change
-  //of screen size. 	SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+  // of screen size. 	SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
   //	gameManager.width = SCREEN_WIDTH;
   //	gameManager.height = SCREEN_HEIGHT;
 

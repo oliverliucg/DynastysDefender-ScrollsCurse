@@ -1,11 +1,13 @@
 #include "TextRenderer.h"
 
-std::unordered_map<char32_t, std::unordered_map<CharStyle, Character>> TextRenderer::characterMap;
+std::unordered_map<char32_t, std::unordered_map<CharStyle, Character>>
+    TextRenderer::characterMap;
 
 std::unordered_map<char32_t, int> TextRenderer::characterCount;
 
 void TextRenderer::Load(std::string font, unsigned int fontSize,
-    CharStyle charStyle, const std::vector<FT_ULong> charactersToLoad) {
+                        CharStyle charStyle,
+                        const std::vector<FT_ULong> charactersToLoad) {
   FT_Library ft;
   if (FT_Init_FreeType(&ft))  // all functions return a value different than 0
                               // whenever an error occurred
@@ -27,7 +29,7 @@ void TextRenderer::Load(std::string font, unsigned int fontSize,
   // }
 
   // pre - load / compile characters and store them
-  for (const auto& c: charactersToLoad) {
+  for (const auto& c : charactersToLoad) {
     // load character glyph
     if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
       std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
@@ -60,108 +62,39 @@ void TextRenderer::Load(std::string font, unsigned int fontSize,
   FT_Done_FreeType(ft);
 }
 
-//void TextRenderer::Load(std::string font, unsigned int fontSize,
-//                        CharStyle charStyle,
-//                        const std::pair<FT_ULong, FT_ULong>& range) {
-//  //// first clear the previously loaded Characters
-//  // if (characterMap.count(charStyle)) {
-//  //   characterMap[charStyle].clear();
-//  // }
-//  //  then initialize and load the FreeType library
-//  FT_Library ft;
-//  if (FT_Init_FreeType(&ft))  // all functions return a value different than 0
-//                              // whenever an error occurred
-//    std::cout << "ERROR::FREETYPE: Could not init FreeType Library"
-//              << std::endl;
-//  // load font as face
-//  FT_Face face;
-//  if (FT_New_Face(ft, font.c_str(), 0, &face))
-//    std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-//  // set size to load glyphs as
-//  FT_Set_Pixel_Sizes(face, 0, fontSize);
-//  // disable byte-alignment restriction
-//  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//
-//  // std::vector<FT_ULong> charactersToLoad;
-//  //// Add the first 128 ASCII characters
-//  // for (FT_ULong c = 0; c < 128; ++c) {
-//  //   charactersToLoad.emplace_back(c);
-//  // }
-//
-//  // pre - load / compile characters and store them
-//  for (auto c = range.first; c < range.second; ++c) {
-//    // load character glyph
-//    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-//      std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-//      continue;
-//    }
-//    // generate texture
-//    unsigned int texture;
-//    glGenTextures(1, &texture);
-//    glBindTexture(GL_TEXTURE_2D, texture);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
-//                 face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
-//                 face->glyph->bitmap.buffer);
-//    // set texture options
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//    // now store character for later use
-//    Character character = {
-//        texture,
-//        glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-//        glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-//        face->glyph->advance.x};
-//    characterMap[charStyle][c] = character;
-//  }
-//  glBindTexture(GL_TEXTURE_2D, 0);
-//  // destroy FreeType once we're finished
-//  FT_Done_Face(face);
-//  FT_Done_FreeType(ft);
-//}
-
-//void TextRenderer::Load(
-//    std::string font, unsigned int fontSize, CharStyle charStyle,
-//    const std::vector<std::pair<FT_ULong, FT_ULong>>& ranges) {
-//  for (const auto& range : ranges) {
-//    Load(font, fontSize, charStyle, range);
-//  }
-//}
-
-//void TextRenderer::Load(std::string font, unsigned int fontSize, const std::vector<FT_ULong>& charactersToLoad) {
-//  Load(font, fontSize, CharStyle::REGULAR, charactersToLoad);
-//  Load(font, fontSize, CharStyle::BOLD, charactersToLoad);
-//  Load(font, fontSize, CharStyle::ITALIC, charactersToLoad);
-//  Load(font, fontSize, CharStyle::BOLD_ITALIC, charactersToLoad);
-//}
-
 void TextRenderer::Load(const std::u32string& charactersToLoad) {
   ConfigManager& config = ConfigManager::GetInstance();
   // store the start hex of the font, the font path, and the characters to load
-  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> regularCharacters;
-  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> boldCharacters;
-  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> italicCharacters;
-  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> boldItalicCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>>
+      regularCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>>
+      boldCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>>
+      italicCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>>
+      boldItalicCharacters;
   for (char32_t c : charactersToLoad) {
     ++characterCount[c];
-	auto [fontStartHexRegular, fontPathRegular] = config.GetFontFilePath(c, CharStyle::REGULAR);
-	auto [fontStartHexBold, fontPathBold] = config.GetFontFilePath(c, CharStyle::BOLD);
-	auto [fontStartHexItalic, fontPathItalic] = config.GetFontFilePath(c, CharStyle::ITALIC);
-	auto [fontStartHexBoldItalic, fontPathBoldItalic] = config.GetFontFilePath(c, CharStyle::BOLD_ITALIC);
+    auto [fontStartHexRegular, fontPathRegular] =
+        config.GetFontFilePath(c, CharStyle::REGULAR);
+    auto [fontStartHexBold, fontPathBold] =
+        config.GetFontFilePath(c, CharStyle::BOLD);
+    auto [fontStartHexItalic, fontPathItalic] =
+        config.GetFontFilePath(c, CharStyle::ITALIC);
+    auto [fontStartHexBoldItalic, fontPathBoldItalic] =
+        config.GetFontFilePath(c, CharStyle::BOLD_ITALIC);
     if (fontPathRegular.empty()) {
-        assert(fontPathBold.empty() && fontPathItalic.empty() &&
-                 fontPathBoldItalic.empty());
+      assert(fontPathBold.empty() && fontPathItalic.empty() &&
+             fontPathBoldItalic.empty());
       continue;
-	}
+    }
     if (characterMap.count(c) > 0) {
-	  continue;
-	}
+      continue;
+    }
 
     if (regularCharacters.count(fontStartHexRegular) == 0) {
-	    regularCharacters[fontStartHexRegular] = {fontPathRegular, {}};
-	}
+      regularCharacters[fontStartHexRegular] = {fontPathRegular, {}};
+    }
     if (boldCharacters.count(fontStartHexBold) == 0) {
       boldCharacters[fontStartHexBold] = {fontPathBold, {}};
     }
@@ -246,7 +179,7 @@ void TextRenderer::LoadLanguage(std::string font, unsigned int fontSize,
 void TextRenderer::LoadPreferredLanguage(CharStyle charStyle) {
   ConfigManager& config = ConfigManager::GetInstance();
   LoadLanguage(config.GetFontFilePath(charStyle), kFontSize, charStyle,
-                     config.GetLanguage());
+               config.GetLanguage());
 }
 
 TextRenderer::TextRenderer(const Shader& shader, unsigned int width,
@@ -364,13 +297,13 @@ void TextRenderer::RenderLine(std::vector<Character>& line,
 }
 
 bool TextRenderer::IsDescender(char32_t c) {
-    if (c == U'g' || c == U'j' || c == U'p' || c == U'q' || c == U'y') {
-      return true;
-    }
-    else {
-      float bearingY = TextRenderer::characterMap.at(c).at(CharStyle::REGULAR).Bearing.y;
-      float sizeY =
-          TextRenderer::characterMap.at(c).at(CharStyle::REGULAR).Size.y;
-      return bearingY - sizeY < 0.f;
-    }
+  if (c == U'g' || c == U'j' || c == U'p' || c == U'q' || c == U'y') {
+    return true;
+  } else {
+    float bearingY =
+        TextRenderer::characterMap.at(c).at(CharStyle::REGULAR).Bearing.y;
+    float sizeY =
+        TextRenderer::characterMap.at(c).at(CharStyle::REGULAR).Size.y;
+    return bearingY - sizeY < 0.f;
+  }
 }

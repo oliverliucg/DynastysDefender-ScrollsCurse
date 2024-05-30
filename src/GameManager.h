@@ -237,7 +237,8 @@ class GameManager {
   // Load the font based on the language.
   void LoadTextRenderer();
 
-  // Load the control characters that are used in the game. For example, descenders like 'g', 'j', 'p', 'q', and 'y', that could be used to
+  // Load the control characters that are used in the game. For example,
+  // descenders like 'g', 'j', 'p', 'q', and 'y', that could be used to
   // determine the height of the text. Also load the space character that could
   // be used for tabulation.
   void LoadControlCharacters();

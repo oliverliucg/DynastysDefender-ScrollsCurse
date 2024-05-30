@@ -62,40 +62,44 @@ std::u32string Text::GetParagraph(int index) const { return paragraphs[index]; }
 
 void Text::SetParagraph(int index, const std::u32string& text) {
   assert(index < paragraphs.size() && index >= 0 && "Index out of bounds");
-  //int lastIdx = paragraphs.size() - 1;
-  //std::swap(paragraphs[index], paragraphs[lastIdx]);
-  //paragraphs.pop_back();
-  //this->AddParagraph(text);
-  //std::swap(paragraphs[index], paragraphs[lastIdx]);
+  // int lastIdx = paragraphs.size() - 1;
+  // std::swap(paragraphs[index], paragraphs[lastIdx]);
+  // paragraphs.pop_back();
+  // this->AddParagraph(text);
+  // std::swap(paragraphs[index], paragraphs[lastIdx]);
   TextRenderer::UnLoadIfNotUsed(paragraphs[index]);
- // std::cout << "Text::CharacterCount: " << TextRenderer::characterCount.size()
- //           << std::endl;
- // for (auto& [key, value] : TextRenderer::characterCount) {
- //   // Print char32_t
- //   if (key == 0x20) {
- //       std::cout << "Space character count: ...................................." << std::endl;
- //       std::cout<< static_cast<unsigned int>(key) << " " << value << std::endl;
- //   }
- // }
- // for (auto& [key, value] : TextRenderer::characterMap) {
-	//// Print char32_t as hexadecimal
- //     if (key == 0x20) {
- //       std::cout << "Space character map: ...................................."
- //                   << std::endl;
-	//	std::cout << static_cast<unsigned int>(key)<<":"<<std::endl;
- //       for (auto& [charstyle, character] : value) {
- //           std::cout << "  " << static_cast<int>(charstyle) << ": "
- //                   << character.Size.x << " " << character.Size.y
- //                   << character.Bearing.x << " " << character.Bearing.y << std::endl;
-	//	
- //       }
-	//}
- // }
+  // std::cout << "Text::CharacterCount: " <<
+  // TextRenderer::characterCount.size()
+  //           << std::endl;
+  // for (auto& [key, value] : TextRenderer::characterCount) {
+  //   // Print char32_t
+  //   if (key == 0x20) {
+  //       std::cout << "Space character count:
+  //       ...................................." << std::endl; std::cout<<
+  //       static_cast<unsigned int>(key) << " " << value << std::endl;
+  //   }
+  // }
+  // for (auto& [key, value] : TextRenderer::characterMap) {
+  //// Print char32_t as hexadecimal
+  //     if (key == 0x20) {
+  //       std::cout << "Space character map:
+  //       ...................................."
+  //                   << std::endl;
+  //	std::cout << static_cast<unsigned int>(key)<<":"<<std::endl;
+  //       for (auto& [charstyle, character] : value) {
+  //           std::cout << "  " << static_cast<int>(charstyle) << ": "
+  //                   << character.Size.x << " " << character.Size.y
+  //                   << character.Bearing.x << " " << character.Bearing.y <<
+  //                   std::endl;
+  //
+  //       }
+  //}
+  // }
   paragraphs[index] = text;
   TextRenderer::Load(paragraphs[index]);
 }
 
-void Text::AddParagraph(const std::u32string& text) { 
+void Text::AddParagraph(const std::u32string& text) {
   paragraphs.emplace_back(text);
   TextRenderer::Load(text);
 }
@@ -171,7 +175,10 @@ glm::vec2 Text::GetTextSize(std::shared_ptr<TextRenderer> textRenderer) const {
     } else if (i + 1 == paragraphs.size() && hasDescendersInLastLine) {
       finalSize.y +=
           (TextRenderer::characterMap.at(U'g').at(CharStyle::REGULAR).Size.y -
-           TextRenderer::characterMap.at(U'g').at(CharStyle::REGULAR).Bearing.y) *scale;
+           TextRenderer::characterMap.at(U'g')
+               .at(CharStyle::REGULAR)
+               .Bearing.y) *
+          scale;
     }
   }
   return finalSize;
@@ -179,9 +186,6 @@ glm::vec2 Text::GetTextSize(std::shared_ptr<TextRenderer> textRenderer) const {
 
 void Text::Draw(std::shared_ptr<TextRenderer> textRenderer,
                 bool textCenteringEnabled) {
-    if (textCenteringEnabled == false) {
-     std::string str = ""; (void)str;
-    }
   float x = position.x;
   float y = position.y;
   if (!textCenteringEnabled) {

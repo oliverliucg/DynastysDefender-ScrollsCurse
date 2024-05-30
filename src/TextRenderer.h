@@ -22,9 +22,6 @@ struct Character {
   unsigned int Advance;    // horizontal offset to advance to next glyph
 };
 
-// enum of char styles
-// enum CharStyle { Regular, Bold, Italic, BoldItalic };
-
 // A renderer class for rendering text displayed by a font loaded using the
 // FreeType library. A single font is loaded, processed into a list of Character
 // items for later rendering.
@@ -35,11 +32,6 @@ class TextRenderer : public Renderer {
       characterMap;
   // counts the number of times the character has been loaded
   static std::unordered_map<char32_t, int> characterCount;
-  // std::map<char, Character> Characters;
-  //// holds a list of pre-compiled Charecters in bold.
-  // std::map<char, Character> BoldCharacters;
-  //// holds a list of pre-compiled Charecters in italic.
-  // std::map<char, Character> ItalicCharacters;
   //  shader used for text rendering
   Shader TextShader;
   // constructor
@@ -47,38 +39,27 @@ class TextRenderer : public Renderer {
                char32_t benchmarkChar = U'H');
   // pre-compiles a list of characters from the given font
   static void Load(std::string font, unsigned int fontSize,
-            CharStyle charStyle = CharStyle::REGULAR,
-            const std::vector<FT_ULong> charactersToLoad = {});
-  //// pre-compiles a list of characters from the given font
-  //void Load(std::string font, unsigned int fontSize,
-  //          CharStyle charStyle = CharStyle::REGULAR,
-  //          const std::pair<FT_ULong, FT_ULong>& range = {0, 128});
-  // pre-compiles multiple lists of characters from the given font
-  //void Load(std::string font, unsigned int fontSize,
-  //          CharStyle charStyle = CharStyle::REGULAR,
-  //          const std::vector<std::pair<FT_ULong, FT_ULong>>& range = {
-  //              {0, 128}});
-
- /* static void LoadCharacter(unsigned int fontSize, CharStyle charStyle = CharStyle::REGULAR, char32_t character = 'a');*/
-  // pre-compiles a list of characters from the given font
-  //static void Load(std::string font, unsigned int fontSize, const std::vector<FT_ULong>& charactersToLoad);
+                   CharStyle charStyle = CharStyle::REGULAR,
+                   const std::vector<FT_ULong> charactersToLoad = {});
+  // pre-compiles a list of characters
   static void Load(const std::u32string& charactersToLoad);
   static void UnLoadIfNotUsed(char32_t character);
   static void UnLoadIfNotUsed(const std::u32string& charactersToLoad);
   static void LoadLanguage(std::string font, unsigned int fontSize,
-                    CharStyle = CharStyle::REGULAR,
-                    Language languae = Language::ENGLISH);
+                           CharStyle = CharStyle::REGULAR,
+                           Language languae = Language::ENGLISH);
   static void LoadPreferredLanguage(CharStyle = CharStyle::REGULAR);
 
   // Get the height and width of the text
-  virtual std::pair<glm::vec3, bool> GetTextSize(std::u32string text, float scale,
-                                                 float lineWidth,
+  virtual std::pair<glm::vec3, bool> GetTextSize(std::u32string text,
+                                                 float scale, float lineWidth,
                                                  float lineSpacingFactor,
                                                  float additionalPadding) = 0;
   // renders a string of text using the precompiled list of characters, return
   // the bottom left corner of the rendered text and the spacing between lines
-  virtual std::pair<float, float> RenderText(std::u32string text, float x, float y,
-                                             float scale, float lineWidth,
+  virtual std::pair<float, float> RenderText(std::u32string text, float x,
+                                             float y, float scale,
+                                             float lineWidth,
                                              float lineSpacingFactor,
                                              float additionalPadding,
                                              glm::vec3 color, float alpha) = 0;
@@ -90,7 +71,8 @@ class TextRenderer : public Renderer {
  protected:
   // spaces per tab
   const size_t tabSize = 4;
-  // the specific character as a reference or standard for setting the vertical alignment and spacing of text
+  // the specific character as a reference or standard for setting the vertical
+  // alignment and spacing of text
   char32_t benchmarkChar = U'H';
   // replaces all tabs with spaces
   std::u32string replaceTabs(const std::u32string& text);

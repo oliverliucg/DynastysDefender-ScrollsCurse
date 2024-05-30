@@ -1,28 +1,5 @@
 #include "WesternTextRenderer.h"
 
-// void WesternTextRenderer::LoadLanguage(std::string font, unsigned int
-// fontSize, CharStyle charStyle, Language languae) {
-//   assert((languae == Language::ENGLISH || languae == Language::FRENCH) &&
-//   "The language is not supported."); switch (languae) {
-//     case Language::ENGLISH:
-//       TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
-//       break;
-//     case Language::FRENCH:
-//       TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
-//       TextRenderer::Load(font, fontSize, charStyle, {0x0080, 0x00FF});
-//       break;
-//     default:
-//       break;
-//   }
-// }
-//
-// void WesternTextRenderer::LoadPreferredLanguage(unsigned int fontSize,
-// CharStyle charStyle) {
-//   ConfigManager& config = ConfigManager::GetInstance();
-//   this->LoadLanguage(config.GetFontFilePath(charStyle), fontSize, charStyle,
-//   config.GetLanguage());
-// }
-
 std::pair<glm::vec3, bool> WesternTextRenderer::GetTextSize(
     std::u32string text, float scale, float lineWidth, float lineSpacingFactor,
     float additionalPadding) {
@@ -40,9 +17,9 @@ std::pair<glm::vec3, bool> WesternTextRenderer::GetTextSize(
   float lenOfLine = 0.f;
 
   // Space between lines
-  float lineSpacing =
-      characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale * lineSpacingFactor +
-      additionalPadding;
+  float lineSpacing = characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
+                          scale * lineSpacingFactor +
+                      additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line.
   bool firstWord = true;
@@ -152,7 +129,8 @@ std::pair<glm::vec3, bool> WesternTextRenderer::GetTextSize(
   // float lastCharSize =
   // characterMap.at(CharStyle::REGULAR).at(lastCharOfLongestLine).Size.x;
   // finalSize.x -= (lastCharAdvance - lastCharBearing - lastCharSize) * scale;
-  finalSize.y = y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale;
+  finalSize.y =
+      y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale;
   return std::make_pair(glm::vec3(finalSize, lineSpacing),
                         hasDescendersInLastLine);
 }
@@ -180,9 +158,9 @@ std::pair<float, float> WesternTextRenderer::RenderText(
   float lenOfLine = 0.f;
 
   // Space between lines
-  float lineSpacing =
-      characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale * lineSpacingFactor +
-      additionalPadding;
+  float lineSpacing = characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
+                          scale * lineSpacingFactor +
+                      additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line.
   bool firstWord = true;
@@ -221,8 +199,7 @@ std::pair<float, float> WesternTextRenderer::RenderText(
       assert(!firstWord &&
              "The width of the line should at least have space for one word.");
       firstWord = true;
-    }
-    else {
+    } else {
       firstWord = false;
     }
 
@@ -238,8 +215,9 @@ std::pair<float, float> WesternTextRenderer::RenderText(
 
       float xpos = x + ch.Bearing.x * scale;
       float ypos =
-          y +
-          (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y - ch.Bearing.y) * scale;
+          y + (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y -
+               ch.Bearing.y) *
+                  scale;
 
       float w = ch.Size.x * scale;
       float h = ch.Size.y * scale;
@@ -287,7 +265,8 @@ std::pair<float, float> WesternTextRenderer::RenderText(
   glBindTexture(GL_TEXTURE_2D, 0);
 
   return std::make_pair(
-      y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale, lineSpacing);
+      y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale,
+      lineSpacing);
 }
 
 std::pair<float, float> WesternTextRenderer::RenderCenteredText(
@@ -312,9 +291,9 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
   float lenOfLine = 0.f;
 
   // Space between lines
-  float lineSpacing =
-      characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale * lineSpacingFactor +
-      additionalPadding;
+  float lineSpacing = characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
+                          scale * lineSpacingFactor +
+                      additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line.
   bool firstWord = true;
@@ -329,8 +308,9 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
 
   // Assume the text contains only one line.
   glm::vec2 offset = glm::vec2(
-      0.f, center.y - (y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
-                               scale * 0.5f));
+      0.f,
+      center.y - (y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
+                          scale * 0.5f));
 
   while (wordIndex.second > wordIndex.first) {
     std::u32string word =
@@ -366,8 +346,7 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
       assert(!firstWord &&
              "The width of the line should at least have space for one word.");
       firstWord = true;
-    }
-    else {
+    } else {
       firstWord = false;
     }
 
@@ -384,8 +363,9 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
 
       float xpos = x + ch.Bearing.x * scale;
       float ypos =
-          y +
-          (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y - ch.Bearing.y) * scale;
+          y + (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y -
+               ch.Bearing.y) *
+                  scale;
       float w = ch.Size.x * scale;
       float h = ch.Size.y * scale;
       // store the position, width, and height of the character.
@@ -446,5 +426,6 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
   glBindTexture(GL_TEXTURE_2D, 0);
 
   return std::make_pair(
-      y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale, lineSpacing);
+      y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale,
+      lineSpacing);
 }

@@ -7,12 +7,6 @@ class WesternTextRenderer : public TextRenderer {
                       unsigned int height, char32_t benchmarkChar = U'H')
       : TextRenderer(shader, width, height, benchmarkChar) {}
 
-  // void LoadLanguage(std::string font, unsigned int fontSize, CharStyle =
-  // CharStyle::REGULAR, Language languae = Language::ENGLISH);
-
-  // void LoadPreferredLanguage(unsigned int fontSize, CharStyle =
-  // CharStyle::REGULAR);
-
   // Get the height and width of the text
   std::pair<glm::vec3, bool> GetTextSize(
       std::u32string text, float scale, float lineWidth,

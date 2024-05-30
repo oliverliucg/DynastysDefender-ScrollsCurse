@@ -6,7 +6,6 @@
 #include <string>
 #include <unordered_map>
 
-
 enum class ScreenMode { UNDEFINED, WINDOWED, FULLSCREEN };
 
 enum class CharStyle { UNDEFINED, REGULAR, BOLD, ITALIC, BOLD_ITALIC };
@@ -82,7 +81,8 @@ class ConfigManager {
   // Get the language preference
   Language GetLanguage() const;
   // Get path to font file for a certain character
-  std::pair<char32_t, std::string> GetFontFilePath(char32_t character, CharStyle style) const;
+  std::pair<char32_t, std::string> GetFontFilePath(char32_t character,
+                                                   CharStyle style) const;
   // Get path to font file for the given language
   std::string GetFontFilePath(CharStyle style) const;
   // Get path to text file for the given language

@@ -149,7 +149,9 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
     : ContentUnit(ContentType::kOption, text->GetHeight(), name),
       icon_(icon),
       text_(text),
-      horizontal_spacing_(TextRenderer::characterMap.at('N').at(CharStyle::REGULAR).Size.x * text->GetText()->GetScale()),
+      horizontal_spacing_(
+          TextRenderer::characterMap.at('N').at(CharStyle::REGULAR).Size.x *
+          text->GetText()->GetScale()),
       state_(state),
       image_on_left_(imageOnLeft),
       text_on_center_(textOnCenter) {
@@ -168,7 +170,8 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
   // horizontal_spacing2 << std::endl;
   /*this->SetState(this->state_);*/
   char32_t firstChar = text->GetText()->GetParagraph(0)[0];
-  horizontal_spacing_ -= TextRenderer::characterMap.at(firstChar).at(CharStyle::REGULAR)
+  horizontal_spacing_ -= TextRenderer::characterMap.at(firstChar)
+                             .at(CharStyle::REGULAR)
                              .Bearing.x *
                          text->GetText()->GetScale();
   this->SetPosition(this->GetPosition());
