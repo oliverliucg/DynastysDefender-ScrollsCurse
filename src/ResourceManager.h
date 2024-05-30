@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <json.hpp>
+#include <boost/locale.hpp>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -109,26 +110,6 @@ extern float kVelocityUnit;
 // number of directions of a neighbor bubble
 const int kNumNeighborDirections = 12;
 
-// File paths
-
-//// background story of the game
-// extern std::string kBackgroundStoryPart1;
-// extern std::string kBackgroundStoryPart2;
-//
-//// control instructions
-// extern std::string kControlInstruction1;
-// extern std::string kControlInstruction2;
-// extern std::string kControlInstruction3;
-// extern std::string kControlInstruction4;
-//
-//// Introduction for each character
-// extern std::string kLiuCheIntroduction;
-// extern std::string kWeiZiFuIntroduction;
-// extern std::string kWeiQingIntroduction;
-// extern std::string kGuoJieIntroduction;
-//
-// extern std::string kPromptToMainMenuText;
-
 bool areFloatsEqual(float a, float b, float epsilon = 1e-4);
 
 bool areFloatsEqual(const glm::vec2& a, const glm::vec2& b,
@@ -203,9 +184,6 @@ bool isSameColor(glm::vec3 rgb1, glm::vec3 rgb2);
 // Convert a color to a Color enum
 Color colorToEnum(glm::vec3 rgb);
 
-// Checks if a char is a descender.
-bool isDescender(char c);
-
 // Check if a point has higher y value than a line
 bool isPointHigherYThanLine(glm::vec2 point, glm::vec3 lineParams);
 
@@ -248,8 +226,17 @@ glm::vec2 calculateTravelDistanceVector(glm::vec2 velocity,
 glm::vec2 calculateVelocity(glm::vec2 initialVelocity, glm::vec2 acceleration,
                             float time);
 
+// convert int to u32string
+std::u32string intToU32String(int64_t num);
+
+// convert u32string to string
+std::string u32StringToString(std::u32string u32str);
+
+// convert string to u32string
+std::u32string stringToU32String(std::string str);
+
 // Find the start (inclusive) and end index (exclusive) of a word in a string.
-std::pair<int, int> findWord(std::string text, int startIndex);
+std::pair<int, int> findWord(std::u32string text, int startIndex);
 
 // Mix two boundaries.
 glm::vec4 mixBoundaries(glm::vec4 boundary1, glm::vec4 boundary2);
@@ -291,7 +278,7 @@ class ResourceManager {
   bool LoadText(const char* file);
 
   template <typename... Strings>
-  std::string GetText(Strings... keys) const {
+  std::u32string GetText(Strings... keys) const {
     std::vector<std::string> keyVec = {keys...};  // Convert arguments to vector
     nlohmann::json res = texts;
     for (const auto& key : keyVec) {
@@ -299,7 +286,10 @@ class ResourceManager {
       res = res.at(key);
     }
     assert(res.is_string() && "Value is not a string");
-    return res;
+    // Get the string from json (UTF-8 string)
+    std::string utf8_str = res.get<std::string>();
+
+    return stringToU32String(utf8_str);stringToU32String(utf8_str);
   }
 
   int GetAvailableID();

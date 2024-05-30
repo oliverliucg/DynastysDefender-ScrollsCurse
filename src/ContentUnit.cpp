@@ -67,6 +67,12 @@ void ButtonUnit::SetButton(std::shared_ptr<Button> button) {
   height_ = button_->GetSize().y;
 }
 
+void ButtonUnit::SetTextRenderer(std::shared_ptr<TextRenderer> textRenderer) {
+  text_renderer_ = textRenderer;
+  // Update height
+  height_ = button_->GetSize().y;
+}
+
 void ButtonUnit::SetRenderer(std::shared_ptr<TextRenderer> textRenderer,
                              std::shared_ptr<ColorRenderer> colorRenderer) {
   text_renderer_ = textRenderer;
@@ -143,11 +149,7 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
     : ContentUnit(ContentType::kOption, text->GetHeight(), name),
       icon_(icon),
       text_(text),
-      horizontal_spacing_(text->GetTextRenderer()
-                              ->characterMap.at(CharStyle::REGULAR)
-                              .at('N')
-                              .Size.x *
-                          text->GetText()->GetScale()),
+      horizontal_spacing_(TextRenderer::characterMap.at('N').at(CharStyle::REGULAR).Size.x * text->GetText()->GetScale()),
       state_(state),
       image_on_left_(imageOnLeft),
       text_on_center_(textOnCenter) {
@@ -165,10 +167,8 @@ OptionUnit::OptionUnit(const std::string& name, std::shared_ptr<ImageUnit> icon,
   // text->GetText()->GetScale(); std::cout << "horizontal spacing2: " <<
   // horizontal_spacing2 << std::endl;
   /*this->SetState(this->state_);*/
-  char firstChar = text->GetText()->GetParagraph(0)[0];
-  horizontal_spacing_ -= text->GetTextRenderer()
-                             ->characterMap.at(CharStyle::REGULAR)
-                             .at(firstChar)
+  char32_t firstChar = text->GetText()->GetParagraph(0)[0];
+  horizontal_spacing_ -= TextRenderer::characterMap.at(firstChar).at(CharStyle::REGULAR)
                              .Bearing.x *
                          text->GetText()->GetScale();
   this->SetPosition(this->GetPosition());
@@ -220,11 +220,11 @@ void OptionUnit::SetPosition(glm::vec2 pos) {
     // glm::vec2 centeredTextCenter = imageCenter;
     // if (image_on_left_){
     //	centeredTextCenter += glm::vec2(icon_->GetSize().x / 2.0f +
-    //horizontal_spacing_ + textSize.x / 2.0f, 0);
+    // horizontal_spacing_ + textSize.x / 2.0f, 0);
     // }
     // else {
     //	centeredTextCenter -= glm::vec2(icon_->GetSize().x / 2.0f +
-    //horizontal_spacing_ + textSize.x / 2.0f, 0);
+    // horizontal_spacing_ + textSize.x / 2.0f, 0);
     // }
     // text_->GetText()->SetCenter(centeredTextCenter);
   }

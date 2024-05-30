@@ -175,10 +175,6 @@ int randomWeightedSelect(std::vector<float> weights) {
   return weights.size() - 1;
 }
 
-bool isDescender(char c) {
-  return c == 'g' || c == 'j' || c == 'p' || c == 'q' || c == 'y';
-}
-
 bool isPointHigherYThanLine(glm::vec2 point, glm::vec3 lineParams) {
   float A = lineParams.x;
   float B = lineParams.y;
@@ -298,7 +294,28 @@ glm::vec2 calculateVelocity(glm::vec2 initialVelocity, glm::vec2 acceleration,
   return initialVelocity + acceleration * time;
 }
 
-std::pair<int, int> findWord(std::string text, int startIndex) {
+std::u32string intToU32String(int64_t num) {
+  std::string str = std::to_string(num);
+  return std::u32string(str.begin(), str.end());
+}
+
+std::string u32StringToString(std::u32string u32str) {
+    boost::locale::generator gen;
+    std::locale loc = gen(""); // Create a system default locale
+    std::locale::global(loc); // Make it the global locale
+    // Convert from UTF-32 to UTF-8
+    return boost::locale::conv::utf_to_utf<char>(u32str);
+}
+
+std::u32string stringToU32String(std::string str) {
+    boost::locale::generator gen;
+    std::locale loc = gen("");  // Create a system default locale
+    std::locale::global(loc);   // Make it the global locale
+    // Convert from UTF-8 to UTF-32
+    return boost::locale::conv::utf_to_utf<char32_t>(str);
+}
+
+std::pair<int, int> findWord(std::u32string text, int startIndex) {
   if (startIndex == text.size()) {
     return std::make_pair(startIndex, startIndex);
   }
@@ -307,7 +324,7 @@ std::pair<int, int> findWord(std::string text, int startIndex) {
   // The word is end with a space or the end of the string or the end of the
   // line.
   auto it = std::find_if(startIt, text.end(),
-                         [](char c) { return c == ' ' || c == '\n'; });
+                         [](char32_t c) { return c == U' ' || c == U'\n'; });
   return std::make_pair(startIndex, it - text.begin());
 }
 
@@ -394,7 +411,6 @@ Texture2D ResourceManager::GetTexture(std::string name) {
 }
 
 bool ResourceManager::LoadText(const char* jsonFile) {
-  std::cout << "Loading texts from file: " << jsonFile << std::endl;
   std::lock_guard<std::mutex> lock(resourceMutex);
   std::ifstream text_file(jsonFile, std::ios::in | std::ios::binary);
   if (!text_file.is_open()) {
@@ -403,7 +419,6 @@ bool ResourceManager::LoadText(const char* jsonFile) {
   }
 
   text_file >> texts;
-
   return true;
 }
 

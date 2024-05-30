@@ -92,27 +92,40 @@ Language ConfigManager::GetLanguage() const {
   }
 }
 
+std::pair<char32_t, std::string> ConfigManager::GetFontFilePath(char32_t character,
+                                           CharStyle style) const {
+  std::string style_str = char_style_map.at(style);
+  if (0x0020 <= character && character <= 0x017F) {
+    // If character is from 0 to 00FF, it is for English and French, and we would
+    // load the latin font
+    return std::make_pair(0, config_.at("language").at("en").at("font").at(style_str));
+  }
+  else if (0x4E00 <= character && character <= 0x9FFF) {
+    // If character is from 4E00 to 9FFF, it is for simplified Chinese or
+    // traditional chinese, and we would load the chinese font
+    return std::make_pair(0x4E00, config_.at("language").at("zh-Hans").at("font").at(style_str));
+  } else if (0x3000 <= character && character <= 0x303F ||
+             0x3040 <= character && character <= 0x309F ||
+             0x30A0 <= character && character <= 0x30FF ||
+             0xFF00 <= character && character <= 0xFFEF) {
+    // If character is from 3040 to 309F, it is for Japanese, and we would
+    // load the japanese font (Hiragana).
+    return std::make_pair(0x3040, config_.at("language").at("ja").at("font").at(style_str));
+  } else if (0x1100 <= character && character <= 0x11FF ||
+             0xAC00 <= character && character <= 0xD7AF) {
+    // If character is from 1100 to 11FF, it is for Korean, and we would
+    // load the korean font (Hangul).
+    return std::make_pair(0x1100, config_.at("language").at("ko").at("font").at(style_str));
+  }
+  else {
+    return std::make_pair(character, "");
+  }
+  
+}
+
 std::string ConfigManager::GetFontFilePath(CharStyle style) const {
   std::string preference = config_.at("language").at("preference");
-  std::string style_str;
-  switch (style) {
-	case CharStyle::REGULAR:
-	  style_str = "regular";
-	  break;
-	case CharStyle::BOLD:
-	  style_str = "bold";
-	  break;
-	case CharStyle::ITALIC:
-	  style_str = "italic";
-	  break;
-	case CharStyle::BOLD_ITALIC:
-	  style_str = "boldItalic";
-	  break;
-	default:
-	  std::cerr << "Invalid font style value: " << static_cast<int>(style)
-				<< std::endl;
-	  return "";
-  }
+  std::string style_str = char_style_map.at(style);
   return config_.at("language").at(preference).at("font").at(style_str);
 }
 

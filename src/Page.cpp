@@ -17,6 +17,20 @@ float Page::GetLimitedSectionHeight(const std::string& section_name) const {
                   sections_.at(section_name)->GetMaxHeight());
 }
 
+void Page::UpdateComponentsHeight() {
+  for (size_t i = 0; i < order_.size(); ++i) {
+    assert(sections_.find(order_[i]) != sections_.end() && "Section not found");
+    sections_[order_[i]]->UpdateComponentsHeight();
+  }
+}
+
+void Page::SetCompenentsTextRenderer(std::shared_ptr<TextRenderer> textRenderer) {
+  for (size_t i = 0; i < order_.size(); ++i) {
+    assert(sections_.find(order_[i]) != sections_.end() && "Section not found");
+    sections_[order_[i]]->SetCompenentsTextRenderer(textRenderer);
+  }
+}
+
 float Page::GetHeight() const {
   float height = top_spacing_ + bottom_spacing_;
   for (size_t i = 0; i < order_.size(); ++i) {

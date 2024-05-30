@@ -308,6 +308,8 @@ int main() {
   Renderer::SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
   GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
   gameManager.Init();
+  //std::cout << "rturn at this point." << std::endl;
+  //return 0;
   std::cout << "Screen width: " << SCREEN_WIDTH
             << " Screen height: " << SCREEN_HEIGHT << std::endl;
 

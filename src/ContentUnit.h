@@ -56,6 +56,7 @@ class ButtonUnit : public ContentUnit {
              std::shared_ptr<ColorRenderer> colorRenderer);
   std::shared_ptr<Button> GetButton();
   void SetButton(std::shared_ptr<Button> button);
+  void SetTextRenderer(std::shared_ptr<TextRenderer> textRenderer);
   void SetRenderer(std::shared_ptr<TextRenderer> textRenderer,
                    std::shared_ptr<ColorRenderer> colorRenderer);
   void UpdateHeight() override;

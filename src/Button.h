@@ -22,7 +22,7 @@ class Button {
   // Default destructor
   ~Button() = default;
   // Constructs a new Button instance.
-  Button(glm::vec2 position, glm::vec2 size, std::string content,
+  Button(glm::vec2 position, glm::vec2 size, std::u32string content,
          bool textOnCenter = true,
          glm::vec4 color = glm::vec4(Button::buttonColor, 1.0f),
          glm::vec3 textColor = Button::buttonTextColor,

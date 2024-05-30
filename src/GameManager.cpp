@@ -143,15 +143,6 @@ void GameManager::Init() {
   lineRenderer =
       std::make_shared<LineRenderer>(resourceManager.GetShader("ray"));
 
-  //   int paddedWidth = this->width, paddedHeight = this->height;
-  //   if (this->screenMode == ScreenMode::FULLSCREEN) {
-  //       paddedWidth += kFullScreenSizePadding.padLeft +
-  //       kFullScreenSizePadding.padRight;
-  //	paddedHeight += kFullScreenSizePadding.padTop +
-  //kFullScreenSizePadding.padBottom;
-  //}
-  //   std::cout << "padded width: " << paddedWidth << ", padded height: " <<
-  //   paddedHeight << std::endl;
   postProcessor = std::make_shared<PostProcessor>(
       resourceManager.GetShader("postprocessing"), this->width, this->height);
 
@@ -389,56 +380,13 @@ void GameManager::Init() {
   explosionSystem = std::make_unique<ExplosionSystem>(
       resourceManager.GetShader("particle"),
       resourceManager.GetTexture("particle1"), 3000);
-
   // Initialize text renderer and text box
-  this->LoadFont();
+  this->LoadTextRenderer();
+  this->LoadControlCharacters();
   this->LoadTexts();
-  auto textRenderer = textRenderers.at(language);
-
-  //  Create buttons
-  // Button menuButton = Button(glm::vec2(this->width / 2.0f - kBubbleRadius * 4.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 8.f, kBubbleRadius* 3.0f), "Menu");
-  // glm::vec2 commonButtionPosition = glm::vec2(this->width / 2.0f -
-  // kBubbleRadius * 4.5f, this->height * 0.84f); glm::vec2 commonButtonSize =
-  // glm::vec2(gameBoard->GetSize().x-2*(commonButtionPosition.x-gameBoard->GetPosition().x),
-  // kBubbleRadius * 3.0f);
-  buttons["back"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), "Back");
-  buttons["control"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 9.5f, kBubbleRadius * 3.0f), "Control");
-  buttons["start"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 11.0f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), "Start");
-  buttons["exit"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f + kBubbleRadius * 5.0f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 5.5f, kBubbleRadius * 3.0f), "Exit");
-  buttons["restart"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 11.5f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 9.0f, kBubbleRadius * 3.0f), "Restart");
-  buttons["resume"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 2.5f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 10.0f, kBubbleRadius * 3.0f), "Resume");
-  buttons["stop"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f + kBubbleRadius * 7.0f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 6.0f, kBubbleRadius * 3.0f), "Stop");
-  buttons["displaysettings"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), "Display");
-  buttons["languagepreference"] = std::make_shared<Button>(
-      glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-                this->height * 0.84f),
-      glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), "Language");
-
+  this->LoadButtons();
   // Create page "story" / "Main Menu"
+  auto textRenderer = textRenderers.at(language);
   auto textUnit =
       std::make_shared<TextUnit>("storytextunit", texts["story"], textRenderer);
   auto startButtonUnit = std::make_shared<ButtonUnit>(
@@ -457,24 +405,23 @@ void GameManager::Init() {
   auto liucheIconUnit = std::make_shared<ImageUnit>(
       "liucheiconunit",
       /*pos=*/glm::vec2(0.f), /*size=*/
-                                  gameCharacters.at("liuche")->GetGeneralSize(
-                                      GameCharacterState::HAPPY) *
-                                  0.75f,
+      gameCharacters.at("liuche")->GetGeneralSize(GameCharacterState::HAPPY) *
+          0.75f,
       /*texture=*/
       gameCharacters.at("liuche")->GetGeneralTexture(GameCharacterState::HAPPY),
       spriteRenderer);
   auto liucheTextUnit = std::make_shared<TextUnit>(
-      "liuchetextunit", texts["liucheintro"], textRenderer);
+      "liuchetextunit", texts.at("liucheintro"), textRenderer);
   auto liucheIconTextUnit = std::make_shared<OptionUnit>(
       "liucheicontextunit", liucheIconUnit, liucheTextUnit);
   // Get the icon size of liucheiconunit
   glm::vec2 liucheIconSize = liucheIconUnit->GetSize();
+
   auto weizifuIconUnit = std::make_shared<ImageUnit>(
       "weizifuiconunit",
       /*pos=*/glm::vec2(0.f), /*size=*/
-                                  gameCharacters.at("weizifu")->GetGeneralSize(
-                                      GameCharacterState::HAPPY) *
-                                  0.75f,
+      gameCharacters.at("weizifu")->GetGeneralSize(GameCharacterState::HAPPY) *
+          0.75f,
       /*texture=*/
       gameCharacters.at("weizifu")->GetGeneralTexture(
           GameCharacterState::HAPPY),
@@ -491,9 +438,8 @@ void GameManager::Init() {
   auto weiqingIconUnit = std::make_shared<ImageUnit>(
       "weiqingiconunit",
       /*pos=*/glm::vec2(0.f), /*size=*/
-                                  gameCharacters.at("weiqing")->GetGeneralSize(
-                                      GameCharacterState::HAPPY) *
-                                  0.75f,
+      gameCharacters.at("weiqing")->GetGeneralSize(GameCharacterState::HAPPY) *
+          0.75f,
       /*texture=*/
       gameCharacters.at("weiqing")->GetGeneralTexture(
           GameCharacterState::HAPPY),
@@ -513,9 +459,9 @@ void GameManager::Init() {
   auto guojieIconUnit = std::make_shared<ImageUnit>(
       "guojieiconunit",
       /*pos=*/glm::vec2(0.f), /*size=*/
-                                  gameCharacters.at("guojie")->GetGeneralSize(
-                                      GameCharacterState::FIGHTING) *
-                                  0.75f,
+      gameCharacters.at("guojie")->GetGeneralSize(
+          GameCharacterState::FIGHTING) *
+          0.75f,
       /*texture=*/
       gameCharacters.at("guojie")->GetGeneralTexture(
           GameCharacterState::FIGHTING),
@@ -621,7 +567,6 @@ void GameManager::Init() {
   }
 
   pages.at("story")->UpdatePosition();
-
   // Create page "control"
   textUnit = std::make_shared<TextUnit>("controltextunit", texts["control"],
                                         textRenderer);
@@ -694,9 +639,9 @@ void GameManager::Init() {
 
   // Create page "Display Settings"
   auto displaysetting1 =
-      CreateClickableOptionUnit("fullscreenmode", "Full Screen Mode");
+      CreateClickableOptionUnit("fullscreen", resourceManager.GetText("screenmode", "fullscreen"));
   auto displaysetting2 =
-      CreateClickableOptionUnit("windowedmode", "Windowed Mode");
+      CreateClickableOptionUnit("windowed", resourceManager.GetText("screenmode", "windowed"));
   if (this->GetScreenMode() == ScreenMode::FULLSCREEN)
     displaysetting1->SetState(OptionState::kClicked);
   else
@@ -705,7 +650,7 @@ void GameManager::Init() {
   buttonSection = std::make_shared<PageSection>("displaysettingbuttonsection");
   textSection->AddContent(displaysetting1);
   textSection->AddContent(displaysetting2);
-  textSection->SetInterUnitSpacing("fullscreenmode", "windowedmode",
+  textSection->SetInterUnitSpacing("fullscreen", "windowed",
                                    0.5f * kBubbleRadius);
   buttonSection->AddContent(backButtonUnit);
   pages["displaysettings"] = std::make_unique<Page>("displaysettings");
@@ -759,17 +704,17 @@ void GameManager::Init() {
 
   // Create page "Language Preference"
   auto languagepreference1 = CreateClickableOptionUnit(
-      language_map[Language::CHINESE_TRADITIONAL], "Chinese (Traditional)");
+      language_map[Language::CHINESE_TRADITIONAL], U"中文（繁體）");
   auto languagepreference2 = CreateClickableOptionUnit(
-      language_map[Language::CHINESE_SIMPLIFIED], "Chinese (Simplified)");
+      language_map[Language::CHINESE_SIMPLIFIED], U"中文（简体）");
   auto languagepreference3 =
-      CreateClickableOptionUnit(language_map[Language::ENGLISH], "English");
+      CreateClickableOptionUnit(language_map[Language::ENGLISH], U"English");
   auto languagepreference4 =
-      CreateClickableOptionUnit(language_map[Language::FRENCH], "French");
+      CreateClickableOptionUnit(language_map[Language::FRENCH], U"Français");
   auto languagepreference5 =
-      CreateClickableOptionUnit(language_map[Language::JAPANESE], "Japanese");
+      CreateClickableOptionUnit(language_map[Language::JAPANESE], U"日本語");
   auto languagepreference6 =
-      CreateClickableOptionUnit(language_map[Language::KOREAN], "Korean");
+      CreateClickableOptionUnit(language_map[Language::KOREAN], U"한국어");
 
   switch (ConfigManager::GetInstance().GetLanguage()) {
     case Language::CHINESE_TRADITIONAL:
@@ -860,6 +805,7 @@ void GameManager::Init() {
   scroll->SetTargetSilkLenForOpening(gameBoard->GetSize().y);
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForOpening());
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
+  scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
   // Set the narrowing, closing, and opening velocity of the scroll
   scroll->SetVelocityForNarrowing(kBubbleRadius);
   scroll->SetVelocityForClosing(48 * kBubbleRadius);
@@ -876,12 +822,19 @@ void GameManager::Init() {
 void GameManager::ProcessInput(float dt) {
   // std::lock_guard<std::mutex> lock(inputMutex);
   //  If 'F' is pressed, then we toggle the full screen mode.
-  if (this->keys[GLFW_KEY_F] && this->keysLocked[GLFW_KEY_F] == false) {
-    this->keysLocked[GLFW_KEY_F] = true;
-    if (this->GetScreenMode() != ScreenMode::FULLSCREEN) {
-      this->GoToScreenMode(ScreenMode::FULLSCREEN);
-    }
-  }
+  //if (this->keys[GLFW_KEY_F] && this->keysLocked[GLFW_KEY_F] == false) {
+  //  this->keysLocked[GLFW_KEY_F] = true;
+  //  //if (this->GetScreenMode() != ScreenMode::FULLSCREEN) {
+  //  //  this->GoToScreenMode(ScreenMode::FULLSCREEN);
+  //  //}
+  //  if (ConfigManager::GetInstance().GetLanguage() == Language::ENGLISH) {
+  //    this->SetLanguage(Language::FRENCH);
+  //  }
+  //  else {
+  //    this->SetLanguage(Language::ENGLISH);
+  //  }
+  //  //this->SetLanguage(Language::FRENCH);
+  //}
   // If 'W' is pressed, then we toggle the windowed mode.
   if (this->keys[GLFW_KEY_W] && this->keysLocked[GLFW_KEY_W] == false) {
     this->keysLocked[GLFW_KEY_W] = true;
@@ -1233,9 +1186,9 @@ void GameManager::ProcessInput(float dt) {
                 if (option->GetState() == OptionState::kHovered) {
                   option->SetState(OptionState::kClicked);
                   if (activePage == "displaysettings") {
-                    if (optionToBeClicked == "fullscreenmode") {
+                    if (optionToBeClicked == "fullscreen") {
                       this->GoToScreenMode(ScreenMode::FULLSCREEN);
-                    } else if (optionToBeClicked == "windowedmode") {
+                    } else if (optionToBeClicked == "windowed") {
                       this->GoToScreenMode(ScreenMode::WINDOWED);
                     }
                   } else if (activePage == "languagepreference") {
@@ -1294,9 +1247,20 @@ void GameManager::ProcessInput(float dt) {
 
 void GameManager::Update(float dt) {
   // Adjust the length of scroll based on the length of the page "control".
-  if (!this->activePage.empty()) {
-    this->scroll->SetTargetSilkLenForOpening(std::min(
-        pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y));
+  if (!this->activePage.empty() &&
+      this->scroll->GetState() == ScrollState::OPENING) {
+    this->scroll->SetTargetSilkLenForOpening(std::min(pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y));
+  //  float newScrollHeight = std::min(pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y);
+  //  float oldScrollHeight = this->scroll->GetTargetSilkLenForOpening();
+  //  if (oldScrollHeight != newScrollHeight) {
+  //      this->scroll->SetTargetSilkLenForOpening(newScrollHeight);
+  ////      if (oldScrollHeight < newScrollHeight) {
+		////	this->scroll->SetState(ScrollState::OPENING);
+  ////      }
+  ////      else {
+		////	this->scroll->SetState(ScrollState::NARROWING);
+		////}
+  //  }
   }
 
   // silk boundary before scrolling
@@ -1523,7 +1487,7 @@ void GameManager::Update(float dt) {
         this->timer->ResumeEventTimer("beforenarrowing");
         // Set the time to be displayed on the screen.
         texts["time"]->SetParagraph(
-            0, std::to_string(static_cast<int>(
+            0, intToU32String(static_cast<int64_t>(
                    std::ceil(this->timer->GetEventTimer("beforenarrowing")))));
       }
     }
@@ -1708,7 +1672,7 @@ void GameManager::Update(float dt) {
       } else {
         // Update the time to be displayed on the screen.
         texts["time"]->SetParagraph(
-            0, std::to_string(static_cast<int>(std::ceil(
+            0, intToU32String(static_cast<int64_t>(std::ceil(
                    this->timer->GetEventRemainingTime("beforenarrowing")))));
         // Shaking the whole scroll if the time is less than 1.5s.
         if (this->timer->GetEventRemainingTime("beforenarrowing") < 1.5f) {
@@ -2590,41 +2554,56 @@ void GameManager::SetLanguage(Language newLanguage) {
   // Store the language to the global config.
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetLanguage(this->language);
-  LoadFont();
+  LoadTextRenderer();
   LoadTexts();
+  LoadButtons();
+  // Update page components' position based on the new language.
+  for (const auto& [pageName, page] : pages) {
+    page->SetCompenentsTextRenderer(textRenderers.at(language));
+    page->UpdateComponentsHeight();
+    page->SetPosition(glm::vec2(
+      this->gameBoard->GetPosition().x,
+      std::max(
+          this->gameBoard->GetCenter().y - page->GetHeight() * 0.5f,
+          this->gameBoard->GetPosition().y)));
+    
+    // Reinit the scroll icon of each section
+    for (const auto& sectionName : page->GetOrder()) {
+      auto section = page->GetSection(sectionName);
+      section->UpdateScrollIconAndSectionOffset();
+    }
+  }
+
+  // Update the position of all components in the active page.
+  if (!activePage.empty()) {
+    pages.at(activePage)->UpdatePosition();
+  }
 }
 
-void GameManager::LoadFont(){
+void GameManager::LoadTextRenderer() {
+  if (textRenderers.find(this->language) != textRenderers.end()) {
+	return;
+  }
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   // Load the text renderer based on the language.
   switch (this->language) {
-	case Language::ENGLISH : case Language::FRENCH :
-	    textRenderers[this->language] = std::make_shared<WesternTextRenderer>(
-		    resourceManager.GetShader("text"), this->width, this->height);
-	    break;
-	default:
-		textRenderers[this->language] = std::make_shared<CJKTextRenderer>(
-			resourceManager.GetShader("text"), this->width, this->height);
+    case Language::ENGLISH:
+    case Language::FRENCH:
+    case Language::KOREAN:
+      textRenderers[this->language] = std::make_shared<WesternTextRenderer>(
+          resourceManager.GetShader("text"), this->width, this->height,
+          benchmark_char_map.at(this->language));
+      break;
+    default:
+      textRenderers[this->language] = std::make_shared<CJKTextRenderer>(
+          resourceManager.GetShader("text"), this->width, this->height, benchmark_char_map.at(this->language));
   }
+}
 
-  auto textRenderer = textRenderers.at(language);
-  textRenderer->LoadPreferredLanguage(kFontSize,CharStyle::REGULAR);
-  textRenderer->LoadPreferredLanguage(kFontSize, CharStyle::BOLD);
-  textRenderer->LoadPreferredLanguage(kFontSize, CharStyle::ITALIC);
-  textRenderer->LoadPreferredLanguage(kFontSize, CharStyle::BOLD_ITALIC);
-  //auto westernTextRenderer = std::dynamic_pointer_cast<WesternTextRenderer>(textRenderer);
-  //auto cjkTextRenderer = std::dynamic_pointer_cast<CJKTextRenderer>(textRenderer);
-  //if (westernTextRenderer) {
-  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF", kFontSize,CharStyle::REGULAR, language);
-  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF", kFontSize, CharStyle::BOLD, language);
-  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",kFontSize, CharStyle::ITALIC, language);
-  //  westernTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF", kFontSize, CharStyle::BOLD_ITALIC, language);
-  //} else if (cjkTextRenderer) {
-  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF", kFontSize,CharStyle::REGULAR, language);
-  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF", kFontSize, CharStyle::BOLD, language);
-  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",kFontSize, CharStyle::ITALIC, language);
-  //  cjkTextRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF", kFontSize, CharStyle::BOLD_ITALIC, language);
-  //}
+void GameManager::LoadControlCharacters() {
+  std::u32string controlCharacters = U"gjpqyHN힣 ";
+
+  TextRenderer::Load(controlCharacters);
 }
 
 void GameManager::LoadTexts() {
@@ -2633,93 +2612,202 @@ void GameManager::LoadTexts() {
   // Load the texts for the game
   resourceManager.LoadText(
       ConfigManager::GetInstance().GetTextFilePath().c_str());
-
   // Initialize text box
-  texts["story"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBubbleRadius / 2.0f,
+  std::vector<std::u32string> textsToLoad;
+  textsToLoad.push_back(resourceManager.GetText("story", "1"));
+  textsToLoad.push_back(resourceManager.GetText("story", "2"));
+  if (texts.find("story") == texts.end()) {
+    texts["story"] = std::make_shared<Text>(
+        /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBubbleRadius / 2.0f,
                         gameBoard->GetPosition().y + kBubbleRadius / 2.0f),
-      /*lineWidth=*/gameBoard->GetSize().x - 2 * kBubbleRadius);
-  texts["story"]->AddParagraph(resourceManager.GetText("story", "1"));
-  texts["story"]->AddParagraph(resourceManager.GetText("story", "2"));
-  texts["story"]->SetScale(0.03f / kFontScale);
+        /*lineWidth=*/gameBoard->GetSize().x - 2 * kBubbleRadius);
+    for (const auto& textToLoad : textsToLoad) {
+	  texts["story"]->AddParagraph(textToLoad);
+	}
+    texts["story"]->SetScale(0.03f / kFontScale);
+  }
+  else {
+    for (size_t i = 0; i < textsToLoad.size(); ++i) {
+      texts["story"]->SetParagraph(i, textsToLoad[i]);
+	}
+  }
 
-  texts["control"] = std::make_shared<Text>(
+  textsToLoad.clear();
+  textsToLoad.push_back(resourceManager.GetText("control", "1"));
+  textsToLoad.push_back(resourceManager.GetText("control", "2"));
+  textsToLoad.push_back(resourceManager.GetText("control", "3"));
+  textsToLoad.push_back(resourceManager.GetText("control", "4"));
+  if (texts.find("control") == texts.end()) {
+    texts["control"] = std::make_shared<Text>(
       /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBubbleRadius / 2.0f,
                         gameBoard->GetPosition().y + kBubbleRadius / 2.0f),
       /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-  texts["control"]->AddParagraph(resourceManager.GetText("control", "1"));
-  texts["control"]->AddParagraph(resourceManager.GetText("control", "2"));
-  texts["control"]->AddParagraph(resourceManager.GetText("control", "3"));
-  texts["control"]->AddParagraph(resourceManager.GetText("control", "4"));
-  texts["control"]->SetScale(0.0216f / kFontScale);
+    for (const auto& textToLoad : textsToLoad) {
+      texts["control"]->AddParagraph(textToLoad);
+    }
+    texts["control"]->SetScale(0.0216f / kFontScale);
+  }
+  else {
+    for (size_t i = 0; i < textsToLoad.size(); ++i) {
+      texts["control"]->SetParagraph(i, textsToLoad[i]);
+    }
+  }
 
-  texts["victory"] = std::make_shared<Text>(
+  textsToLoad.clear();
+
+  if (texts.find("victory") == texts.end()) {
+      texts["victory"] = std::make_shared<Text>(
+          /*pos=*/glm::vec2(0, 0),
+          /*lineWidth=*/std::numeric_limits<float>::max(), /*boxBounds=*/
+          glm::vec4(0.f, 0.f, std::numeric_limits<float>::max(),
+                    std::numeric_limits<float>::max()));
+      texts["victory"]->AddParagraph(resourceManager.GetText("victory"));
+      texts["victory"]->SetColor(glm::vec3(1.f, 0.f, 0.f));
+      texts["victory"]->SetTargetScale("max", 2.f / kFontScale);
+      texts["victory"]->SetScale(texts["victory"]->GetTargetScale("max"));
+      texts["victory"]->SetCenter(
+          glm::vec2(this->width / 2.0f, this->height / 2.0f));
+  }
+  else {
+    texts["victory"]->SetParagraph(0, resourceManager.GetText("victory"));
+  }
+
+  if (texts.find("defeated") == texts.end()) {
+      texts["defeated"] = std::make_shared<Text>(
       /*pos=*/glm::vec2(0, 0),
       /*lineWidth=*/std::numeric_limits<float>::max(), /*boxBounds=*/
       glm::vec4(0.f, 0.f, std::numeric_limits<float>::max(),
                 std::numeric_limits<float>::max()));
-  texts["victory"]->AddParagraph(resourceManager.GetText("victory"));
-  texts["victory"]->SetColor(glm::vec3(1.f, 0.f, 0.f));
-  texts["victory"]->SetTargetScale("max", 2.f / kFontScale);
-  texts["victory"]->SetScale(texts["victory"]->GetTargetScale("max"));
-  texts["victory"]->SetCenter(
-      glm::vec2(this->width / 2.0f, this->height / 2.0f));
+      texts["defeated"]->AddParagraph(resourceManager.GetText("defeated"));
+      texts["defeated"]->SetColor(glm::vec3(0.5f, 0.5f, 0.5f));
+      texts["defeated"]->SetTargetScale("max", 2.f / kFontScale);
+      texts["defeated"]->SetScale(texts["defeated"]->GetTargetScale("max"));
+      texts["defeated"]->SetCenter(
+          glm::vec2(this->width / 2.0f, this->height / 2.0f));    
+  } else {
+    texts["defeated"]->SetParagraph(0, resourceManager.GetText("defeated"));
+  }
 
-  texts["defeated"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(0, 0),
-      /*lineWidth=*/std::numeric_limits<float>::max(), /*boxBounds=*/
-      glm::vec4(0.f, 0.f, std::numeric_limits<float>::max(),
-                std::numeric_limits<float>::max()));
-  texts["defeated"]->AddParagraph(resourceManager.GetText("defeated"));
-  texts["defeated"]->SetColor(glm::vec3(0.5f, 0.5f, 0.5f));
-  texts["defeated"]->SetTargetScale("max", 2.f / kFontScale);
-  texts["defeated"]->SetScale(texts["defeated"]->GetTargetScale("max"));
-  texts["defeated"]->SetCenter(
-      glm::vec2(this->width / 2.0f, this->height / 2.0f));
+  if (texts.find("prompttomainmenu") == texts.end()) {
+      texts["prompttomainmenu"] = std::make_shared<Text>(
+          /*pos=*/glm::vec2(this->width * 0.4f, this->height * 0.65f),
+          /*lineWidth=*/std::numeric_limits<float>::max());
+      texts["prompttomainmenu"]->AddParagraph(
+          resourceManager.GetText("prompttomainmenu"));
+      texts["prompttomainmenu"]->SetColor(glm::vec3(1.f, 1.f, 1.f));
+      texts["prompttomainmenu"]->SetScale(0.025f / kFontScale);
+      texts["prompttomainmenu"]->SetCenter(
+          glm::vec2(this->width / 2.0f, this->height * 0.65f));
+  }
+  else {
+      texts["prompttomainmenu"]->SetParagraph(
+          0, resourceManager.GetText("prompttomainmenu"));
+  }
 
-  texts["prompttomainmenu"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(this->width * 0.4f, this->height * 0.65f),
-      /*lineWidth=*/std::numeric_limits<float>::max());
-  texts["prompttomainmenu"]->AddParagraph(
-      resourceManager.GetText("prompttomainmenu"));
-  texts["prompttomainmenu"]->SetColor(glm::vec3(1.f, 1.f, 1.f));
-  texts["prompttomainmenu"]->SetScale(0.025f / kFontScale);
-  texts["prompttomainmenu"]->SetCenter(
-      glm::vec2(this->width / 2.0f, this->height * 0.65f));
-
-  texts["time"] = std::make_shared<Text>(
+  if (texts.find("time") == texts.end()) {
+      texts["time"] = std::make_shared<Text>(
       /*pos=*/glm::vec2(gameBoard->GetPosition().x + gameBoard->GetSize().x -
                             2 * kBubbleRadius,
                         gameBoard->GetPosition().y - kBubbleRadius),
       /*lineWidth=*/gameBoard->GetSize().x);
-  texts["time"]->AddParagraph("30");
-  texts["time"]->SetScale(0.025f / kFontScale);
+      texts["time"]->AddParagraph(U"30");
+      texts["time"]->SetScale(0.025f / kFontScale);
+  } else {
+    texts["time"]->SetParagraph(0, U"30");
+  }
+  
+  std::vector<std::string> clickableOptionNames = {"fullscreen", "windowed"};
+  for (const auto& clickableOptionName : clickableOptionNames) {
+    if (texts.find(clickableOptionName) != texts.end()) {
+        if (clickableOptionName == "fullscreen" || clickableOptionName == "windowed") {
+            texts[clickableOptionName]->SetParagraph(
+                0, resourceManager.GetText("screenmode", clickableOptionName));
+        }
+    }
+  }
+  
 
   // Create character introduction units
-  texts["liucheintro"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(0.f),
-      /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-  texts["liucheintro"]->AddParagraph(
-      resourceManager.GetText("characterintro", "liuche"));
-  texts["liucheintro"]->SetScale(0.0216f / kFontScale);
-  texts["weizifuintro"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(0.f),
-      /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-  texts["weizifuintro"]->AddParagraph(
-      resourceManager.GetText("characterintro", "weizifu"));
-  texts["weizifuintro"]->SetScale(0.0216f / kFontScale);
-  texts["weiqingintro"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(0.f),
-      /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-  texts["weiqingintro"]->AddParagraph(
-      resourceManager.GetText("characterintro", "weiqing"));
-  texts["weiqingintro"]->SetScale(0.0216f / kFontScale);
-  texts["guojieintro"] = std::make_shared<Text>(
-      /*pos=*/glm::vec2(0.f),
-      /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
-  texts["guojieintro"]->AddParagraph(
-      resourceManager.GetText("characterintro", "guojie"));
-  texts["guojieintro"]->SetScale(0.0216f / kFontScale);
+  std::vector<std::string> gameCharacterNames = {"liuche", "weizifu", "weiqing", "guojie"};
+  for (const auto& gameCharacterName : gameCharacterNames) {
+      if (texts.find(gameCharacterName + "intro") == texts.end()) {
+          texts[gameCharacterName + "intro"] = std::make_shared<Text>(
+		  /*pos=*/glm::vec2(0.f),
+		  /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+          texts[gameCharacterName + "intro"]->AddParagraph(
+		  resourceManager.GetText("characterintro", gameCharacterName));
+	  texts[gameCharacterName + "intro"]->SetScale(0.0216f / kFontScale);
+      }
+      else {
+          texts[gameCharacterName + "intro"]->SetParagraph(
+		  0, resourceManager.GetText("characterintro", gameCharacterName));
+	}
+  }
+}
+
+void GameManager::LoadButtons() {
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+  //  Create buttons
+  // Button menuButton = Button(glm::vec2(this->width / 2.0f - kBubbleRadius
+  // * 4.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 8.f,
+  // kBubbleRadius* 3.0f), "Menu"); glm::vec2 commonButtionPosition =
+  // glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f);
+  // glm::vec2 commonButtonSize =
+  // glm::vec2(gameBoard->GetSize().x-2*(commonButtionPosition.x-gameBoard->GetPosition().x),
+  // kBubbleRadius * 3.0f);
+  std::vector<std::string> buttonNames = {
+      "back", "control",         "start",
+      "exit", "restart",         "resume",
+      "stop", "displaysettings", "languagepreference"};
+  for (const auto& buttonName : buttonNames) {
+    if (buttons.find(buttonName) == buttons.end()) {
+          buttons[buttonName] = std::make_shared<Button>(
+		  glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
+              					this->height * 0.84f),
+		  glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f),
+		  resourceManager.GetText("button", buttonName));
+    }
+    else {
+      buttons[buttonName]->GetText().SetParagraph(
+          0, resourceManager.GetText("button", buttonName));
+    }
+  }
+  //buttons["back"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "back"));
+  //buttons["control"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 9.5f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "control"));
+  //buttons["start"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 11.0f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "start"));
+  //buttons["exit"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f + kBubbleRadius * 5.0f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 5.5f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "exit"));
+  //buttons["restart"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 11.5f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 9.0f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "restart"));
+  //buttons["resume"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 2.5f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 10.0f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "resume"));
+  //buttons["stop"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f + kBubbleRadius * 7.0f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 6.0f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "stop"));
+  //buttons["displaysettings"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "displaysettings"));
+  //buttons["languagepreference"] = std::make_shared<Button>(
+  //    glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
+  //              this->height * 0.84f),
+  //    glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f), resourceManager.GetText("button", "languagepreference"));
 }
 
 std::shared_ptr<TextRenderer> GameManager::GetTextRenderer() {
@@ -3323,8 +3411,8 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
   int lastAddedBubbleID = -1;
 
   //// Record the number of bubbles of each color. The key is the index of the
-  ///color in the color pool and the value is the number of bubbles of that
-  ///color.
+  /// color in the color pool and the value is the number of bubbles of that
+  /// color.
   // std::unordered_map<int, int> colorCount;
 
   // Generate bubble one by one
@@ -3363,7 +3451,7 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
         (void)str;
       }
       //// Get the common free slots of the last added free slots and the
-      ///provided free slots.
+      /// provided free slots.
       // std::vector<glm::vec2> commonFreeSlots =
       // GetCommonFreeSlots(lastAddedFreeSlots, freeSlots);
       //  Randomly select a free slot from the common free slots.
@@ -3616,17 +3704,7 @@ bool GameManager::IsLevelFailed() {
 }
 
 std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
-    const std::string& name, const std::string& text) {
-  // auto liucheIconUnit = std::make_shared<ImageUnit>("liucheiconunit",
-  //     /*pos=*/glm::vec2(0.f),
-  //     /*size=*/gameCharacters.at("liuche")->GetGeneralSize(GameCharacterState::HAPPY)
-  //     * 0.75f,
-  //     /*texture=*/gameCharacters.at("liuche")->GetGeneralTexture(GameCharacterState::HAPPY),
-  //     spriteRenderer);
-  // auto liucheTextUnit = std::make_shared<TextUnit>("liuchetextunit",
-  // texts["liucheintro"], textRenderer); auto liucheIconTextUnit =
-  // std::make_shared<OptionUnit>("liucheicontextunit", liucheIconUnit,
-  // liucheTextUnit);
+    const std::string& name, const std::u32string& text) {
   //  Create the image unit
   std::shared_ptr<ImageUnit> imageUnit = std::make_shared<ImageUnit>(
       "clickableiconunit",
@@ -3639,8 +3717,6 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
       /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
   texts[name]->AddParagraph(text);
   texts[name]->SetScale(0.0018f * imageUnit->GetHeight());
-  std::cout << "imageUnit->GetHeight(): " << imageUnit->GetHeight()
-            << std::endl;
   std::shared_ptr<TextUnit> textUnit =
       std::make_shared<TextUnit>(name, texts.at(name), this->GetTextRenderer());
   // Create the option unit

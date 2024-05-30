@@ -1,13 +1,11 @@
 #include "TextRenderer.h"
 
-std::unordered_map<CharStyle, std::map<char32_t, Character>> TextRenderer::characterMap;
+std::unordered_map<char32_t, std::unordered_map<CharStyle, Character>> TextRenderer::characterMap;
 
-void TextRenderer::Load(std::string font, unsigned int fontSize,CharStyle charStyle, const std::pair<FT_ULong, FT_ULong>& range) {
-  //// first clear the previously loaded Characters
-  // if (characterMap.count(charStyle)) {
-  //   characterMap[charStyle].clear();
-  // }
-  //  then initialize and load the FreeType library
+std::unordered_map<char32_t, int> TextRenderer::characterCount;
+
+void TextRenderer::Load(std::string font, unsigned int fontSize,
+    CharStyle charStyle, const std::vector<FT_ULong> charactersToLoad) {
   FT_Library ft;
   if (FT_Init_FreeType(&ft))  // all functions return a value different than 0
                               // whenever an error occurred
@@ -22,14 +20,14 @@ void TextRenderer::Load(std::string font, unsigned int fontSize,CharStyle charSt
   // disable byte-alignment restriction
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  //std::vector<FT_ULong> charactersToLoad;
+  // std::vector<FT_ULong> charactersToLoad;
   //// Add the first 128 ASCII characters
-  //for (FT_ULong c = 0; c < 128; ++c) {
-  //  charactersToLoad.emplace_back(c);
-  //}
+  // for (FT_ULong c = 0; c < 128; ++c) {
+  //   charactersToLoad.emplace_back(c);
+  // }
 
   // pre - load / compile characters and store them
-  for (auto c = range.first; c < range.second; ++c) {
+  for (const auto& c: charactersToLoad) {
     // load character glyph
     if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
       std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
@@ -54,7 +52,7 @@ void TextRenderer::Load(std::string font, unsigned int fontSize,CharStyle charSt
         glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
         glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
         face->glyph->advance.x};
-    characterMap[charStyle][c] = character;
+    characterMap[c][charStyle] = character;
   }
   glBindTexture(GL_TEXTURE_2D, 0);
   // destroy FreeType once we're finished
@@ -62,48 +60,198 @@ void TextRenderer::Load(std::string font, unsigned int fontSize,CharStyle charSt
   FT_Done_FreeType(ft);
 }
 
-void TextRenderer::Load(std::string font, unsigned int fontSize,
-  CharStyle charStyle,
-  const std::vector<std::pair<FT_ULong, FT_ULong>>& ranges) {
-  for (const auto& range : ranges) {
-	Load(font, fontSize, charStyle, range);
+//void TextRenderer::Load(std::string font, unsigned int fontSize,
+//                        CharStyle charStyle,
+//                        const std::pair<FT_ULong, FT_ULong>& range) {
+//  //// first clear the previously loaded Characters
+//  // if (characterMap.count(charStyle)) {
+//  //   characterMap[charStyle].clear();
+//  // }
+//  //  then initialize and load the FreeType library
+//  FT_Library ft;
+//  if (FT_Init_FreeType(&ft))  // all functions return a value different than 0
+//                              // whenever an error occurred
+//    std::cout << "ERROR::FREETYPE: Could not init FreeType Library"
+//              << std::endl;
+//  // load font as face
+//  FT_Face face;
+//  if (FT_New_Face(ft, font.c_str(), 0, &face))
+//    std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+//  // set size to load glyphs as
+//  FT_Set_Pixel_Sizes(face, 0, fontSize);
+//  // disable byte-alignment restriction
+//  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//
+//  // std::vector<FT_ULong> charactersToLoad;
+//  //// Add the first 128 ASCII characters
+//  // for (FT_ULong c = 0; c < 128; ++c) {
+//  //   charactersToLoad.emplace_back(c);
+//  // }
+//
+//  // pre - load / compile characters and store them
+//  for (auto c = range.first; c < range.second; ++c) {
+//    // load character glyph
+//    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+//      std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+//      continue;
+//    }
+//    // generate texture
+//    unsigned int texture;
+//    glGenTextures(1, &texture);
+//    glBindTexture(GL_TEXTURE_2D, texture);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
+//                 face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
+//                 face->glyph->bitmap.buffer);
+//    // set texture options
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//    // now store character for later use
+//    Character character = {
+//        texture,
+//        glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+//        glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+//        face->glyph->advance.x};
+//    characterMap[charStyle][c] = character;
+//  }
+//  glBindTexture(GL_TEXTURE_2D, 0);
+//  // destroy FreeType once we're finished
+//  FT_Done_Face(face);
+//  FT_Done_FreeType(ft);
+//}
+
+//void TextRenderer::Load(
+//    std::string font, unsigned int fontSize, CharStyle charStyle,
+//    const std::vector<std::pair<FT_ULong, FT_ULong>>& ranges) {
+//  for (const auto& range : ranges) {
+//    Load(font, fontSize, charStyle, range);
+//  }
+//}
+
+//void TextRenderer::Load(std::string font, unsigned int fontSize, const std::vector<FT_ULong>& charactersToLoad) {
+//  Load(font, fontSize, CharStyle::REGULAR, charactersToLoad);
+//  Load(font, fontSize, CharStyle::BOLD, charactersToLoad);
+//  Load(font, fontSize, CharStyle::ITALIC, charactersToLoad);
+//  Load(font, fontSize, CharStyle::BOLD_ITALIC, charactersToLoad);
+//}
+
+void TextRenderer::Load(const std::u32string& charactersToLoad) {
+  ConfigManager& config = ConfigManager::GetInstance();
+  // store the start hex of the font, the font path, and the characters to load
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> regularCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> boldCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> italicCharacters;
+  std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>> boldItalicCharacters;
+  for (char32_t c : charactersToLoad) {
+    ++characterCount[c];
+	auto [fontStartHexRegular, fontPathRegular] = config.GetFontFilePath(c, CharStyle::REGULAR);
+	auto [fontStartHexBold, fontPathBold] = config.GetFontFilePath(c, CharStyle::BOLD);
+	auto [fontStartHexItalic, fontPathItalic] = config.GetFontFilePath(c, CharStyle::ITALIC);
+	auto [fontStartHexBoldItalic, fontPathBoldItalic] = config.GetFontFilePath(c, CharStyle::BOLD_ITALIC);
+    if (fontPathRegular.empty()) {
+        assert(fontPathBold.empty() && fontPathItalic.empty() &&
+                 fontPathBoldItalic.empty());
+      continue;
+	}
+    if (characterMap.count(c) > 0) {
+	  continue;
+	}
+
+    if (regularCharacters.count(fontStartHexRegular) == 0) {
+	    regularCharacters[fontStartHexRegular] = {fontPathRegular, {}};
+	}
+    if (boldCharacters.count(fontStartHexBold) == 0) {
+      boldCharacters[fontStartHexBold] = {fontPathBold, {}};
+    }
+    if (italicCharacters.count(fontStartHexItalic) == 0) {
+      italicCharacters[fontStartHexItalic] = {fontPathItalic, {}};
+    }
+    if (boldItalicCharacters.count(fontStartHexBoldItalic) == 0) {
+      boldItalicCharacters[fontStartHexBoldItalic] = {fontPathBoldItalic, {}};
+    }
+    regularCharacters[fontStartHexRegular].second.emplace_back(c);
+    boldCharacters[fontStartHexBold].second.emplace_back(c);
+    italicCharacters[fontStartHexItalic].second.emplace_back(c);
+    boldItalicCharacters[fontStartHexBoldItalic].second.emplace_back(c);
+  }
+
+  // load the characters
+  for (const auto& [fontStartHex, fontCharacters] : regularCharacters) {
+    Load(fontCharacters.first, kFontSize, CharStyle::REGULAR,
+         fontCharacters.second);
+  }
+  for (const auto& [fontStartHex, fontCharacters] : boldCharacters) {
+    Load(fontCharacters.first, kFontSize, CharStyle::BOLD,
+         fontCharacters.second);
+  }
+  for (const auto& [fontStartHex, fontCharacters] : italicCharacters) {
+    Load(fontCharacters.first, kFontSize, CharStyle::ITALIC,
+         fontCharacters.second);
+  }
+  for (const auto& [fontStartHex, fontCharacters] : boldItalicCharacters) {
+    Load(fontCharacters.first, kFontSize, CharStyle::BOLD_ITALIC,
+         fontCharacters.second);
   }
 }
 
-void TextRenderer::LoadLanguage(std::string font, unsigned int fontSize, CharStyle charStyle, Language languae) {
+void TextRenderer::UnLoadIfNotUsed(char32_t character) {
+  if (--characterCount[character] == 0) {
+    if (character == 0x20) {
+      std::cout << "Space character is being removed!!" << std::endl;
+      std::cout << "Space character count: " << characterCount[character]
+                << std::endl;
+    }
+    characterMap.erase(character);
+  }
+}
+
+void TextRenderer::UnLoadIfNotUsed(const std::u32string& charactersToLoad) {
+  for (const auto& c : charactersToLoad) {
+    UnLoadIfNotUsed(c);
+  }
+}
+
+void TextRenderer::LoadLanguage(std::string font, unsigned int fontSize,
+                                CharStyle charStyle, Language languae) {
+  std::vector<FT_ULong> charactersToLoad;
+  for (FT_ULong c = 0; c < 128; ++c) {
+    charactersToLoad.emplace_back(c);
+  }
   switch (languae) {
     case Language::ENGLISH:
-      TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
       break;
     case Language::FRENCH:
-      TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
-      TextRenderer::Load(font, fontSize, charStyle, {0x0080, 0x00FF});
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
       break;
-	case Language::CHINESE_SIMPLIFIED:
-      TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
-	  break;
+    case Language::CHINESE_SIMPLIFIED:
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
+      break;
     case Language::CHINESE_TRADITIONAL:
-      TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
-	  break;
-	case Language::KOREAN:
-      TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
-	  break;
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
+      break;
+    case Language::KOREAN:
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
+      break;
     case Language::JAPANESE:
-	  TextRenderer::Load(font, fontSize, charStyle, {0x0000, 0x007F});
+      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
     default:
       break;
   }
 }
 
-void TextRenderer::LoadPreferredLanguage(unsigned int fontSize, CharStyle charStyle) {
+void TextRenderer::LoadPreferredLanguage(CharStyle charStyle) {
   ConfigManager& config = ConfigManager::GetInstance();
-  this->LoadLanguage(config.GetFontFilePath(charStyle), fontSize, charStyle, config.GetLanguage());
+  LoadLanguage(config.GetFontFilePath(charStyle), kFontSize, charStyle,
+                     config.GetLanguage());
 }
 
-
 TextRenderer::TextRenderer(const Shader& shader, unsigned int width,
-                           unsigned int height)
-    : Renderer(shader) {
+                           unsigned int height, char32_t benchmarkChar)
+    : Renderer(shader), benchmarkChar(benchmarkChar) {
   // load and configure shader
   this->shader.SetMatrix4("projection",
                           glm::ortho(0.0f, static_cast<float>(width),
@@ -122,11 +270,11 @@ TextRenderer::TextRenderer(const Shader& shader, unsigned int width,
   glBindVertexArray(0);
 }
 
-std::string TextRenderer::replaceTabs(const std::string& text) {
-  std::string result;
+std::u32string TextRenderer::replaceTabs(const std::u32string& text) {
+  std::u32string result;
   for (const auto& c : text) {
-    if (c == '\t') {
-      result.append(tabSize, ' ');
+    if (c == U'\t') {
+      result.append(tabSize, U' ');
     } else {
       result.append(1, c);
     }
@@ -134,33 +282,33 @@ std::string TextRenderer::replaceTabs(const std::string& text) {
   return result;
 }
 
-std::pair<std::string, std::vector<CharStyle> >
-TextRenderer::getEachCharacterStyle(const std::string& text,
+std::pair<std::u32string, std::vector<CharStyle>>
+TextRenderer::getEachCharacterStyle(const std::u32string& text,
                                     CharStyle initialStyle) {
-  std::string tmp = replaceTabs(text);
+  std::u32string tmp = replaceTabs(text);
   std::vector<CharStyle> resultStyle;
-  std::string resultText;
+  std::u32string resultText;
   CharStyle currentStyle = initialStyle;
   for (const auto& c : tmp) {
-    if (c == '{') {
+    if (c == U'{') {
       if (currentStyle == CharStyle::ITALIC) {
         currentStyle = CharStyle::BOLD_ITALIC;
       } else {
         currentStyle = CharStyle::BOLD;
       }
-    } else if (c == '[') {
+    } else if (c == U'[') {
       if (currentStyle == CharStyle::BOLD) {
         currentStyle = CharStyle::BOLD_ITALIC;
       } else {
         currentStyle = CharStyle::ITALIC;
       }
-    } else if (c == '}') {
+    } else if (c == U'}') {
       if (currentStyle == CharStyle::BOLD_ITALIC) {
         currentStyle = CharStyle::ITALIC;
       } else {
         currentStyle = CharStyle::REGULAR;
       }
-    } else if (c == ']') {
+    } else if (c == U']') {
       if (currentStyle == CharStyle::BOLD_ITALIC) {
         currentStyle = CharStyle::BOLD;
       } else {
@@ -213,4 +361,16 @@ void TextRenderer::RenderLine(std::vector<Character>& line,
   ypositions.clear();
   widths.clear();
   heights.clear();
+}
+
+bool TextRenderer::IsDescender(char32_t c) {
+    if (c == U'g' || c == U'j' || c == U'p' || c == U'q' || c == U'y') {
+      return true;
+    }
+    else {
+      float bearingY = TextRenderer::characterMap.at(c).at(CharStyle::REGULAR).Bearing.y;
+      float sizeY =
+          TextRenderer::characterMap.at(c).at(CharStyle::REGULAR).Size.y;
+      return bearingY - sizeY < 0.f;
+    }
 }

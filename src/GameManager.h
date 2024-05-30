@@ -19,6 +19,7 @@
 #include "Arrow.h"
 #include "Bubble.h"
 #include "Button.h"
+#include "CJKTextRenderer.h"
 #include "Capsule.h"
 #include "CircleRenderer.h"
 #include "ColorRenderer.h"
@@ -40,9 +41,8 @@
 #include "SpriteRenderer.h"
 #include "Text.h"
 #include "TextRenderer.h"
-#include "WesternTextRenderer.h"
-#include "CJKTextRenderer.h"
 #include "Timer.h"
+#include "WesternTextRenderer.h"
 
 enum class GameState {
   UNDEFINED,
@@ -235,10 +235,18 @@ class GameManager {
   void SetLanguage(Language newLanguage);
 
   // Load the font based on the language.
-  void LoadFont();
+  void LoadTextRenderer();
+
+  // Load the control characters that are used in the game. For example, descenders like 'g', 'j', 'p', 'q', and 'y', that could be used to
+  // determine the height of the text. Also load the space character that could
+  // be used for tabulation.
+  void LoadControlCharacters();
 
   // Load text based from resource file.
   void LoadTexts();
+
+  // Load buttons based from resource file.
+  void LoadButtons();
 
   // Get the text renderer of the game.
   std::shared_ptr<TextRenderer> GetTextRenderer();
@@ -361,5 +369,5 @@ class GameManager {
 
   // Create clickable option units with the image of bubble as the icon.
   std::shared_ptr<OptionUnit> CreateClickableOptionUnit(
-      const std::string& name, const std::string& text);
+      const std::string& name, const std::u32string& text);
 };

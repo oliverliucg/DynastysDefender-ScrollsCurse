@@ -8,6 +8,8 @@ class Page {
   Page(const std::string& name);
   Page() = delete;
   std::string GetName() const;
+  void UpdateComponentsHeight();
+  void SetCompenentsTextRenderer(std::shared_ptr<TextRenderer> textRenderer);
   float GetHeight() const;
   std::shared_ptr<PageSection> GetSection(const std::string& name);
   void AddSection(std::shared_ptr<PageSection> section);

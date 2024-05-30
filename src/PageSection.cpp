@@ -17,6 +17,35 @@ PageSection::PageSection(const std::string& name)
 
 std::string PageSection::GetName() const { return name_; }
 
+void PageSection::UpdateComponentsHeight() {
+  for (size_t i = 0; i < order_.size(); ++i) {
+    assert(content_.find(order_[i]) != content_.end() &&
+           "Content not found in PageSection!");
+    content_[order_[i]]->UpdateHeight();
+  }
+}
+
+void PageSection::SetCompenentsTextRenderer(
+    std::shared_ptr<TextRenderer> textRenderer) {
+  for (size_t i = 0; i < order_.size(); ++i) {
+    assert(content_.find(order_[i]) != content_.end() &&
+           "Content not found in PageSection!");
+    if (content_[order_[i]]->GetType() == ContentType::kText) {
+      auto textUnit = std::dynamic_pointer_cast<TextUnit>(content_[order_[i]]);
+      textUnit->SetTextRenderer(textRenderer);
+    } else if (content_[order_[i]]->GetType() == ContentType::kButton) {
+      auto buttonUnit =
+          std::dynamic_pointer_cast<ButtonUnit>(content_[order_[i]]);
+      buttonUnit->SetTextRenderer(textRenderer);
+    } else if (content_[order_[i]]->GetType() == ContentType::kOption) {
+      auto optionUnit =
+          std::dynamic_pointer_cast<OptionUnit>(content_[order_[i]]);
+      auto textUnit = optionUnit->GetText();
+      textUnit->SetTextRenderer(textRenderer);
+    }
+  }
+}
+
 float PageSection::GetHeight() const {
   float height = top_spacing_ + bottom_spacing_;
   for (size_t i = 0; i < order_.size(); ++i) {
@@ -216,19 +245,65 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer,
   color_renderer_ = colorRenderer;
   circle_renderer_ = circleRenderer;
   line_renderer_ = lineRenderer;
-  auto textUnit = std::dynamic_pointer_cast<TextUnit>(content_[order_[0]]);
-  float textHeight =
-      textUnit->GetText()->GetTextSize(textUnit->GetTextRenderer()).y;
-  float textHeight2 = this->GetHeight();
-  std::cout << "text height: " << textHeight << std::endl;
-  std::cout << "text height2: " << textHeight2 << std::endl;
-  std::cout << "text section name: " << name_ << std::endl;
-  std::cout << "relations: " << scroll_relation_.x << " " << scroll_relation_.y
-            << " " << scroll_relation_.z << std::endl;
-  std::cout << "height: " << height << std::endl;
-  std::cout << "max height: " << max_height_ << std::endl;
-  std::cout << "expecting max offset: "
-            << 0.95f * max_height_ - this->GetHeight() << std::endl;
+  // auto textUnit = std::dynamic_pointer_cast<TextUnit>(content_[order_[0]]);
+  // float textHeight =
+  //     textUnit->GetText()->GetTextSize(textUnit->GetTextRenderer()).y;
+  // float textHeight2 = this->GetHeight();
+  // std::cout << "text height: " << textHeight << std::endl;
+  // std::cout << "text height2: " << textHeight2 << std::endl;
+  // std::cout << "text section name: " << name_ << std::endl;
+  // std::cout << "relations: " << scroll_relation_.x << " " <<
+  // scroll_relation_.y
+  //           << " " << scroll_relation_.z << std::endl;
+  // std::cout << "height: " << height << std::endl;
+  // std::cout << "max height: " << max_height_ << std::endl;
+  // std::cout << "expecting max offset: "
+  //           << 0.95f * max_height_ - this->GetHeight() << std::endl;
+}
+
+void PageSection::UpdateScrollIconAndSectionOffset() {
+  // Get the height of the section.
+  float height = GetHeight();
+  // If height is less than max_height_, set the scroll icon to nullptr,
+  // otherwise update the scroll icon.
+  if (height <= max_height_) {
+    scroll_icon_ = nullptr;
+    return;
+  }
+  // Calculate the proportion of the offset of the icon to the max offset.
+  glm::vec2 iconPos = scroll_icon_->GetPosition();
+  float curOffset = iconPos.y - lines_[0].y;
+  float expectedOffset = lines_[2].y - lines_[0].y - scroll_icon_->GetSize().y;
+  float offsetProportion = curOffset / expectedOffset;
+  // Set the size of the scroll icon. The height of the scroll icon is based on
+  // the difference between height and max_height_. The minimum height of the
+  // scroll icon is 0.8 * kBubbleRadius.
+  float scroll_height =
+      std::max(0.8f * kBubbleRadius, (max_height_ / height) * max_height_);
+  scroll_icon_->SetSize(
+      glm::vec2(PageSection::kScrollIconWidth, scroll_height));
+
+  float newExpectedOffset =
+      lines_[2].y - lines_[0].y - scroll_icon_->GetSize().y;
+  float newOffset = offsetProportion * newExpectedOffset;
+  float newCenterY = lines_[0].y + newOffset + scroll_icon_->GetSize().y * 0.5f;
+
+  // Set the center of the icon to be at the right bottom of the text box.
+  // float scrollCenterX = this->GetPosition().x + this->GetMaxWidth();
+  scroll_icon_->SetCenter(glm::vec2(scroll_icon_->GetCenter().x, newCenterY));
+  // Get the relationship between the offset of scroll icon and the offset of
+  // the content in the section.
+  glm::vec2 relationshipPoint1 = glm::vec2(0.f, 0.f);
+  glm::vec2 relationshipPoint2 =
+      glm::vec2(lines_[2].y - lines_[0].y - scroll_icon_->GetSize().y,
+                0.95f * max_height_ - this->GetHeight());
+  scroll_relation_ = solveLine(relationshipPoint1, relationshipPoint2);
+  this->SetScrollRelationShip(scroll_relation_);
+
+  // Update the offset of the content in the section based on the relationship
+  // between the offset of scroll icon and the offset of the content in the
+  // section
+  SetOffset(getYOfLine(newOffset, scroll_relation_));
 }
 
 void PageSection::ResetSrcollIconPosition() {
@@ -294,42 +369,10 @@ void PageSection::Draw() {
       boundingBox.x, kWindowSize.y - boundingBox.w, scissorBoxWidth,
       scissorBoxHeight);
   handler.SetIntersectedScissorBox(sectionScissorBox);
-  //// Get the current scissor box
-  // ScissorBoxHandler::ScissorBox curScissorBox = handler.GetScissorBox();
-  //// Get the previous scissor box
-  // ScissorBoxHandler::ScissorBox prevScissorBox = handler.GetPrevScissorBox();
-  //// if the first content unit is button, print the scissor box
-  // if (content_[order_[0]]->GetType() == ContentType::kButton) {
-  //	std::cout << "button section scissor box: " << sectionScissorBox.x << "
-  //" << sectionScissorBox.y << " " << sectionScissorBox.width << " " <<
-  //sectionScissorBox.height << std::endl; 	std::cout << "intersect scissor box:
-  //" << curScissorBox.x << " " << curScissorBox.y << " " << curScissorBox.width
-  //<< " " << curScissorBox.height << std::endl; 	std::cout << "actual intersect
-  //scissor box: " << actualIntersectedBox.x << " " << actualIntersectedBox.y <<
-  //" " << actualIntersectedBox.width << " " << actualIntersectedBox.height <<
-  //std::endl; 	std::cout << "previous scissor box: " << prevScissorBox.x << " "
-  //<< prevScissorBox.y << " " << prevScissorBox.width << " " <<
-  //prevScissorBox.height << std::endl;
-  // }
 
   for (size_t i = 0; i < order_.size(); ++i) {
     assert(content_.find(order_[i]) != content_.end() &&
            "Content not found in PageSection!");
-    // if (content_[order_[i]]->GetType() == ContentType::kOption) {
-    //	std::cout << "option position: " << content_[order_[i]]->GetPosition().x
-    //<< ", " << content_[order_[i]]->GetPosition().y << std::endl; 	std::cout <<
-    //"offset: " << offset_ << std::endl; 	if
-    //(content_[order_[i]]->GetPosition().y - offset_ < 0.f) { 		std::string str =
-    //""; (void)str;
-    //	}
-    // }
-    //  print the size of the content if it is button
-    // if (content_[order_[i]]->GetType() == ContentType::kButton) {
-    //	auto buttonUnit =
-    //std::dynamic_pointer_cast<ButtonUnit>(content_[order_[i]]); 	std::cout <<
-    //"button size: " << buttonUnit->GetSize().x << ", " <<
-    //buttonUnit->GetSize().y << std::endl;
-    // }
     float unit_horizontal_offset_ = this->horizontal_offset_.find(order_[i]) !=
                                             this->horizontal_offset_.end()
                                         ? this->horizontal_offset_.at(order_[i])

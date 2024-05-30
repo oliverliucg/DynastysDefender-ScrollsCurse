@@ -139,14 +139,14 @@ void Health::IncreaseHealth(int mount) {
   auto& damageText = damageTexts.back();
   damageText.SetPosition(this->totalHealthBar.GetCenter() +
                          glm::vec2(0, 5 * kBubbleRadius));
-  std::string damageStr = std::to_string(mount * 300 / totalHealth);
+  std::u32string damageStr = intToU32String(mount * 300 / totalHealth);
   if (mount < 0) {
     damageText.SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
   } else {
     damageText.SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
-    damageStr = "+" + damageStr;
+    damageStr = U"+" + damageStr;
   }
-  damageStr = "{" + damageStr + "}";
+  damageStr = U"{" + damageStr + U"}";
   damageText.AddParagraph(damageStr);
   damageText.SetScale(0.0005f / kFontScale);
   damageText.SetColor(glm::vec3(1.0f, 0.0f, 0.0f));

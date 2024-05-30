@@ -21,12 +21,14 @@ class Text {
        float additionalPadding = kBubbleRadius / 3.0f);
   // Copy constructor
   Text(const Text& other);
+  // Destructor
+  ~Text();
   // Assignment operator
   Text& operator=(const Text& other);
   // Getters and setters for the text.
-  std::string GetParagraph(int index);
-  void SetParagraph(int index, const std::string& text);
-  void AddParagraph(const std::string& text);
+  std::u32string GetParagraph(int index) const;
+  void SetParagraph(int index, const std::u32string& text);
+  void AddParagraph(const std::u32string& text);
   void RemoveParagraph(int index);
   glm::vec4 GetBoxBounds();
   void SetBoxBounds(glm::vec4 newBoxBounds);
@@ -53,7 +55,7 @@ class Text {
             bool textCenteringEnabled = false);
 
  private:
-  std::vector<std::string> paragraphs;
+  std::vector<std::u32string> paragraphs;
   glm::vec2 position, center;
   glm::vec4 boxBounds;
   glm::vec3 color;

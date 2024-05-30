@@ -15,6 +15,8 @@ class PageSection {
   PageSection(const std::string& name);
   PageSection() = delete;
   std::string GetName() const;
+  void UpdateComponentsHeight();
+  void SetCompenentsTextRenderer(std::shared_ptr<TextRenderer> textRenderer);
   float GetHeight() const;
   std::shared_ptr<ContentUnit> GetContent(const std::string& name);
   void AddContent(std::shared_ptr<ContentUnit> unit);
@@ -46,6 +48,7 @@ class PageSection {
                       std::shared_ptr<CircleRenderer> circleRenderer,
                       std::shared_ptr<LineRenderer> lineRenderer,
                       float scrollIconCenterX);
+  void UpdateScrollIconAndSectionOffset();
   void ResetSrcollIconPosition();
   void SetScrollRelationShip(glm::vec3 relation);
   glm::vec3 GetScrollRelationShip() const;

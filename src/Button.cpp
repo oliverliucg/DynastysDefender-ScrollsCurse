@@ -1,6 +1,6 @@
 #include "Button.h"
 
-Button::Button(glm::vec2 position, glm::vec2 size, std::string content,
+Button::Button(glm::vec2 position, glm::vec2 size, std::u32string content,
                bool textOnCenter, glm::vec4 color, glm::vec3 textColor,
                ButtonState state)
     : position_(position),
