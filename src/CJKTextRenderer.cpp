@@ -216,6 +216,8 @@ std::pair<float, float> CJKTextRenderer::RenderText(
       Character ch = characterMap.at(*c).at(charStyle);
 
       float xpos = x + ch.Bearing.x * scale;
+      
+      // print the hex string of the current char:
       float ypos =
           y + (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y -
                ch.Bearing.y) *

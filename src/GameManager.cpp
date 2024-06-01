@@ -578,6 +578,7 @@ void GameManager::Init() {
    * buttons["controlexit"], textRenderer, colorRenderer);*/
   textSection = std::make_shared<PageSection>("controltextsection");
   textSection->AddContent(textUnit);
+
   buttonSection = std::make_shared<PageSection>("controlbuttonsection");
   buttonSection->AddContent(backButtonUnit);
   buttonSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit",
@@ -704,17 +705,17 @@ void GameManager::Init() {
 
   // Create page "Language Preference"
   auto languagepreference1 = CreateClickableOptionUnit(
-      language_map[Language::CHINESE_TRADITIONAL], U"中文（繁體）");
+      language_map[Language::CHINESE_TRADITIONAL], U"中文（繁體）", textRenderers.at(Language::CHINESE_TRADITIONAL));
   auto languagepreference2 = CreateClickableOptionUnit(
-      language_map[Language::CHINESE_SIMPLIFIED], U"中文（简体）");
+      language_map[Language::CHINESE_SIMPLIFIED], U"中文（简体）", textRenderers.at(Language::CHINESE_SIMPLIFIED));
   auto languagepreference3 =
-      CreateClickableOptionUnit(language_map[Language::ENGLISH], U"English");
+      CreateClickableOptionUnit(language_map[Language::ENGLISH], U"English", textRenderers.at(Language::ENGLISH));
   auto languagepreference4 =
-      CreateClickableOptionUnit(language_map[Language::FRENCH], U"Français");
+      CreateClickableOptionUnit(language_map[Language::FRENCH], U"Français", textRenderers.at(Language::FRENCH));
   auto languagepreference5 =
-      CreateClickableOptionUnit(language_map[Language::JAPANESE], U"日本語");
+      CreateClickableOptionUnit(language_map[Language::JAPANESE], U"日本語", textRenderers.at(Language::JAPANESE));
   auto languagepreference6 =
-      CreateClickableOptionUnit(language_map[Language::KOREAN], U"한국어");
+      CreateClickableOptionUnit(language_map[Language::KOREAN], U"한국어", textRenderers.at(Language::KOREAN));
 
   switch (ConfigManager::GetInstance().GetLanguage()) {
     case Language::CHINESE_TRADITIONAL:
@@ -2557,11 +2558,16 @@ void GameManager::SetLanguage(Language newLanguage) {
   // Store the language to the global config.
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetLanguage(this->language);
-  LoadTextRenderer();
+  //LoadTextRenderer();
   LoadTexts();
   LoadButtons();
   // Update page components' position based on the new language.
   for (const auto& [pageName, page] : pages) {
+    // No need to update text renderers for the language preference page. As
+    // they are preloaded and fixed.
+    if (pageName == "languagepreference") {
+      continue;
+    }
     page->SetCompenentsTextRenderer(textRenderers.at(language));
     page->UpdateComponentsHeight();
     page->SetPosition(glm::vec2(
@@ -2583,23 +2589,42 @@ void GameManager::SetLanguage(Language newLanguage) {
 }
 
 void GameManager::LoadTextRenderer() {
-  if (textRenderers.find(this->language) != textRenderers.end()) {
-    return;
-  }
+  //if (textRenderers.find(this->language) != textRenderers.end()) {
+  //  return;
+  //}
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  // Load the text renderer based on the language.
-  switch (this->language) {
-    case Language::ENGLISH:
-    case Language::FRENCH:
-    case Language::KOREAN:
-      textRenderers[this->language] = std::make_shared<WesternTextRenderer>(
-          resourceManager.GetShader("text"), this->width, this->height,
-          benchmark_char_map.at(this->language));
-      break;
-    default:
-      textRenderers[this->language] = std::make_shared<CJKTextRenderer>(
-          resourceManager.GetShader("text"), this->width, this->height,
-          benchmark_char_map.at(this->language));
+  //// Load the text renderer based on the language.
+  //switch (this->language) {
+  //  case Language::ENGLISH:
+  //  case Language::FRENCH:
+  //  case Language::KOREAN:
+  //    textRenderers[this->language] = std::make_shared<WesternTextRenderer>(
+  //        resourceManager.GetShader("text"), this->width, this->height,
+  //        benchmark_char_map.at(this->language));
+  //    break;
+  //  default:
+  //    textRenderers[this->language] = std::make_shared<CJKTextRenderer>(
+  //        resourceManager.GetShader("text"), this->width, this->height,
+  //        benchmark_char_map.at(this->language));
+  //}
+
+  // Load renderers for all languages
+  for (const auto& [language, charMap] : benchmark_char_map) {
+    if (textRenderers.find(language) == textRenderers.end()) {
+      switch (language) {
+        case Language::ENGLISH:
+        case Language::FRENCH:
+        case Language::KOREAN:
+          textRenderers[language] = std::make_shared<WesternTextRenderer>(
+              resourceManager.GetShader("text"), this->width, this->height,
+              charMap);
+          break;
+        default:
+          textRenderers[language] = std::make_shared<CJKTextRenderer>(
+              resourceManager.GetShader("text"), this->width, this->height,
+              charMap);
+      }
+    }
   }
 }
 
@@ -3707,7 +3732,8 @@ bool GameManager::IsLevelFailed() {
 }
 
 std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
-    const std::string& name, const std::u32string& text) {
+    const std::string& name, const std::u32string& text,
+    std::shared_ptr<TextRenderer> textRenderer) {
   //  Create the image unit
   std::shared_ptr<ImageUnit> imageUnit = std::make_shared<ImageUnit>(
       "clickableiconunit",
@@ -3720,8 +3746,11 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
       /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
   texts[name]->AddParagraph(text);
   texts[name]->SetScale(0.0018f * imageUnit->GetHeight());
+  if (textRenderer == nullptr) {
+    textRenderer = this->GetTextRenderer();
+  }
   std::shared_ptr<TextUnit> textUnit =
-      std::make_shared<TextUnit>(name, texts.at(name), this->GetTextRenderer());
+      std::make_shared<TextUnit>(name, texts.at(name), textRenderer);
   // Create the option unit
   std::shared_ptr<OptionUnit> optionUnit = std::make_shared<OptionUnit>(
       name, imageUnit, textUnit, OptionState::kNormal);

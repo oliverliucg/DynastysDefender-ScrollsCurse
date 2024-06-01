@@ -370,5 +370,6 @@ class GameManager {
 
   // Create clickable option units with the image of bubble as the icon.
   std::shared_ptr<OptionUnit> CreateClickableOptionUnit(
-      const std::string& name, const std::u32string& text);
+      const std::string& name, const std::u32string& text,
+      std::shared_ptr<TextRenderer> textRenderer = nullptr);
 };

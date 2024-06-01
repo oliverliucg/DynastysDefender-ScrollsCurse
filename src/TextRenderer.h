@@ -68,6 +68,8 @@ class TextRenderer : public Renderer {
       float lineSpacingFactor, float additionalPadding, glm::vec2 center,
       glm::vec3 color, float alpha) = 0;
 
+  char32_t GetBenchmarkChar() const { return benchmarkChar; }
+
  protected:
   // spaces per tab
   const size_t tabSize = 4;

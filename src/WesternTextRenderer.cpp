@@ -131,6 +131,7 @@ std::pair<glm::vec3, bool> WesternTextRenderer::GetTextSize(
   // finalSize.x -= (lastCharAdvance - lastCharBearing - lastCharSize) * scale;
   finalSize.y =
       y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale;
+  auto paragraphSize = glm::vec3(finalSize, lineSpacing);
   return std::make_pair(glm::vec3(finalSize, lineSpacing),
                         hasDescendersInLastLine);
 }
