@@ -229,7 +229,7 @@ class GameManager {
   void SetScreenMode(ScreenMode newScreenMode);
 
   // Get the language of the game.
-  Language GetLanguage() const;
+  Language GetLanguage() const { return language; }
 
   // Set the language of the game.
   void SetLanguage(Language newLanguage);

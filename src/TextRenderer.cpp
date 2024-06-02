@@ -146,42 +146,6 @@ void TextRenderer::UnLoadIfNotUsed(const std::u32string& charactersToLoad) {
   }
 }
 
-void TextRenderer::LoadLanguage(std::string font, unsigned int fontSize,
-                                CharStyle charStyle, Language languae) {
-  std::vector<FT_ULong> charactersToLoad;
-  for (FT_ULong c = 0; c < 128; ++c) {
-    charactersToLoad.emplace_back(c);
-  }
-  switch (languae) {
-    case Language::ENGLISH:
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-      break;
-    case Language::FRENCH:
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-      break;
-    case Language::CHINESE_SIMPLIFIED:
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-      break;
-    case Language::CHINESE_TRADITIONAL:
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-      break;
-    case Language::KOREAN:
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-      break;
-    case Language::JAPANESE:
-      TextRenderer::Load(font, fontSize, charStyle, charactersToLoad);
-    default:
-      break;
-  }
-}
-
-void TextRenderer::LoadPreferredLanguage(CharStyle charStyle) {
-  ConfigManager& config = ConfigManager::GetInstance();
-  LoadLanguage(config.GetFontFilePath(charStyle), kFontSize, charStyle,
-               config.GetLanguage());
-}
-
 TextRenderer::TextRenderer(const Shader& shader, unsigned int width,
                            unsigned int height, char32_t benchmarkChar)
     : Renderer(shader), benchmarkChar(benchmarkChar) {

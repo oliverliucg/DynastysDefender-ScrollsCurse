@@ -704,68 +704,75 @@ void GameManager::Init() {
       glm::vec2(this->width * 0.785f, this->height * 0.73f));
 
   // Create page "Language Preference"
-  auto languagepreference1 = CreateClickableOptionUnit(
-      language_map[Language::CHINESE_TRADITIONAL], U"中文（繁體）", textRenderers.at(Language::CHINESE_TRADITIONAL));
-  auto languagepreference2 = CreateClickableOptionUnit(
-      language_map[Language::CHINESE_SIMPLIFIED], U"中文（简体）", textRenderers.at(Language::CHINESE_SIMPLIFIED));
-  auto languagepreference3 =
-      CreateClickableOptionUnit(language_map[Language::ENGLISH], U"English", textRenderers.at(Language::ENGLISH));
-  auto languagepreference4 =
-      CreateClickableOptionUnit(language_map[Language::FRENCH], U"Français", textRenderers.at(Language::FRENCH));
-  auto languagepreference5 =
-      CreateClickableOptionUnit(language_map[Language::JAPANESE], U"日本語", textRenderers.at(Language::JAPANESE));
-  auto languagepreference6 =
-      CreateClickableOptionUnit(language_map[Language::KOREAN], U"한국어", textRenderers.at(Language::KOREAN));
+  std::unordered_map<Language, std::shared_ptr<OptionUnit>> languagePreferences;
+  languagePreferences[Language::GERMAN] =
+      CreateClickableOptionUnit(language_map[Language::GERMAN], U"Deutsch",
+                                textRenderers.at(Language::GERMAN));
+  languagePreferences[Language::ENGLISH] =
+      CreateClickableOptionUnit(language_map[Language::ENGLISH], U"English",
+                                textRenderers.at(Language::ENGLISH));
+  languagePreferences[Language::SPANISH] =
+      CreateClickableOptionUnit(language_map[Language::SPANISH], U"Español",
+                                textRenderers.at(Language::SPANISH));
+  languagePreferences[Language::ITALIAN] =
+      CreateClickableOptionUnit(language_map[Language::ITALIAN], U"Italiano",
+                                textRenderers.at(Language::ITALIAN));
+  languagePreferences[Language::FRENCH] =
+      CreateClickableOptionUnit(language_map[Language::FRENCH], U"Français",
+                                textRenderers.at(Language::FRENCH));
+  languagePreferences[Language::JAPANESE] =
+      CreateClickableOptionUnit(language_map[Language::JAPANESE], U"日本語",
+                                textRenderers.at(Language::JAPANESE));
+  languagePreferences[Language::KOREAN] =
+      CreateClickableOptionUnit(language_map[Language::KOREAN], U"한국어",
+                                textRenderers.at(Language::KOREAN));
+  languagePreferences[Language::RUSSIAN] =
+      CreateClickableOptionUnit(language_map[Language::RUSSIAN], U"Русский",
+                                textRenderers.at(Language::RUSSIAN));
+  languagePreferences[Language::PORTUGUESE_BR] = CreateClickableOptionUnit(
+      language_map[Language::PORTUGUESE_BR], U"Português (Brasil)",
+      textRenderers.at(Language::PORTUGUESE_BR));
+  languagePreferences[Language::PORTUGUESE_PT] = CreateClickableOptionUnit(
+      language_map[Language::PORTUGUESE_PT], U"Português (Portugal)",
+      textRenderers.at(Language::PORTUGUESE_PT));
+  languagePreferences[Language::CHINESE_SIMPLIFIED] = CreateClickableOptionUnit(
+      language_map[Language::CHINESE_SIMPLIFIED], U"中文（简体）",
+      textRenderers.at(Language::CHINESE_SIMPLIFIED));
+  languagePreferences[Language::CHINESE_TRADITIONAL] =
+      CreateClickableOptionUnit(
+          language_map[Language::CHINESE_TRADITIONAL], U"中文（繁體）",
+          textRenderers.at(Language::CHINESE_TRADITIONAL));
 
-  switch (ConfigManager::GetInstance().GetLanguage()) {
-    case Language::CHINESE_TRADITIONAL:
-      languagepreference1->SetState(OptionState::kClicked);
-      break;
-    case Language::CHINESE_SIMPLIFIED:
-      languagepreference2->SetState(OptionState::kClicked);
-      break;
-    case Language::ENGLISH:
-      languagepreference3->SetState(OptionState::kClicked);
-      break;
-    case Language::FRENCH:
-      languagepreference4->SetState(OptionState::kClicked);
-      break;
-    case Language::JAPANESE:
-      languagepreference5->SetState(OptionState::kClicked);
-      break;
-    case Language::KOREAN:
-      languagepreference6->SetState(OptionState::kClicked);
-      break;
-    default:
-      languagepreference1->SetState(OptionState::kClicked);
-  }
+  languagePreferences.at(ConfigManager::GetInstance().GetLanguage())
+      ->SetState(OptionState::kClicked);
 
   const std::string languagePreferencePageName = "languagepreference";
   textSection = std::make_shared<PageSection>(languagePreferencePageName +
                                               textSectionBaseName);
   buttonSection = std::make_shared<PageSection>(languagePreferencePageName +
                                                 buttonSectionBaseName);
-  textSection->AddContent(languagepreference1);
-  textSection->AddContent(languagepreference2);
-  textSection->AddContent(languagepreference3);
-  textSection->AddContent(languagepreference4);
-  textSection->AddContent(languagepreference5);
-  textSection->AddContent(languagepreference6);
-  textSection->SetInterUnitSpacing(language_map[Language::CHINESE_TRADITIONAL],
-                                   language_map[Language::CHINESE_SIMPLIFIED],
-                                   0.5f * kBubbleRadius);
-  textSection->SetInterUnitSpacing(language_map[Language::CHINESE_SIMPLIFIED],
-                                   language_map[Language::ENGLISH],
-                                   0.5f * kBubbleRadius);
-  textSection->SetInterUnitSpacing(language_map[Language::ENGLISH],
-                                   language_map[Language::FRENCH],
-                                   0.5f * kBubbleRadius);
-  textSection->SetInterUnitSpacing(language_map[Language::FRENCH],
-                                   language_map[Language::JAPANESE],
-                                   0.5f * kBubbleRadius);
-  textSection->SetInterUnitSpacing(language_map[Language::JAPANESE],
-                                   language_map[Language::KOREAN],
-                                   0.5f * kBubbleRadius);
+  std::vector<Language> languagePreferenceOrder = {
+      Language::GERMAN,
+      Language::ENGLISH,
+      Language::SPANISH,
+      Language::ITALIAN,
+      Language::FRENCH,
+      Language::JAPANESE,
+      Language::KOREAN,
+      Language::RUSSIAN,
+      Language::PORTUGUESE_BR,
+      Language::PORTUGUESE_PT,
+      Language::CHINESE_SIMPLIFIED,
+      Language::CHINESE_TRADITIONAL};
+  for (size_t i = 0; i < languagePreferenceOrder.size(); ++i) {
+    textSection->AddContent(languagePreferences.at(languagePreferenceOrder[i]));
+    if (i > 0) {
+      textSection->SetInterUnitSpacing(
+          language_map[languagePreferenceOrder[i - 1]],
+          language_map[languagePreferenceOrder[i]], 0.5f * kBubbleRadius);
+    }
+  }
+
   buttonSection->AddContent(backButtonUnit);
   pages[languagePreferencePageName] =
       std::make_unique<Page>(languagePreferencePageName);
@@ -1147,6 +1154,8 @@ void GameManager::ProcessInput(float dt) {
               // assume that only one button is pressed at a time, so we break
               // the loop.
               break;
+            } else {
+              button->SetState(ButtonState::kHovered);
             }
           } else {
             button->SetState(ButtonState::kHovered);
@@ -1173,48 +1182,32 @@ void GameManager::ProcessInput(float dt) {
             if (option == nullptr) {
               continue;
             }
+
             assert(option->GetType() == ContentType::kOption &&
                    "The content type should be an option.");
             if (option->GetState() == OptionState::kUnclickable) {
               continue;
-            } else if (option->GetState() == OptionState::kClicked) {
-              optionAlreadyClicked = option->GetName();
             }
+
             if (option->IsPositionInsideIcon(mousePosition) &&
                 option->GetState() != OptionState::kClicked) {
               if (this->leftMousePressed) {
                 optionToBeClicked = option->GetName();
-                if (option->GetState() == OptionState::kHovered) {
-                  option->SetState(OptionState::kClicked);
-                  if (activePage == "displaysettings") {
-                    if (optionToBeClicked == "fullscreen") {
-                      this->GoToScreenMode(ScreenMode::FULLSCREEN);
-                    } else if (optionToBeClicked == "windowed") {
-                      this->GoToScreenMode(ScreenMode::WINDOWED);
-                    }
-                  } else if (activePage == "languagepreference") {
-                    if (optionToBeClicked ==
-                        language_map[Language::CHINESE_TRADITIONAL]) {
-                      this->SetLanguage(Language::CHINESE_TRADITIONAL);
-                    } else if (optionToBeClicked ==
-                               language_map[Language::CHINESE_SIMPLIFIED]) {
-                      this->SetLanguage(Language::CHINESE_SIMPLIFIED);
-                    } else if (optionToBeClicked ==
-                               language_map[Language::ENGLISH]) {
-                      this->SetLanguage(Language::ENGLISH);
-                    } else if (optionToBeClicked ==
-                               language_map[Language::FRENCH]) {
-                      this->SetLanguage(Language::FRENCH);
-                    } else if (optionToBeClicked ==
-                               language_map[Language::JAPANESE]) {
-                      this->SetLanguage(Language::JAPANESE);
-                    } else if (optionToBeClicked ==
-                               language_map[Language::KOREAN]) {
-                      this->SetLanguage(Language::KOREAN);
-                    }
+                option->SetState(OptionState::kClicked);
+                if (activePage == "displaysettings") {
+                  optionAlreadyClicked =
+                      this->screenMode == ScreenMode::FULLSCREEN ? "fullscreen"
+                                                                 : "windowed";
+                  if (optionToBeClicked == "fullscreen") {
+                    this->GoToScreenMode(ScreenMode::FULLSCREEN);
+                  } else if (optionToBeClicked == "windowed") {
+                    this->GoToScreenMode(ScreenMode::WINDOWED);
                   }
-                  continue;
+                } else if (activePage == "languagepreference") {
+                  optionAlreadyClicked = language_map.at(this->GetLanguage());
+                  this->SetLanguage(language_enum_map.at(optionToBeClicked));
                 }
+                break;
               } else {
                 if (option->GetState() != OptionState::kClicked) {
                   option->SetState(OptionState::kHovered);
@@ -1247,26 +1240,6 @@ void GameManager::ProcessInput(float dt) {
 }
 
 void GameManager::Update(float dt) {
-  // Adjust the length of scroll based on the length of the page "control".
-  if (!this->activePage.empty() &&
-      this->scroll->GetState() == ScrollState::OPENING) {
-    this->scroll->SetTargetSilkLenForOpening(std::min(
-        pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y));
-    //  float newScrollHeight =
-    //  std::min(pages.at(this->activePage)->GetHeight(),
-    //  gameBoard->GetSize().y); float oldScrollHeight =
-    //  this->scroll->GetTargetSilkLenForOpening(); if (oldScrollHeight !=
-    //  newScrollHeight) {
-    //      this->scroll->SetTargetSilkLenForOpening(newScrollHeight);
-    ////      if (oldScrollHeight < newScrollHeight) {
-    ////	this->scroll->SetState(ScrollState::OPENING);
-    ////      }
-    ////      else {
-    ////	this->scroll->SetState(ScrollState::NARROWING);
-    ////}
-    //  }
-  }
-
   // silk boundary before scrolling
   glm::vec4 silkBoundsBefore = this->scroll->GetSilkBounds();
 
@@ -1693,7 +1666,7 @@ void GameManager::Update(float dt) {
       // PREPARING.
       if (this->state != GameState::PREPARING) {
         gameBoard->SetState(GameBoardState::ACTIVE);
-        this->scroll->SetState(ScrollState::OPENING);
+        SetScrollState(ScrollState::OPENING);
       }
     }
   } else if (this->state == GameState::PREPARING) {
@@ -1712,11 +1685,10 @@ void GameManager::Update(float dt) {
       }
       statics.clear();
       colorCount.clear();
-      /*this->scroll->SetState(ScrollState::OPENING);*/
     } else if (this->scroll->GetState() == ScrollState::DEPLOYED ||
                this->scroll->GetState() == ScrollState::RETURNED) {
       if (this->targetState != GameState::LOSE) {
-        this->scroll->SetState(ScrollState::OPENING);
+        SetScrollState(ScrollState::OPENING);
       } else {
         this->scroll->SetState(ScrollState::RETRACTING);
       }
@@ -1845,7 +1817,7 @@ void GameManager::Update(float dt) {
           // Set the gameboard state to ACTIVE.
           gameBoard->SetState(GameBoardState::ACTIVE);
           // Set the scoll state to be OPENING.
-          scroll->SetState(ScrollState::OPENING);
+          SetScrollState(ScrollState::OPENING);
           if (lastLastState == GameState::EXIT) {
             // Set the offset of the text "Story".
             glm::vec2 buttonSectionPos = this->pages.at("story")
@@ -1895,7 +1867,7 @@ void GameManager::Update(float dt) {
       this->SetToTargetState();
       this->SetTransitionState(TransitionState::TRANSITION);
       if (this->state != GameState::PREPARING) {
-        this->scroll->SetState(ScrollState::OPENING);
+        SetScrollState(ScrollState::OPENING);
       }
       // If the new state is Preparing, then we set the gameboard state to be
       // INGAME.
@@ -1947,7 +1919,7 @@ void GameManager::Update(float dt) {
       this->SetToTargetState();
       this->SetTransitionState(TransitionState::TRANSITION);
       if (this->state != GameState::PREPARING) {
-        this->scroll->SetState(ScrollState::OPENING);
+        SetScrollState(ScrollState::OPENING);
       }
 
       // If the new state is PREPARING or ACTIVE, then we set the gameboard
@@ -1963,7 +1935,7 @@ void GameManager::Update(float dt) {
         this->scroll->GetState() == ScrollState::CLOSED) {
       this->SetToTargetState();
       this->SetTransitionState(TransitionState::TRANSITION);
-      this->scroll->SetState(ScrollState::OPENING);
+      SetScrollState(ScrollState::OPENING);
     }
   }
   // Check if the characters are moving to the target position.
@@ -2558,7 +2530,7 @@ void GameManager::SetLanguage(Language newLanguage) {
   // Store the language to the global config.
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetLanguage(this->language);
-  //LoadTextRenderer();
+  // LoadTextRenderer();
   LoadTexts();
   LoadButtons();
   // Update page components' position based on the new language.
@@ -2589,47 +2561,43 @@ void GameManager::SetLanguage(Language newLanguage) {
 }
 
 void GameManager::LoadTextRenderer() {
-  //if (textRenderers.find(this->language) != textRenderers.end()) {
-  //  return;
-  //}
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  //// Load the text renderer based on the language.
-  //switch (this->language) {
-  //  case Language::ENGLISH:
-  //  case Language::FRENCH:
-  //  case Language::KOREAN:
-  //    textRenderers[this->language] = std::make_shared<WesternTextRenderer>(
-  //        resourceManager.GetShader("text"), this->width, this->height,
-  //        benchmark_char_map.at(this->language));
-  //    break;
-  //  default:
-  //    textRenderers[this->language] = std::make_shared<CJKTextRenderer>(
-  //        resourceManager.GetShader("text"), this->width, this->height,
-  //        benchmark_char_map.at(this->language));
-  //}
-
   // Load renderers for all languages
-  for (const auto& [language, charMap] : benchmark_char_map) {
+  for (const auto& [language, benchmark] : benchmark_char_map) {
     if (textRenderers.find(language) == textRenderers.end()) {
       switch (language) {
+        case Language::GERMAN:
         case Language::ENGLISH:
+        case Language::SPANISH:
+        case Language::ITALIAN:
         case Language::FRENCH:
         case Language::KOREAN:
+        case Language::PORTUGUESE_BR:
+        case Language::PORTUGUESE_PT:
+        case Language::RUSSIAN:
+
           textRenderers[language] = std::make_shared<WesternTextRenderer>(
               resourceManager.GetShader("text"), this->width, this->height,
-              charMap);
+              benchmark);
           break;
         default:
           textRenderers[language] = std::make_shared<CJKTextRenderer>(
               resourceManager.GetShader("text"), this->width, this->height,
-              charMap);
+              benchmark);
       }
     }
   }
 }
 
 void GameManager::LoadControlCharacters() {
-  std::u32string controlCharacters = U"gjpqyHN힣 ";
+  std::unordered_set<char32_t> benchmarkChars;
+  for (const auto& [language, benchmark] : benchmark_char_map) {
+    benchmarkChars.insert(benchmark);
+  }
+  std::u32string controlCharacters = U"gjpqyN ";
+  for (const auto& benchmark : benchmarkChars) {
+    controlCharacters.push_back(benchmark);
+  }
 
   TextRenderer::Load(controlCharacters);
 }
@@ -2856,6 +2824,14 @@ TransitionState GameManager::GetTransitionState() {
 
 void GameManager::SetScrollState(ScrollState newScrollState) {
   this->scroll->SetState(newScrollState);
+  if (newScrollState == ScrollState::OPENING) {
+    // Adjust the length of scroll based on the length of the current page.
+    if (!this->activePage.empty() &&
+        this->scroll->GetState() == ScrollState::OPENING) {
+      this->scroll->SetTargetSilkLenForOpening(std::min(
+          pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y));
+    }
+  }
 }
 
 ScrollState GameManager::GetScrollState() { return this->scroll->GetState(); }

@@ -210,6 +210,7 @@ std::pair<float, float> WesternTextRenderer::RenderText(
       word.append(U" ");
       styles.emplace_back(styles.back());
     }
+    char32_t charOfLargeBearingY = benchmarkChar;
     for (c = word.begin(); c != word.end(); ++c) {
       charStyle = styles[c - word.begin()];
       Character ch = characterMap.at(*c).at(charStyle);
@@ -219,16 +220,13 @@ std::pair<float, float> WesternTextRenderer::RenderText(
           y + (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y -
                ch.Bearing.y) *
                   scale;
-
       float w = ch.Size.x * scale;
       float h = ch.Size.y * scale;
       // update VBO for each character
       float vertices[6][4] = {
-          {xpos, ypos + h, 0.0f, 1.0f}, {xpos + w, ypos, 1.0f, 0.0f},
-          {xpos, ypos, 0.0f, 0.0f},
-
-          {xpos, ypos + h, 0.0f, 1.0f}, {xpos + w, ypos + h, 1.0f, 1.0f},
-          {xpos + w, ypos, 1.0f, 0.0f}};
+          {xpos, ypos + h, 0.0f, 1.0f},     {xpos + w, ypos, 1.0f, 0.0f},
+          {xpos, ypos, 0.0f, 0.0f},         {xpos, ypos + h, 0.0f, 1.0f},
+          {xpos + w, ypos + h, 1.0f, 1.0f}, {xpos + w, ypos, 1.0f, 0.0f}};
       // render glyph texture over quad
       glBindTexture(GL_TEXTURE_2D, ch.TextureID);
       // update content of VBO memory

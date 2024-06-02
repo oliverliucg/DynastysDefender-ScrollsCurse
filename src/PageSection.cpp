@@ -114,6 +114,10 @@ glm::vec4 PageSection::GetBoundingBox() const {
 }
 
 std::shared_ptr<ContentUnit> PageSection::GetContent(const std::string& name) {
+  if (content_.find(name) == content_.end()) {
+    std::cout << "content: " << name << " not found in section: " << name_
+              << std::endl;
+  }
   assert(content_.find(name) != content_.end() &&
          "Content not found in PageSection!");
   return content_[name];
@@ -262,6 +266,9 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer,
 }
 
 void PageSection::UpdateScrollIconAndSectionOffset() {
+  if (scroll_icon_ == nullptr) {
+    return;
+  }
   // Get the height of the section.
   float height = GetHeight();
   // If height is less than max_height_, set the scroll icon to nullptr,
@@ -270,6 +277,7 @@ void PageSection::UpdateScrollIconAndSectionOffset() {
     scroll_icon_ = nullptr;
     return;
   }
+
   // Calculate the proportion of the offset of the icon to the max offset.
   glm::vec2 iconPos = scroll_icon_->GetPosition();
   float curOffset = iconPos.y - lines_[0].y;

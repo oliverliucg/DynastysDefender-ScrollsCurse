@@ -211,13 +211,23 @@ std::pair<float, float> CJKTextRenderer::RenderText(
       word.append(U" ");
       styles.emplace_back(styles.back());
     }
+    char32_t charOfLargeBearingY = benchmarkChar;
     for (c = word.begin(); c != word.end(); ++c) {
       charStyle = styles[c - word.begin()];
       Character ch = characterMap.at(*c).at(charStyle);
 
       float xpos = x + ch.Bearing.x * scale;
-      
-      // print the hex string of the current char:
+      // float benchMarkBearingY =
+      //     this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y;
+      // float curCharBearingY = ch.Bearing.y;
+      // if (curCharBearingY > benchMarkBearingY) {
+      //   // print the hex string of the current char:
+      //   if (*c != 0xFF09 && *c != 0xFF08) {
+      //       std::cout << "larger breaing Y
+      //       apprear!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
+      //       charOfLargeBearingY = *c;
+      //     }
+      // }
       float ypos =
           y + (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y -
                ch.Bearing.y) *

@@ -45,10 +45,6 @@ class TextRenderer : public Renderer {
   static void Load(const std::u32string& charactersToLoad);
   static void UnLoadIfNotUsed(char32_t character);
   static void UnLoadIfNotUsed(const std::u32string& charactersToLoad);
-  static void LoadLanguage(std::string font, unsigned int fontSize,
-                           CharStyle = CharStyle::REGULAR,
-                           Language languae = Language::ENGLISH);
-  static void LoadPreferredLanguage(CharStyle = CharStyle::REGULAR);
 
   // Get the height and width of the text
   virtual std::pair<glm::vec3, bool> GetTextSize(std::u32string text,

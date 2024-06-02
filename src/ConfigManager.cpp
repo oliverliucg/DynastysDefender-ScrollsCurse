@@ -73,14 +73,26 @@ void ConfigManager::SetLanguage(Language language) {
 
 Language ConfigManager::GetLanguage() const {
   std::string language = config_.at("language").at("preference");
-  if (language == "en") {
+  if (language == "de") {
+    return Language::GERMAN;
+  } else if (language == "en") {
     return Language::ENGLISH;
+  } else if (language == "es") {
+    return Language::SPANISH;
+  } else if (language == "it") {
+    return Language::ITALIAN;
   } else if (language == "fr") {
     return Language::FRENCH;
   } else if (language == "ja") {
     return Language::JAPANESE;
   } else if (language == "ko") {
     return Language::KOREAN;
+  } else if (language == "pt-BR") {
+    return Language::PORTUGUESE_BR;
+  } else if (language == "pt-PT") {
+    return Language::PORTUGUESE_PT;
+  } else if (language == "ru") {
+    return Language::RUSSIAN;
   } else if (language == "zh-Hant") {
     return Language::CHINESE_TRADITIONAL;
   } else if (language == "zh-Hans") {
@@ -119,6 +131,11 @@ std::pair<char32_t, std::string> ConfigManager::GetFontFilePath(
     // load the korean font (Hangul).
     return std::make_pair(
         0x1100, config_.at("language").at("ko").at("font").at(style_str));
+  } else if (0x0400 <= character && character <= 0x04FF) {
+    // If character is from 0400 to 04FF, it is for Russian, and we would
+    // load the russian font.
+    return std::make_pair(
+        0x0400, config_.at("language").at("ru").at("font").at(style_str));
   } else {
     return std::make_pair(character, "");
   }

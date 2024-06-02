@@ -12,10 +12,16 @@ enum class CharStyle { UNDEFINED, REGULAR, BOLD, ITALIC, BOLD_ITALIC };
 
 enum class Language {
   UNDEFINED,
+  GERMAN,
   ENGLISH,
+  SPANISH,
+  ITALIAN,
   FRENCH,
   JAPANESE,
   KOREAN,
+  PORTUGUESE_BR,
+  PORTUGUESE_PT,
+  RUSSIAN,
   CHINESE_SIMPLIFIED,
   CHINESE_TRADITIONAL
 };
@@ -41,21 +47,49 @@ struct hash<CharStyle> {
 
 // Define the language map
 inline std::unordered_map<Language, std::string> language_map = {
+
+    {Language::GERMAN, "de"},
     {Language::ENGLISH, "en"},
+    {Language::SPANISH, "es"},
+    {Language::ITALIAN, "it"},
     {Language::FRENCH, "fr"},
     {Language::JAPANESE, "ja"},
     {Language::KOREAN, "ko"},
+    {Language::PORTUGUESE_BR, "pt-BR"},
+    {Language::PORTUGUESE_PT, "pt-PT"},
+    {Language::RUSSIAN, "ru"},
     {Language::CHINESE_SIMPLIFIED, "zh-Hans"},
     {Language::CHINESE_TRADITIONAL, "zh-Hant"}};
 
+// Define language enum map
+inline std::unordered_map<std::string, Language> language_enum_map = {
+    {"de", Language::GERMAN},
+    {"en", Language::ENGLISH},
+    {"es", Language::SPANISH},
+    {"it", Language::ITALIAN},
+    {"fr", Language::FRENCH},
+    {"ja", Language::JAPANESE},
+    {"ko", Language::KOREAN},
+    {"pt-BR", Language::PORTUGUESE_BR},
+    {"pt-PT", Language::PORTUGUESE_PT},
+    {"ru", Language::RUSSIAN},
+    {"zh-Hans", Language::CHINESE_SIMPLIFIED},
+    {"zh-Hant", Language::CHINESE_TRADITIONAL}};
+
 // Define bench mark character for each language's font
 inline std::unordered_map<Language, char32_t> benchmark_char_map = {
-    {Language::ENGLISH, U'H'},
-    {Language::FRENCH, U'H'},
-    {Language::JAPANESE, U'힣'},
+    {Language::GERMAN, U'f'},
+    {Language::ENGLISH, U'f'},
+    {Language::SPANISH, U'f'},
+    {Language::ITALIAN, U'f'},
+    {Language::FRENCH, U'f'},
+    {Language::JAPANESE, U'宴'},
     {Language::KOREAN, U'힣'},
-    {Language::CHINESE_SIMPLIFIED, U'힣'},
-    {Language::CHINESE_TRADITIONAL, U'힣'}};
+    {Language::PORTUGUESE_BR, U'f'},
+    {Language::PORTUGUESE_PT, U'f'},
+    {Language::RUSSIAN, U'б'},
+    {Language::CHINESE_SIMPLIFIED, U'宴'},
+    {Language::CHINESE_TRADITIONAL, U'宴'}};
 
 // Define the char style map
 inline std::unordered_map<CharStyle, std::string> char_style_map = {

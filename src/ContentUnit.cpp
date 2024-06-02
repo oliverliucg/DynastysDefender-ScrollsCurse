@@ -217,11 +217,16 @@ void OptionUnit::SetPosition(glm::vec2 pos) {
         text_->GetText()->GetTextSize(text_->GetTextRenderer());
 
     glm::vec2 imageSize = icon_->GetSize();
-    //float offsetY = (imageSize.y - textSize.y) / 2.0f;
-    //float textY = pos.y + offsetY;
-    // Assume the text contains only one line.
-    float offsetY = icon_->GetPosition().y+icon_->GetSize().y*0.5f - (text_->GetPosition().y + TextRenderer::characterMap[this->text_->GetTextRenderer()->GetBenchmarkChar()][CharStyle::REGULAR].Size.y *
-                            this->text_->GetText()->GetScale() * 0.5f);
+    // float offsetY = (imageSize.y - textSize.y) / 2.0f;
+    // float textY = pos.y + offsetY;
+    //  Assume the text contains only one line.
+    float offsetY = icon_->GetPosition().y + icon_->GetSize().y * 0.5f -
+                    (text_->GetPosition().y +
+                     TextRenderer::characterMap[this->text_->GetTextRenderer()
+                                                    ->GetBenchmarkChar()]
+                                               [CharStyle::REGULAR]
+                                                   .Size.y *
+                         this->text_->GetText()->GetScale() * 0.5f);
     float textY = text_->GetPosition().y + offsetY;
     text_->SetPosition(glm::vec2(text_->GetPosition().x, textY));
     // glm::vec2 imageCenter = icon_->GetPosition() + icon_->GetSize() / 2.0f;
@@ -301,9 +306,8 @@ void OptionUnit::Draw() {
   // else {
   //	text_->SetCentered(false);
   // }
- // if (text_on_center_) {
-	//std::cout << "text is on center: " << std::endl;
- // }
+  // if (text_on_center_) {
+  // std::cout << "text is on center: " << std::endl;
+  // }
   text_->Draw();
-
 }
