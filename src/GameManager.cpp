@@ -509,8 +509,9 @@ void GameManager::Init() {
   pages["story"]->SetBottomSpacing(0.5f * kBubbleRadius);
   pages["story"]->SetLeftSpacing(0.5f * kBubbleRadius);
   // Set the inter spacing between the sections of the page "story".
+  const float kCommonInterSectionSpacing = 1.f * kBubbleRadius;
   pages["story"]->SetInterSectionSpacing(
-      "storytextsection", "storybuttonsection", 0.5f * kBubbleRadius);
+      "storytextsection", "storybuttonsection", kCommonInterSectionSpacing);
 
   glm::vec2 commonButtionPosition = glm::vec2(
       pages["story"]->GetPosition().x + pages["story"]->GetLeftSpacing(),
@@ -574,17 +575,32 @@ void GameManager::Init() {
    * buttons["controlstart"], textRenderer, colorRenderer);*/
   auto backButtonUnit = std::make_shared<ButtonUnit>(
       "backbuttonunit", buttons["back"], textRenderer, colorRenderer);
+  auto resumeButtonUnit = std::make_shared<ButtonUnit>(
+      "resumebuttonunit", buttons["resume"], textRenderer, colorRenderer);
+  auto restartButtonUnit = std::make_shared<ButtonUnit>(
+      "restartbuttonunit", buttons["restart"], textRenderer, colorRenderer);
+  auto stopButtonUnit = std::make_shared<ButtonUnit>(
+      "stopbuttonunit", buttons["stop"], textRenderer, colorRenderer);
   /*auto exitButtonUnit = std::make_shared<ButtonUnit>("exitbuttonunit",
    * buttons["controlexit"], textRenderer, colorRenderer);*/
   textSection = std::make_shared<PageSection>("controltextsection");
   textSection->AddContent(textUnit);
 
   buttonSection = std::make_shared<PageSection>("controlbuttonsection");
+  // Content to be added to the button section when the game is not started
   buttonSection->AddContent(backButtonUnit);
-  buttonSection->SetInterUnitSpacing("startbuttonunit", "backbuttonunit",
+  // Content to be added to the button section when the game is started
+  buttonSection->AddContent(resumeButtonUnit);
+  buttonSection->AddContent(restartButtonUnit);
+  buttonSection->AddContent(stopButtonUnit);
+  buttonSection->SetInterUnitSpacing("resumebuttonunit", "restartbuttonunit",
                                      0.1f * kBubbleRadius);
-  buttonSection->SetInterUnitSpacing("backbuttonunit", "exitbuttonunit",
+  buttonSection->SetInterUnitSpacing("restartbuttonunit", "stopbuttonunit",
                                      0.1f * kBubbleRadius);
+  buttonSection->SetInterUnitSpacing("stopbuttonunit", "backbuttonunit",
+                                     0.1f * kBubbleRadius);
+  buttonSection->SetOrder({ "resumebuttonunit",
+                           "restartbuttonunit", "stopbuttonunit", "backbuttonunit"});
   pages["control"] = std::make_unique<Page>("control");
   pages["control"]->AddSection(textSection);
   pages["control"]->AddSection(buttonSection);
@@ -594,7 +610,7 @@ void GameManager::Init() {
   pages["control"]->SetLeftSpacing(0.5f * kBubbleRadius);
   // Set the inter spacing between the sections of the page "control".
   pages["control"]->SetInterSectionSpacing(
-      "controltextsection", "controlbuttonsection", 2.0f * kBubbleRadius);
+      "controltextsection", "controlbuttonsection", kCommonInterSectionSpacing);
 
   commonButtionPosition = glm::vec2(
       pages["control"]->GetPosition().x + pages["control"]->GetLeftSpacing(),
@@ -612,6 +628,7 @@ void GameManager::Init() {
     auto button = buttonUnit->GetButton();
     button->SetTextOnCenter(true);
   }
+ /* buttonSection->SetOrder({ "backbuttonunit" });*/
   interspacingBetweenTextAndButton = pages["control"]->GetInterSectionSpacing(
       "controltextsection", "controlbuttonsection");
   maxHeightForTextSection =
@@ -664,7 +681,7 @@ void GameManager::Init() {
   // Set the inter spacing between the sections of the page "Display Settings".
   pages["displaysettings"]->SetInterSectionSpacing(
       "displaysettingtextsection", "displaysettingbuttonsection",
-      2.0f * kBubbleRadius);
+      kCommonInterSectionSpacing);
   interspacingBetweenTextAndButton =
       pages["displaysettings"]->GetInterSectionSpacing(
           "displaysettingtextsection", "displaysettingbuttonsection");
@@ -785,7 +802,7 @@ void GameManager::Init() {
   // Set the inter spacing between the sections of the page "Display Settings".
   pages[languagePreferencePageName]->SetInterSectionSpacing(
       languagePreferencePageName + textSectionBaseName,
-      languagePreferencePageName + buttonSectionBaseName, 2.0f * kBubbleRadius);
+      languagePreferencePageName + buttonSectionBaseName, kCommonInterSectionSpacing);
   interspacingBetweenTextAndButton =
       pages[languagePreferencePageName]->GetInterSectionSpacing(
           languagePreferencePageName + textSectionBaseName,
@@ -879,6 +896,15 @@ void GameManager::ProcessInput(float dt) {
       if (this->targetState == GameState::UNDEFINED) {
         // if Q is pressed, then we go to the state 'Control' of the game.
         this->GoToState(GameState::CONTROL);
+        // Get the buttion section of the page "control"
+        auto buttonSection = pages.at("control")->GetSection("controlbuttonsection");
+        // Set the order of the buttons in the button section of the page
+        buttonSection->SetOrder({"resumebuttonunit", "restartbuttonunit",
+                                 "stopbuttonunit"});
+        pages.at("control")->SetPosition(glm::vec2(
+                    this->gameBoard->GetPosition().x,
+                    std::max(this->gameBoard->GetCenter().y - pages.at("control")->GetHeight() * 0.5f,
+                             this->gameBoard->GetPosition().y)));
         // Set scroll state to be CLOSING
         this->scroll->SetState(ScrollState::CLOSING);
         // pause timer of related events if it is not paused yet.
@@ -913,57 +939,8 @@ void GameManager::ProcessInput(float dt) {
       postProcessor->SetGrayscale(false);
       // gradually fading out the blur effect
       timer->SetEventTimer("deblurring", 2.f);
-      // Set game character to be transparent gradually in its old state and be
-      // opaque in its new state.
-      const float transparency = 0.4f, opaque = 0.3f;
-      auto guojieCopied =
-          std::make_shared<GameCharacter>(*gameCharacters["guojie"]);
-      graduallyTransparentObjects["guojie"] =
-          std::make_pair(guojieCopied, transparency);
-      // Clear all carried objects of guojie
-      gameCharacters["guojie"]->ClearCarriedObjects();
-      if (gameCharacters["weiqing"]->GetState() != GameCharacterState::HAPPY) {
-        auto weiqingCopied =
-            std::make_shared<GameCharacter>(*gameCharacters["weiqing"]);
-        graduallyTransparentObjects["weiqing"] =
-            std::make_pair(weiqingCopied, transparency);
-        gameCharacters["weiqing"]->SetState(GameCharacterState::HAPPY);
-        gameCharacters["weiqing"]->SetAlpha(0.f);
-        graduallyOpaqueObjects["weiqing"] =
-            std::make_pair(gameCharacters["weiqing"], opaque);
-      }
-      if (gameCharacters["weizifu"]->GetState() != GameCharacterState::HAPPY) {
-        auto weizifuCopied =
-            std::make_shared<GameCharacter>(*gameCharacters["weizifu"]);
-        // Add 0 before "Weizifu" and 1 before "Liuche" to make sure that
-        // Weizifu is drawn before Liuche.
-        graduallyTransparentObjects["0weizifu"] =
-            std::make_pair(weizifuCopied, transparency);
-        gameCharacters["weizifu"]->SetState(GameCharacterState::HAPPY);
-        gameCharacters["weizifu"]->SetAlpha(0.f);
-        graduallyOpaqueObjects["0weizifu"] =
-            std::make_pair(gameCharacters["weizifu"], opaque);
-      }
-      if (gameCharacters["liuche"]->GetState() != GameCharacterState::HAPPY) {
-        auto liucheCopied =
-            std::make_shared<GameCharacter>(*gameCharacters["liuche"]);
-        graduallyTransparentObjects["1liuche"] =
-            std::make_pair(liucheCopied, transparency);
-        gameCharacters["liuche"]->SetState(GameCharacterState::HAPPY);
-        gameCharacters["liuche"]->SetAlpha(0.f);
-        graduallyOpaqueObjects["1liuche"] =
-            std::make_pair(gameCharacters["liuche"], opaque);
-      }
-
-      gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
-      // Reset the health of characters
-      int totalHealth = gameCharacters["guojie"]->GetHealth().GetTotalHealth();
-      gameCharacters["guojie"]->GetHealth().SetCurrentHealth(totalHealth);
-      totalHealth = gameCharacters["weiqing"]->GetHealth().GetTotalHealth();
-      gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(totalHealth);
-
-      gameCharacters["guojie"]->SetPosition(
-          gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
+      // reset the state of each game character
+      this->ResetGameCharacters();
 
       // Delete all the arrows
       arrows.clear();
@@ -1110,17 +1087,23 @@ void GameManager::ProcessInput(float dt) {
               button->SetState(ButtonState::kPressed);
               if (content == "control") {
                 this->GoToState(GameState::CONTROL);
+                // Get the buttion section of the page "control"
+                auto buttonSection =
+                    pages.at("control")->GetSection("controlbuttonsection");
+                // Set the order of the buttons in the button section of the
+                // page
+                buttonSection->SetOrder({"backbuttonunit"});
+                // Update the page "control" position.
+              /*  pages.at("control")->UpdateComponentsHeight();*/
+                pages.at("control")->SetPosition(glm::vec2(
+                    this->gameBoard->GetPosition().x,
+                    std::max(this->gameBoard->GetCenter().y - pages.at("control")->GetHeight() * 0.5f,
+                             this->gameBoard->GetPosition().y)));
               } else if (content == "displaysettings") {
                 this->GoToState(GameState::DISPLAY_SETTINGS);
               } else if (content == "languagepreference") {
                 this->GoToState(GameState::LANGUAGE_PREFERENCE);
               } else if (content == "start") {
-                // print the page story position and all its sections' positions
-                auto textSection =
-                    pages["story"]->GetSection("storytextsection");
-                auto buttonSection =
-                    pages["story"]->GetSection("storybuttonsection");
-
                 this->GoToState(GameState::PREPARING);
                 if (gameCharacters["guojie"]->GetState() !=
                     GameCharacterState::FIGHTING) {
@@ -1146,7 +1129,47 @@ void GameManager::ProcessInput(float dt) {
               } else if (content == "back") {
                 // Go to the last state
                 this->GoToState(this->lastState);
-              }
+              } else if (content == "resume") {
+				// Go to the last state
+				this->GoToState(this->lastState);
+              } else if (content == "restart") {
+                this->GoToState(GameState::PREPARING);
+                  // Reset the health of characters
+                  int totalHealth = gameCharacters["guojie"]->GetHealth().GetTotalHealth();
+                  gameCharacters["guojie"]->GetHealth().SetCurrentHealth(totalHealth);
+                  totalHealth = gameCharacters["weiqing"]->GetHealth().GetTotalHealth();
+                  gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(totalHealth);
+
+                  // Delete all the arrows
+                  arrows.clear();
+
+                  // Delete all the static bubbles.
+                  statics.clear();
+
+                  // Delete all the moving bubbles.
+                  moves.clear();
+
+                  // Reset the game level to 1.
+                  this->level = 1;
+
+              } else if (content == "stop") {
+				// Go to the state "Story"
+				this->GoToState(GameState::STORY);
+                // reset the state of each game character
+                  this->ResetGameCharacters();
+
+                  // Delete all the arrows
+                  arrows.clear();
+
+                  // Delete all the static bubbles.
+                  statics.clear();
+
+                  // Delete all the moving bubbles.
+                  moves.clear();
+
+                  // Reset the game level to 1.
+                  this->level = 1;
+			  }
 
               // Set scroll state to be CLOSING
               this->scroll->SetState(ScrollState::CLOSING);
@@ -1454,8 +1477,10 @@ void GameManager::Update(float dt) {
       shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
 
       // Move the timer's text downwards by the offset.
-      texts["time"]->SetPosition(texts["time"]->GetPosition() +
-                                 glm::vec2(0.f, offsetY));
+      //texts["time"]->SetPosition(texts["time"]->GetPosition() +
+      //                           glm::vec2(0.f, offsetY));
+      texts["time"]->SetCenter(texts["time"]->GetCenter() +
+                               glm::vec2(0.f, offsetY));
 
       if (this->scroll->GetState() == ScrollState::NARROWED) {
         // Reset the scroll state to OPENED.
@@ -1712,7 +1737,8 @@ void GameManager::Update(float dt) {
       gameBoard->SetValidPosition(gameBoard->GetPosition());
       gameBoard->SetValidSize(gameBoard->GetSize());
       // reset the time text position
-      texts["time"]->SetPosition(texts["time"]->GetPosition() - halfOffset);
+      //texts["time"]->SetPosition(texts["time"]->GetPosition() - halfOffset);
+      texts["time"]->SetCenter(texts["time"]->GetCenter() - halfOffset);
       // reset the position of the shooter
       shooter->SetPosition(shooter->GetPosition() + halfOffset);
       shooter->GetRay().UpdatePath(this->gameBoard->GetBoundaries(),
@@ -2229,7 +2255,7 @@ void GameManager::Render() {
             originalPositionsForShaking[std::to_string(id)] =
                 bubble->GetPosition();
           }
-          originalPositionsForShaking["time"] = texts["time"]->GetPosition();
+          originalPositionsForShaking["time"] = texts["time"]->GetCenter();
 
           // start shake effect
           float shakingStrengthForX =
@@ -2269,8 +2295,10 @@ void GameManager::Render() {
                                 glm::vec2(shakeOffsetX, shakeOffsetY));
           }
           // shake the time text
-          texts["time"]->SetPosition(texts["time"]->GetPosition() +
-                                     glm::vec2(shakeOffsetX, shakeOffsetY));
+          //texts["time"]->SetPosition(texts["time"]->GetPosition() +
+          //                           glm::vec2(shakeOffsetX, shakeOffsetY));
+          texts["time"]->SetCenter(texts["time"]->GetCenter() +
+                                   glm::vec2(shakeOffsetX, shakeOffsetY));
         }
 
         scroll->Draw(spriteRenderer);
@@ -2329,7 +2357,7 @@ void GameManager::Render() {
 
         // Draw the time when the scroll is opened
         if (this->scroll->GetState() == ScrollState::OPENED) {
-          texts["time"]->Draw(textRenderer);
+          texts["time"]->Draw(textRenderer, true);
         }
 
         // Restore the original positions for each shaking object
@@ -2347,7 +2375,8 @@ void GameManager::Render() {
             bubble->SetPosition(
                 originalPositionsForShaking[std::to_string(id)]);
           }
-          texts["time"]->SetPosition(originalPositionsForShaking["time"]);
+          //texts["time"]->SetPosition(originalPositionsForShaking["time"]);
+          texts["time"]->SetCenter(originalPositionsForShaking["time"]);
         }
       }
     } else {
@@ -2365,10 +2394,21 @@ void GameManager::Render() {
              this->state == GameState::LANGUAGE_PREFERENCE) {
     gameCharacters["weizifu"]->Draw(spriteRenderer);
     gameCharacters["liuche"]->Draw(spriteRenderer);
-    gameCharacters["weiqing"]->Draw(spriteRenderer);
-    if (this->targetState == GameState::PREPARING) {
-      gameCharacters["guojie"]->Draw(spriteRenderer);
+    bool isPausedDuringGame = this->state == GameState::CONTROL &&
+                              this->lastState == GameState::ACTIVE;
+    if (isPausedDuringGame) {
+      gameCharacters["guojie"]->DrawGameCharacter(spriteRenderer, colorRenderer,
+                                                  circleRenderer, textRenderer);
+      gameCharacters["weiqing"]->DrawGameCharacter(
+          spriteRenderer, colorRenderer, circleRenderer, textRenderer);
     }
+    else {
+        gameCharacters["weiqing"]->Draw(spriteRenderer);
+        if (this->targetState == GameState::PREPARING) {
+          gameCharacters["guojie"]->Draw(spriteRenderer);
+        }
+    }
+
     // Draw scroll
     scroll->Draw(spriteRenderer);
     // Enable scissor test
@@ -2704,6 +2744,17 @@ void GameManager::LoadTexts() {
         /*lineWidth=*/gameBoard->GetSize().x);
     texts["time"]->AddParagraph(U"30");
     texts["time"]->SetScale(0.025f / kFontScale);
+    // Get the center of the text "time"
+    glm::vec2 centerTime;
+    centerTime.x = gameBoard->GetPosition().x + gameBoard->GetSize().x -
+                   kBubbleRadius;
+    centerTime.y = gameBoard->GetPosition().y -
+                   this->scroll->GetTopRoller()->GetSize().y * 0.37f;
+    std::cout << "gameBoard->GetPosition().y: " << gameBoard->GetPosition().y
+              << std::endl;
+    std::cout << "this->scroll->GetTopRoller()->GetSize().y: "
+              << this->scroll->GetTopRoller()->GetSize().y << std::endl;
+    texts["time"]->SetCenter(centerTime);
   } else {
     texts["time"]->SetParagraph(0, U"30");
   }
@@ -2825,11 +2876,15 @@ TransitionState GameManager::GetTransitionState() {
 void GameManager::SetScrollState(ScrollState newScrollState) {
   this->scroll->SetState(newScrollState);
   if (newScrollState == ScrollState::OPENING) {
-    // Adjust the length of scroll based on the length of the current page.
+    // Adjust the length of scroll based on the length of the current page or
+    // the current game board.
     if (!this->activePage.empty() &&
         this->scroll->GetState() == ScrollState::OPENING) {
       this->scroll->SetTargetSilkLenForOpening(std::min(
           pages.at(this->activePage)->GetHeight(), gameBoard->GetSize().y));
+    }
+    else {
+      this->scroll->SetTargetSilkLenForOpening(gameBoard->GetSize().y);
     }
   }
 }
@@ -3734,4 +3789,58 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
   optionUnit->SetPosition(optionUnit->GetPosition());
 
   return optionUnit;
+}
+
+void GameManager::ResetGameCharacters() {
+      // Set game character to be transparent gradually in its old state and be
+      // opaque in its new state.
+      const float transparency = 0.4f, opaque = 0.3f;
+      auto guojieCopied =
+          std::make_shared<GameCharacter>(*gameCharacters["guojie"]);
+      graduallyTransparentObjects["guojie"] =
+          std::make_pair(guojieCopied, transparency);
+      // Clear all carried objects of guojie
+      gameCharacters["guojie"]->ClearCarriedObjects();
+      if (gameCharacters["weiqing"]->GetState() != GameCharacterState::HAPPY) {
+        auto weiqingCopied =
+            std::make_shared<GameCharacter>(*gameCharacters["weiqing"]);
+        graduallyTransparentObjects["weiqing"] =
+            std::make_pair(weiqingCopied, transparency);
+        gameCharacters["weiqing"]->SetState(GameCharacterState::HAPPY);
+        gameCharacters["weiqing"]->SetAlpha(0.f);
+        graduallyOpaqueObjects["weiqing"] =
+            std::make_pair(gameCharacters["weiqing"], opaque);
+      }
+      if (gameCharacters["weizifu"]->GetState() != GameCharacterState::HAPPY) {
+        auto weizifuCopied =
+            std::make_shared<GameCharacter>(*gameCharacters["weizifu"]);
+        // Add 0 before "Weizifu" and 1 before "Liuche" to make sure that
+        // Weizifu is drawn before Liuche.
+        graduallyTransparentObjects["0weizifu"] =
+            std::make_pair(weizifuCopied, transparency);
+        gameCharacters["weizifu"]->SetState(GameCharacterState::HAPPY);
+        gameCharacters["weizifu"]->SetAlpha(0.f);
+        graduallyOpaqueObjects["0weizifu"] =
+            std::make_pair(gameCharacters["weizifu"], opaque);
+      }
+      if (gameCharacters["liuche"]->GetState() != GameCharacterState::HAPPY) {
+        auto liucheCopied =
+            std::make_shared<GameCharacter>(*gameCharacters["liuche"]);
+        graduallyTransparentObjects["1liuche"] =
+            std::make_pair(liucheCopied, transparency);
+        gameCharacters["liuche"]->SetState(GameCharacterState::HAPPY);
+        gameCharacters["liuche"]->SetAlpha(0.f);
+        graduallyOpaqueObjects["1liuche"] =
+            std::make_pair(gameCharacters["liuche"], opaque);
+      }
+
+      gameCharacters["guojie"]->SetState(GameCharacterState::FIGHTING);
+      // Reset the health of characters
+      int totalHealth = gameCharacters["guojie"]->GetHealth().GetTotalHealth();
+      gameCharacters["guojie"]->GetHealth().SetCurrentHealth(totalHealth);
+      totalHealth = gameCharacters["weiqing"]->GetHealth().GetTotalHealth();
+      gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(totalHealth);
+
+      gameCharacters["guojie"]->SetPosition(
+          gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
 }

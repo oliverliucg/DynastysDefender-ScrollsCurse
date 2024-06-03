@@ -210,7 +210,7 @@ std::pair<float, float> WesternTextRenderer::RenderText(
       word.append(U" ");
       styles.emplace_back(styles.back());
     }
-    char32_t charOfLargeBearingY = benchmarkChar;
+
     for (c = word.begin(); c != word.end(); ++c) {
       charStyle = styles[c - word.begin()];
       Character ch = characterMap.at(*c).at(charStyle);

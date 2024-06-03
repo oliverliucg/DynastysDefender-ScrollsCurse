@@ -372,4 +372,7 @@ class GameManager {
   std::shared_ptr<OptionUnit> CreateClickableOptionUnit(
       const std::string& name, const std::u32string& text,
       std::shared_ptr<TextRenderer> textRenderer = nullptr);
+
+  // Reset the state of each game character.
+  void ResetGameCharacters();
 };
