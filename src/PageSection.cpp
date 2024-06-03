@@ -172,9 +172,6 @@ void PageSection::SetLeftSpacing(float spacing) { left_spacing_ = spacing; }
 float PageSection::GetLeftSpacing() const { return left_spacing_; }
 
 void PageSection::SetPosition(glm::vec2 pos) {
-  //if (this->name_ == "controlbuttonsection") {
-  //  std::string str = "control"; (void)str;
-  //}
   float x = pos.x + left_spacing_;
   float y = pos.y + top_spacing_;
   for (size_t i = 0; i < order_.size(); ++i) {
@@ -183,10 +180,6 @@ void PageSection::SetPosition(glm::vec2 pos) {
     content_[order_[i]]->SetPosition(glm::vec2(x, y));
     y += content_[order_[i]]->GetHeight();
     if (i + 1 < order_.size()) {
-      //std::cout << "order_[i]: " << order_[i] << std::endl;
-      //std::cout << "order_[i+1]: " << order_[i + 1] << std::endl;
-      //std::cout << "inter_unit_spacing_[order_[i]][order_[i + 1]]: "
-      //          << inter_unit_spacing_[order_[i]][order_[i + 1]] << std::endl;
       y += inter_unit_spacing_[order_[i]][order_[i + 1]];
     }
   }

@@ -24,7 +24,7 @@ endif()
 target_link_libraries(DynastysDefender-ScrollsCurse PRIVATE 
     "${LIB_PATH}/glfw3.lib" 
     "${LIB_PATH}/freetyped.lib" 
-    "${LIB_PATH}/irrKlang.lib"
+    "${LIB_PATH}/OpenAL32.lib"
     Boost::locale 
     Boost::system
 )
@@ -33,10 +33,10 @@ target_link_libraries(DynastysDefender-ScrollsCurse PRIVATE
 target_include_directories(DynastysDefender-ScrollsCurse PRIVATE 
     "${LIB_PATH}/include"
     "${LIB_PATH}/include/KHR"
-    "${LIB_PATH}/include/Irrklang"
     "${LIB_PATH}/include/glm"
     "${LIB_PATH}/include/GLFW"
     "${LIB_PATH}/include/freetype"
     "${LIB_PATH}/include/nlohmann"
+    "${LIB_PATH}/include/AL"
     ${Boost_LIBRARY_DIRS}
 )
