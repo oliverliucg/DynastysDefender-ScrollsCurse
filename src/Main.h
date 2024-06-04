@@ -14,6 +14,7 @@
 #include "ConfigManager.h"
 #include "GameManager.h"
 #include "ResourceManager.h"
+#include "SoundEngine.h"
 
 // TODO: Reference additional headers your program requires here.
 // GLFW function declarations

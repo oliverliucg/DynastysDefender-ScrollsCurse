@@ -110,7 +110,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
   // SCREEN_WIDTH = -1; 	int SCREEN_HEIGHT = -1; 	if
   // (gameManager->targetScreenMode
   //== ScreenMode::WINDOWED) { 		SCREEN_WIDTH = kWindowedModeSize.x;
-  //SCREEN_HEIGHT = kWindowedModeSize.y;
+  // SCREEN_HEIGHT = kWindowedModeSize.y;
   //	}
   //	else if (gameManager->targetScreenMode == ScreenMode::FULLSCREEN) {
   //		SCREEN_WIDTH = kFullScreenSize.x;
@@ -392,6 +392,12 @@ int main() {
   //	gameManager.width = SCREEN_WIDTH;
   //	gameManager.height = SCREEN_HEIGHT;
 
+  // Play background music
+  SoundEngine& soundEngine = SoundEngine::GetInstance();
+  soundEngine.LoadSound("background",
+                        "C:/Users/xiaod/resources/audio/breakout.wav");
+
+  soundEngine.PlaySound("background");
   // fixed time step
   const float kTimeStep = 1.f / 240.f;
   float accumulator = 0.f;
@@ -456,6 +462,9 @@ int main() {
     // Swap the screen buffers
     glfwSwapBuffers(window);
   }
+
+  // Stop the background music
+  soundEngine.StopSound("background");
 
   // Delete all resources.
   ResourceManager::GetInstance().Clear();
