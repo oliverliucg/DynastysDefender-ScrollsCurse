@@ -31,9 +31,29 @@ SoundEngine::SoundEngine() {
 #define CHECK_AL_ERROR checkAlError(__FILE__, __LINE__)
 }
 
-SoundEngine::~SoundEngine() { CleanUp(); }
+SoundEngine::~SoundEngine() { Clear(); }
 
-void SoundEngine::CleanUp() {
+void SoundEngine::CleanUpSources(bool force) {
+  std::vector<ALuint> sourcesToDelete;
+  for (auto& source :
+       sources_) {  // Assuming activeSources is a list of source IDs
+    ALint state;
+    alGetSourcei(source, AL_SOURCE_STATE, &state);
+
+    // Check if the source is not playing or if force cleanup is enabled
+    if (force || (state != AL_PLAYING && !IsLooping(source))) {
+      alDeleteSources(1, &source);
+      sourcesToDelete.emplace_back(source);
+    }
+  }
+  // Remove the deleted sources from the active list
+  for (auto source : sourcesToDelete) {
+    sources_.erase(source);
+  }
+}
+
+void SoundEngine::Clear() {
+  CleanUpSources(/*force=*/true);
   for (auto& buffer : buffers_) {
     alDeleteBuffers(1, &buffer.second);
   }
@@ -259,12 +279,16 @@ ALuint SoundEngine::LoadSound(const std::string& name,
   return buffer;
 }
 
-void SoundEngine::PlaySound(const std::string& name) {
+void SoundEngine::PlaySound(const std::string& name, bool loop) {
   auto buffer = buffers_.at(name);
   ALuint source;
   alGenSources(1, &source);
   alSourcei(source, AL_BUFFER, buffer);
   alSourcePlay(source);
+  if (loop) {
+    alSourcei(source, AL_LOOPING, AL_TRUE);
+  }
+  sources_.insert(source);
   //// Wait for the sound to finish
   // ALint source_state;
   // do {
@@ -280,4 +304,10 @@ void SoundEngine::StopSound(const std::string& name) {
   alSourcei(source, AL_BUFFER, buffer);
   alSourceStop(source);
   alDeleteSources(1, &source);
+}
+
+bool SoundEngine::IsLooping(ALuint source) {
+  ALint loop;
+  alGetSourcei(source, AL_LOOPING, &loop);
+  return loop == AL_TRUE;
 }

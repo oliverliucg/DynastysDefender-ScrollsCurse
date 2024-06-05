@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Ray.h"
 #include "ResourceManager.h"
+#include "SoundEngine.h"
 // The Shooter class is a GameObject that is controlled by the player. It is the
 // object that shoots the bubbles. It carries a bubble that it will shoot when
 // the player presses the space bar. it also carries another that it's going to

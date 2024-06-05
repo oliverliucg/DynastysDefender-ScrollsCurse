@@ -843,6 +843,12 @@ void GameManager::Init() {
       glm::vec2(this->width / 2.0f, this->height / 2.0f));
   scroll->SetTargetPositionForAttacking(
       glm::vec2(this->width * 0.785f, this->height * 0.73f));
+
+  // Add sound resources
+  SoundEngine& soundEngine = SoundEngine::GetInstance();
+  soundEngine.LoadSound("shoot", "C:/Users/xiaod/resources/audio/solid.wav");
+  soundEngine.LoadSound("bubbleexplode",
+                        "C:/Users/xiaod/resources/audio/bleep.wav");
 }
 
 void GameManager::ProcessInput(float dt) {
@@ -2118,6 +2124,9 @@ void GameManager::Update(float dt) {
       postProcessor->SetSampleOffsets(newSampleOffsets);
     }
   }
+
+  // CLean up the sound sources that are not playing.
+  SoundEngine::GetInstance().CleanUpSources();
 }
 
 void GameManager::Render() {

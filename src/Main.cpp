@@ -395,9 +395,8 @@ int main() {
   // Play background music
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   soundEngine.LoadSound("background",
-                        "C:/Users/xiaod/resources/audio/breakout.wav");
-
-  soundEngine.PlaySound("background");
+                        "C:/Users/xiaod/resources/audio/breakout_clip.wav");
+  soundEngine.PlaySound("background", true);
   // fixed time step
   const float kTimeStep = 1.f / 240.f;
   float accumulator = 0.f;

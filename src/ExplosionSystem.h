@@ -1,5 +1,6 @@
 #pragma once
 #include "ParticleSystem.h"
+#include "SoundEngine.h"
 
 struct ExplosionInfo {
   glm::vec2 center;

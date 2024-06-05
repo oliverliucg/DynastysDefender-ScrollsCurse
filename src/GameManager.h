@@ -37,6 +37,7 @@
 #include "Scroll.h"
 #include "ShadowTrailSystem.h"
 #include "Shooter.h"
+#include "SoundEngine.h"
 #include "SpriteDynamicRenderer.h"
 #include "SpriteRenderer.h"
 #include "Text.h"

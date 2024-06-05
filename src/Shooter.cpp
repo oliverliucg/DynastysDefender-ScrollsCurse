@@ -55,6 +55,8 @@ std::unique_ptr<Bubble> Shooter::ShootBubble() {
 }
 
 std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
+  // Play the sound effect for shooting a bubble
+  SoundEngine::GetInstance().PlaySound("shoot");
   std::unique_ptr<Bubble> copiedBubble =
       std::make_unique<Bubble>(carriedBubble);
   copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *
@@ -72,8 +74,8 @@ std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
 
 void Shooter::GenerateBubble() {
   //// Otherwise, generate a new bubble. The bubble is always at the rotation
-  ///center of the shooter. The radius of it is equal to the regular bubble
-  ///radius provided by the ResourceManager.
+  /// center of the shooter. The radius of it is equal to the regular bubble
+  /// radius provided by the ResourceManager.
   // glm::vec2 rotationCenter(position.x+rotationPivot.x*size.x,
   // position.y+rotationPivot.y*size.y); carriedBubble =
   // std::make_unique<Bubble>(glm::vec2(rotationCenter.x - kBubbleRadius,

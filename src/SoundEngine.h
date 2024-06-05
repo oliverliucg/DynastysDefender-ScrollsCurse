@@ -1,4 +1,5 @@
 #pragma once
+#include "alhelpers.h"
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alext.h>
@@ -11,8 +12,7 @@
 #include <stdlib.h>
 #include <string>e e
 #include <unordered_map>
-
-#include "alhelpers.h"
+#include <unordered_set>
 // #include "alhelpers.h"
 
 enum FormatType { Int16, Float, IMA4, MSADPCM };
@@ -22,10 +22,14 @@ class SoundEngine {
   // Get the singleton instance
   static SoundEngine& GetInstance();
   ALuint LoadSound(const std::string& name, const std::string& filename);
-  void PlaySound(const std::string& name);
+  void PlaySound(const std::string& name, bool loop = false);
   void StopSound(const std::string& name);
 
-  void CleanUp();
+  void Clear();
+
+  // Clean up sources that are no longer playing. If force is true, clean up
+  // all.
+  void CleanUpSources(bool force = false);
 
  private:
   SoundEngine();
@@ -33,7 +37,12 @@ class SoundEngine {
   SoundEngine(const SoundEngine& other) = delete;
   SoundEngine& operator=(const SoundEngine& other) = delete;
   ~SoundEngine();
+
   ALCdevice* device_;
   ALCcontext* context_;
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
+  std::unordered_set<ALuint> sources_;               // Set of sound sources
+
+  // Check if a source is looping
+  bool IsLooping(ALuint source);
 };
