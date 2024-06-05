@@ -6,12 +6,15 @@ BasedOnStyle:  Google
 IncludeBlocks: Preserve
 
 IncludeCategories:
-  # Ensure glad.h is included first
+  # Ensure windows.h is included first
+  - Regex:           '^<windows\.h>$'
+    Priority:        0
   - Regex:           '^<glad/glad\.h>$'
     Priority:        1
   # Ensure GLFW/glfw3.h is included after glad.h
   - Regex:           '^<GLFW/glfw3\.h>$'
     Priority:        2
+
 
 # Specifies whether the includes should be sorted as specified in IncludeCategories.
 SortIncludes:    true
