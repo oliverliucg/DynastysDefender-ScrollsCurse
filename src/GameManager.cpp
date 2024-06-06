@@ -148,8 +148,7 @@ void GameManager::Init() {
 
   // load textures
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/handynastry2.png", false,
-      "background");
+      "C:/Users/xiaod/resources/textures/handynastry3.png", true, "background");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/arenagray.png",
                               true, "gameboard");
   resourceManager.LoadTexture(
