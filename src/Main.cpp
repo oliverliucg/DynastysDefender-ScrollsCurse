@@ -309,9 +309,7 @@ int main() {
   Renderer::SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
   GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
   gameManager.PreLoad();
-  /*gameManager.Init();*/
-  // std::cout << "rturn at this point." << std::endl;
-  // return 0;
+
   std::cout << "Screen width: " << SCREEN_WIDTH
             << " Screen height: " << SCREEN_HEIGHT << std::endl;
 
@@ -325,7 +323,7 @@ int main() {
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  /*gameManager.Init();*/
+
   // Play background music
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   soundEngine.LoadSound("background",
@@ -334,8 +332,8 @@ int main() {
 
   // fixed time step
   const float kTimeStep = 1.f / 240.f;
-  const float kTimeStepForPreLoad = 1.f / 60.f;
   float accumulator = 0.f;
+
   // deltaTime variables
   // -------------------
   float deltaTime = 0.0f;
@@ -349,9 +347,10 @@ int main() {
     lastFrame = currentFrame;
     accumulator += deltaTime;
     if (gameManager.state == GameState::PRELOAD &&
+        gameManager.targetState == GameState::UNDEFINED &&
         currentFrame - startFrame >= 2.85f) {
       gameManager.Init();
-      assert(gameManager.state != GameState::PRELOAD &&
+      assert(gameManager.targetState == GameState::SPLASH_SCREEN &&
              "Failed to initialize the game.");
       int framebufferWidth, framebufferHeight;
       glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
@@ -369,7 +368,10 @@ int main() {
     if (glfwWindowShouldClose(window)) {
       windowShouldClose.store(true);  // Synchronize close signal with GLFW
     }
-
+    // Set the clear color
+    glClearColor(0.039216f, 0.043137f, 0.070588f, 1.0f);
+    // Clear the colorbuffer
+    glClear(GL_COLOR_BUFFER_BIT);
     // Process the input at fixed time step and update the game state.
     while (accumulator >= kTimeStep) {
       // Process input

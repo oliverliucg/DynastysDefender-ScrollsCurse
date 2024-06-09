@@ -18,7 +18,8 @@ PostProcessor::PostProcessor(Shader shader, unsigned int width,
       shakingStrength(0.01f),
       timeMultiplierForX(10.0f),
       timeMultiplierForY(15.0f),
-      offset(offset) {
+      offset(offset),
+      intensity(1.0f) {
   // initialize renderbuffer/framebuffer object
   glGenFramebuffers(1, &this->MSFBO);
   glGenFramebuffers(1, &this->FBO);
@@ -88,6 +89,8 @@ void PostProcessor::SetConfuse(bool confuse) { this->confuse = confuse; }
 
 void PostProcessor::SetChaos(bool chaos) { this->chaos = chaos; }
 
+bool PostProcessor::IsChaos() const { return this->chaos; }
+
 void PostProcessor::SetGrayscale(bool grayscale) {
   this->grayscale = grayscale;
 }
@@ -124,7 +127,13 @@ void PostProcessor::SetSampleOffsets(float offset) {
                25, (float*)offsets);
 }
 
-float PostProcessor::GetSampleOffsets() { return this->offset; }
+float PostProcessor::GetSampleOffsets() const { return this->offset; }
+
+void PostProcessor::SetIntensity(float intensity) {
+  this->intensity = intensity;
+}
+
+float PostProcessor::GetIntensity() const { return this->intensity; }
 
 void PostProcessor::BeginRender() {
   assert(!this->hasBeganRender && !this->hasEndedRender);
@@ -164,6 +173,7 @@ void PostProcessor::Render(float time) {
   this->postProcessingShader.SetFloat("timeMultiplierForY",
                                       this->timeMultiplierForY);
   this->postProcessingShader.SetFloat("shakingStrength", this->shakingStrength);
+  this->postProcessingShader.SetFloat("intensity", this->intensity);
   this->postProcessingShader.SetInteger("confuse", this->confuse);
   this->postProcessingShader.SetInteger("chaos", this->chaos);
   this->postProcessingShader.SetInteger("shake", this->shake);

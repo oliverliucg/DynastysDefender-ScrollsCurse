@@ -104,8 +104,6 @@ void GameManager::Init() {
 
   //    return;
   //}
-  this->SetState(GameState::INITIAL);
-  this->GoToState(GameState::STORY);
 
   // load shaders
   ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -175,6 +173,8 @@ void GameManager::Init() {
   // load textures
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/oliverliulogo.png", false, "logo");
+  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/splash.png",
+                              true, "splash");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/handynastry4.png", true, "background");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/arenagray.png",
@@ -876,6 +876,11 @@ void GameManager::Init() {
   soundEngine.LoadSound("shoot", "C:/Users/xiaod/resources/audio/solid.wav");
   soundEngine.LoadSound("bubbleexplode",
                         "C:/Users/xiaod/resources/audio/bleep.wav");
+
+  // Go to the splash screen state
+  this->GoToState(GameState::SPLASH_SCREEN);
+  // this->SetState(GameState::INITIAL);
+  // this->GoToState(GameState::STORY);
 }
 
 void GameManager::ProcessInput(float dt) {
@@ -1306,6 +1311,64 @@ void GameManager::ProcessInput(float dt) {
 
 void GameManager::Update(float dt) {
   if (this->state == GameState::PRELOAD) {
+    if (this->targetState == GameState::SPLASH_SCREEN) {
+      postProcessor->SetChaos(true);
+      postProcessor->SetSampleOffsets(1.f / 20000.f);
+      this->SetToTargetState();
+    }
+    return;
+  } else if (this->state == GameState::SPLASH_SCREEN) {
+    // Make the whole screen become clear from the chaos effect gradually.
+    float originalIntensity = 1.f;
+    float originalSampleOffsets = 1.f / 20000.f;
+    float targetIntensity = 0.5f;
+    float targetSampleOffsets = 1.f / 150.f;
+    if (postProcessor->GetIntensity() > targetIntensity &&
+        !timer->HasEvent("splash")) {
+      float newIntensity = postProcessor->GetIntensity() - 0.08f * dt;
+      /*float newIntensity = originalIntensity;*/
+      float newSampleOffsets =
+          originalSampleOffsets -
+          (originalIntensity - newIntensity) /
+              (originalIntensity - targetIntensity) *
+              (originalSampleOffsets - targetSampleOffsets);
+      targetSampleOffsets;
+      if (newIntensity < targetIntensity) {
+        newIntensity = targetIntensity;
+        newSampleOffsets = targetSampleOffsets;
+        // Stay at the target state for a while.
+        timer->SetEventTimer("splash", 6.f);
+        timer->StartEventTimer("splash");
+      }
+      postProcessor->SetIntensity(newIntensity);
+      postProcessor->SetSampleOffsets(newSampleOffsets);
+    } else if (timer->HasEvent("splash") &&
+               timer->IsEventTimerExpired("splash")) {
+      postProcessor->SetChaos(false);
+      postProcessor->SetSampleOffsets(0.f);
+      postProcessor->SetIntensity(1.f);
+      this->SetState(GameState::INITIAL);
+      this->GoToState(GameState::STORY);
+    } else if (timer->HasEvent("splash") &&
+               !timer->IsEventTimerExpired("splash")) {
+      originalSampleOffsets = targetSampleOffsets;
+      targetSampleOffsets = 1.f / 2.f;
+      originalIntensity = targetIntensity;
+      targetIntensity = 1.f;
+      if (postProcessor->GetSampleOffsets() < targetSampleOffsets) {
+        float newSampleOffsets = postProcessor->GetSampleOffsets() + 0.002 * dt;
+        float newIntensity = originalIntensity -
+                             (originalSampleOffsets - newSampleOffsets) /
+                                 (originalSampleOffsets - targetSampleOffsets) *
+                                 (originalIntensity - targetIntensity);
+        if (newSampleOffsets > targetSampleOffsets) {
+          newSampleOffsets = targetSampleOffsets;
+          newIntensity = targetIntensity;
+        }
+        postProcessor->SetSampleOffsets(newSampleOffsets);
+        postProcessor->SetIntensity(newIntensity);
+      }
+    }
     return;
   }
   // silk boundary before scrolling
@@ -2163,12 +2226,28 @@ void GameManager::Update(float dt) {
 void GameManager::Render() {
   if (this->state == GameState::EXIT) {
     return;
-  } else if (this->state == GameState::PRELOAD) {
+  } else if (this->state == GameState::PRELOAD &&
+             this->targetState == GameState::UNDEFINED) {
     ResourceManager& resourceManager = ResourceManager::GetInstance();
+
     spriteRenderer->DrawSprite(resourceManager.GetTexture("logo"),
                                glm::vec2(0, 0),
                                glm::vec2(this->width, this->height), 0.0f,
                                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    return;
+  } else if ((this->state == GameState::SPLASH_SCREEN ||
+              this->targetState == GameState::SPLASH_SCREEN)) {
+    if (!this->postProcessor->IsChaos()) {
+      return;
+    }
+    ResourceManager& resourceManager = ResourceManager::GetInstance();
+    postProcessor->BeginRender();
+    spriteRenderer->DrawSprite(resourceManager.GetTexture("splash"),
+                               glm::vec2(0, 0),
+                               glm::vec2(this->width, this->height), 0.0f,
+                               glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    postProcessor->EndRender();
+    postProcessor->Render(glfwGetTime());
     return;
   }
 

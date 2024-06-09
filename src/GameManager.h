@@ -48,6 +48,8 @@
 enum class GameState {
   UNDEFINED,
   PRELOAD,
+  SPLASH_SCREEN,
+  INTRO,
   INITIAL,
   STORY,
   STORY_END,

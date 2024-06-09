@@ -20,15 +20,19 @@ class PostProcessor {
   void Render(float time);
   void SetConfuse(bool confuse);
   void SetChaos(bool chaos);
+  bool IsChaos() const;
   void SetShake(bool shake, float strength = 0.01f,
                 float timeMultiplierForX = 10.f,
                 float timeMultiplierForY = 15.f);
   void SetGrayscale(bool grayscale);
   void SetBlur(bool blur);
   void SetSampleOffsets(float offset);
-  float GetSampleOffsets();
+  float GetSampleOffsets() const;
+  void SetIntensity(float intensity);
+  float GetIntensity() const;
   void SetSrcViewPort(const ViewPortInfo& viewPortInfo);
   void SetDstViewPort(const ViewPortInfo& viewPortInfo);
+
   // Resize the framebuffer
   void Resize(SizePadding sizePadding);
 
@@ -43,7 +47,8 @@ class PostProcessor {
   // options
   bool confuse, chaos, shake, grayscale, blur;
   // paremeters
-  float shakingStrength, timeMultiplierForX, timeMultiplierForY, offset;
+  float shakingStrength, timeMultiplierForX, timeMultiplierForY, offset,
+      intensity;
   unsigned int MSFBO, FBO;
   unsigned int RBO;
   unsigned int VAO;
