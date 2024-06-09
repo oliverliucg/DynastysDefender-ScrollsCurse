@@ -47,7 +47,7 @@
 
 enum class GameState {
   UNDEFINED,
-  OPTION,
+  PRELOAD,
   INITIAL,
   STORY,
   STORY_END,
@@ -122,6 +122,7 @@ class GameManager {
   // Set to the target screen mode of the game.
   void SetToTargetScreenMode();
 
+  void PreLoad();
   void Init();
   void ProcessInput(float dt);
   void Update(float dt);

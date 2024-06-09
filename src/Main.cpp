@@ -308,7 +308,8 @@ int main() {
   Renderer::SetExpectedWindowSizePadding(kVirtualScreenSizePadding);
   Renderer::SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
   GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
-  gameManager.Init();
+  gameManager.PreLoad();
+  /*gameManager.Init();*/
   // std::cout << "rturn at this point." << std::endl;
   // return 0;
   std::cout << "Screen width: " << SCREEN_WIDTH
@@ -319,99 +320,47 @@ int main() {
   int framebufferWidth, framebufferHeight;
   glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
   reconfigureWindowSize(window, framebufferWidth, framebufferHeight);
-
   glfwSetKeyCallback(window, key_callback);
   glfwSetScrollCallback(window, scroll_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-  // Option window to choose between windowed mode and full screen mode
-  /*gameManager.state = GameState::OPTION;*/
   /*gameManager.Init();*/
-  //// Set the background color to (0.988f, 0.928f, 0.828f, 1.0f) which is a
-  /// pale yellow
-  // glClearColor(0.988f, 0.928f, 0.828f, 1.0f);
-  //  Start a loop that runs until the user chooses which mode to play
-  // while(!glfwWindowShouldClose(window)) {
-
-  //	// Clear the color buffer with the specified clear color
-  //	glClear(GL_COLOR_BUFFER_BIT);
-
-  //	// Calculate delta time
-  //	float currentFrame = static_cast<float>(glfwGetTime());
-  //	deltaTime = currentFrame - lastFrame;
-  //	lastFrame = currentFrame;
-
-  //	// Check if any events have been activiated (key pressed, mouse moved
-  // etc.) and call corresponding response functions 	glfwPollEvents();
-
-  //	// Process input
-  //	gameManager.ProcessInput(deltaTime);
-
-  //	// Draw the background
-  //	gameManager.Render();
-
-  //	// Swap the screen buffers
-  //	glfwSwapBuffers(window);
-  //}
-
-  //// Clear the resources
-  // ResourceManager::GetInstance().Clear();
-
-  // if (gameManager.screenMode == ScreenMode::WINDOWED) {
-  //	SCREEN_WIDTH = WINDOWED_MODE_SCREEN_WIDTH;
-  //	SCREEN_HEIGHT = WINDOWED_MODE_SCREEN_HEIGHT;
-  // }
-  // else if (gameManager.screenMode == ScreenMode::FULLSCREEN) {
-  //	SCREEN_WIDTH = FULL_SCREEN_WINDOW_WIDTH;
-  //	SCREEN_HEIGHT = FULL_SCREEN_WINDOW_HEIGHT;
-  // }
-  //  Set the position of window to the center of the screen
-  //	int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
-  //	int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
-  ///*	glfwSetWindowPos(window, windowPosX, windowPosY);*/
-  //	// OpenGL configuration
-  //	// --------------------
-  //	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-  //	/*glfwSetWindowSize(window, SCREEN_WIDTH, SCREEN_HEIGHT);*/
-  //	if (gameManager.screenMode == ScreenMode::FULLSCREEN) {
-  //		glfwSetWindowMonitor(window, NULL, 0, 0, SCREEN_WIDTH,
-  // SCREEN_HEIGHT, mode->refreshRate);
-  //	}
-  //	else {
-  //		glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY,
-  // SCREEN_WIDTH, SCREEN_HEIGHT, GLFW_DONT_CARE);
-  //	}
-  //	std::cout << "refresh rate: " << mode->refreshRate << std::endl;
-  //	std::cout << "screen size: " << SCREEN_WIDTH << "x" << SCREEN_HEIGHT <<
-  // std::endl; 	glfwSetWindowShouldClose(window, false);
-  //
-  //	// Reconfigure the attibutes in the game that are affected by the change
-  // of screen size. 	SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-  //	gameManager.width = SCREEN_WIDTH;
-  //	gameManager.height = SCREEN_HEIGHT;
-
   // Play background music
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   soundEngine.LoadSound("background",
                         "C:/Users/xiaod/resources/audio/breakout_clip.wav");
   soundEngine.PlaySound("background", true);
+
   // fixed time step
   const float kTimeStep = 1.f / 240.f;
+  const float kTimeStepForPreLoad = 1.f / 60.f;
   float accumulator = 0.f;
   // deltaTime variables
   // -------------------
   float deltaTime = 0.0f;
   float lastFrame = static_cast<float>(glfwGetTime());
+  float startFrame = static_cast<float>(glfwGetTime());
   // Start a loop that runs until the user closes the window
   while (!glfwWindowShouldClose(window)) {
     // Calculate delta time
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
-
     accumulator += deltaTime;
+    if (gameManager.state == GameState::PRELOAD &&
+        currentFrame - startFrame >= 2.85f) {
+      gameManager.Init();
+      assert(gameManager.state != GameState::PRELOAD &&
+             "Failed to initialize the game.");
+      int framebufferWidth, framebufferHeight;
+      glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+      reconfigureWindowSize(window, framebufferWidth, framebufferHeight);
+      accumulator = 0.f;
+      currentFrame = static_cast<float>(glfwGetTime());
+      lastFrame = currentFrame;
+      continue;
+    }
 
     // Check if any events have been activiated (key pressed, mouse moved etc.)
     // and call corresponding response functions
@@ -421,11 +370,7 @@ int main() {
       windowShouldClose.store(true);  // Synchronize close signal with GLFW
     }
 
-    // Render
-    // Clear the colorbuffer
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
+    // Process the input at fixed time step and update the game state.
     while (accumulator >= kTimeStep) {
       // Process input
       gameManager.ProcessInput(kTimeStep);
@@ -449,13 +394,16 @@ int main() {
         gameManager.SetToTargetScreenMode();
       }
 
-      // Update game state
+      //// Update game state
       gameManager.Update(kTimeStep);
-
       accumulator -= kTimeStep;
     }
 
-    // Draw the background
+    // Set the clear color
+    glClearColor(0.039216f, 0.043137f, 0.070588f, 1.0f);
+    // Clear the colorbuffer
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Render
     gameManager.Render();
 
     // Swap the screen buffers

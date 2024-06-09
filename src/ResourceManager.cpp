@@ -384,9 +384,13 @@ ResourceManager::ResourceManager() {
 Shader ResourceManager::LoadShader(const char* vShaderFile,
                                    const char* fShaderFile,
                                    const char* gShaderFile, std::string name) {
-  std::lock_guard<std::mutex> lock(resourceMutex);
+  // std::lock_guard<std::mutex> lock(resourceMutex);
   Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
   return Shaders[name];
+}
+
+bool ResourceManager::HasShader(std::string name) {
+  return Shaders.count(name) > 0;
 }
 
 Shader ResourceManager::GetShader(std::string name) {
@@ -398,7 +402,7 @@ Shader ResourceManager::GetShader(std::string name) {
 
 Texture2D ResourceManager::LoadTexture(const char* file, bool alpha,
                                        std::string name) {
-  std::lock_guard<std::mutex> lock(resourceMutex);
+  /* std::lock_guard<std::mutex> lock(resourceMutex);*/
   Textures[name] = loadTextureFromFile(file, alpha);
   return Textures[name];
 }

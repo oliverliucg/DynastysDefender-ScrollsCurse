@@ -30,6 +30,26 @@ GameManager::GameManager(unsigned int width, unsigned int height)
 }
 
 GameManager::~GameManager() {}
+
+void GameManager::PreLoad() {
+  this->SetState(GameState::PRELOAD);
+
+  // load logo
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+  resourceManager.LoadTexture(
+      "C:/Users/xiaod/resources/textures/oliverliulogo4k.png", false, "logo");
+  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt",
+                             "C:/Users/xiaod/resources/shaders/sprite.fs.txt",
+                             nullptr, "sprite");
+  glm::mat4 projection =
+      glm::ortho(0.0f, static_cast<float>(this->width),
+                 static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
+  resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
+  resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
+  spriteRenderer =
+      std::make_shared<SpriteRenderer>(resourceManager.GetShader("sprite"));
+}
+
 void GameManager::Init() {
   // if (this->state == GameState::OPTION) {
   //     ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -89,9 +109,6 @@ void GameManager::Init() {
 
   // load shaders
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt",
-                             "C:/Users/xiaod/resources/shaders/sprite.fs.txt",
-                             nullptr, "sprite");
   resourceManager.LoadShader(
       "C:/Users/xiaod/resources/shaders/post_processing.vs.txt",
       "C:/Users/xiaod/resources/shaders/post_processing.fs.txt", nullptr,
@@ -117,8 +134,15 @@ void GameManager::Init() {
   glm::mat4 projection =
       glm::ortho(0.0f, static_cast<float>(this->width),
                  static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
-  resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
-  resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
+  if (!resourceManager.HasShader("sprite")) {
+    resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt",
+                               "C:/Users/xiaod/resources/shaders/sprite.fs.txt",
+                               nullptr, "sprite");
+    resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
+    resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
+  }
+  // resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
+  // resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
   resourceManager.GetShader("purecolor")
       .Use()
       .SetMatrix4("projection", projection);
@@ -129,8 +153,10 @@ void GameManager::Init() {
   resourceManager.GetShader("discard").SetMatrix4("projection", projection);
 
   // set render-specific controls
-  spriteRenderer =
-      std::make_shared<SpriteRenderer>(resourceManager.GetShader("sprite"));
+  if (spriteRenderer == nullptr) {
+    spriteRenderer =
+        std::make_shared<SpriteRenderer>(resourceManager.GetShader("sprite"));
+  }
   spriteDynamicRenderer = std::make_shared<SpriteDynamicRenderer>(
       resourceManager.GetShader("sprite"));
   partialTextureRenderer = std::make_shared<PartialTextureRenderer>(
@@ -148,7 +174,9 @@ void GameManager::Init() {
 
   // load textures
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/handynastry3.png", true, "background");
+      "C:/Users/xiaod/resources/textures/oliverliulogo.png", false, "logo");
+  resourceManager.LoadTexture(
+      "C:/Users/xiaod/resources/textures/handynastry4.png", true, "background");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/arenagray.png",
                               true, "gameboard");
   resourceManager.LoadTexture(
@@ -972,49 +1000,50 @@ void GameManager::ProcessInput(float dt) {
       this->SetState(GameState::INITIAL);
       this->GoToState(GameState::STORY);
     }
-  } else if (this->state == GameState::OPTION) {
-    glm::vec2 mousePosition = glm::vec2(this->mouseX, this->mouseY);
-    // check if the mouse is hovering over the buttons that are active.
-    auto it = buttons.begin();
-    while (it != buttons.end()) {
-      auto& [content, button] = *it++;
-      // continue if the button is not active
-      if (button->GetState() == ButtonState::kInactive) {
-        continue;
-      }
-      if (button->IsPositionInside(mousePosition)) {
-        // Check if the button is pressed
-        if (this->leftMousePressed) {
-          button->SetState(ButtonState::kPressed);
-          if (content == "windowed") {
-            this->screenMode = ScreenMode::WINDOWED;
-            this->SetState(GameState::EXIT);
-            this->GoToState(GameState::INITIAL);
-            this->buttons.clear();
-          } else if (content == "fullscreen") {
-            this->screenMode = ScreenMode::FULLSCREEN;
-            this->SetState(GameState::EXIT);
-            this->GoToState(GameState::INITIAL);
-            this->buttons.clear();
-          } else if (content == "exit") {
-            this->SetState(GameState::EXIT);
-          }
-
-          // Deactivate all the buttons.
-          for (auto& [content, button] : buttons) {
-            button->SetState(ButtonState::kInactive);
-          }
-          // assume that only one button is pressed at a time, so we break the
-          // loop.
-          break;
-        } else {
-          button->SetState(ButtonState::kHovered);
-        }
-      } else {
-        button->SetState(ButtonState::kNormal);
-      }
-    }
   }
+  // else if (this->state == GameState::OPTION) {
+  //   glm::vec2 mousePosition = glm::vec2(this->mouseX, this->mouseY);
+  //   // check if the mouse is hovering over the buttons that are active.
+  //   auto it = buttons.begin();
+  //   while (it != buttons.end()) {
+  //     auto& [content, button] = *it++;
+  //     // continue if the button is not active
+  //     if (button->GetState() == ButtonState::kInactive) {
+  //       continue;
+  //     }
+  //     if (button->IsPositionInside(mousePosition)) {
+  //       // Check if the button is pressed
+  //       if (this->leftMousePressed) {
+  //         button->SetState(ButtonState::kPressed);
+  //         if (content == "windowed") {
+  //           this->screenMode = ScreenMode::WINDOWED;
+  //           this->SetState(GameState::EXIT);
+  //           this->GoToState(GameState::INITIAL);
+  //           this->buttons.clear();
+  //         } else if (content == "fullscreen") {
+  //           this->screenMode = ScreenMode::FULLSCREEN;
+  //           this->SetState(GameState::EXIT);
+  //           this->GoToState(GameState::INITIAL);
+  //           this->buttons.clear();
+  //         } else if (content == "exit") {
+  //           this->SetState(GameState::EXIT);
+  //         }
+
+  //        // Deactivate all the buttons.
+  //        for (auto& [content, button] : buttons) {
+  //          button->SetState(ButtonState::kInactive);
+  //        }
+  //        // assume that only one button is pressed at a time, so we break the
+  //        // loop.
+  //        break;
+  //      } else {
+  //        button->SetState(ButtonState::kHovered);
+  //      }
+  //    } else {
+  //      button->SetState(ButtonState::kNormal);
+  //    }
+  //  }
+  //}
 
   if (!activePage.empty()) {
     // Move the text content of the page "control" based on the scroll offset.
@@ -1276,6 +1305,9 @@ void GameManager::ProcessInput(float dt) {
 }
 
 void GameManager::Update(float dt) {
+  if (this->state == GameState::PRELOAD) {
+    return;
+  }
   // silk boundary before scrolling
   glm::vec4 silkBoundsBefore = this->scroll->GetSilkBounds();
 
@@ -2131,38 +2163,26 @@ void GameManager::Update(float dt) {
 void GameManager::Render() {
   if (this->state == GameState::EXIT) {
     return;
+  } else if (this->state == GameState::PRELOAD) {
+    ResourceManager& resourceManager = ResourceManager::GetInstance();
+    spriteRenderer->DrawSprite(resourceManager.GetTexture("logo"),
+                               glm::vec2(0, 0),
+                               glm::vec2(this->width, this->height), 0.0f,
+                               glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    return;
   }
-
-  // if (this->state == GameState::OPTION) {
-  //     // Render the buttons that is active
-  //     auto it = buttons.begin();
-  //     while (it != buttons.end())
-  //     {
-  //         if (it->second->GetState() != ButtonState::kInactive) {
-  //             it->second->Draw(textRenderer, colorRenderer);
-  //         }
-  //         ++it;
-  //     }
-  //    /* texts["prompttomainmenu"]->Draw(textRenderer, true);*/
-  //     return;
-  // }
-
-  auto textRenderer = textRenderers.at(language);
 
   // Background
   ResourceManager& resourceManager = ResourceManager::GetInstance();
 
   postProcessor->BeginRender();
 
-  // if (!areFloatsEqual(glm::vec2(this->width, this->height), kFullScreenSize))
-  // {
-  //     std::string str = "";
-  // }
-
   spriteRenderer->DrawSprite(resourceManager.GetTexture("background"),
                              glm::vec2(0, 0),
                              glm::vec2(this->width, this->height), 0.0f,
                              glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+  auto textRenderer = textRenderers.at(language);
 
   // Draw shadow particles
   shadowTrailSystem->Draw(/*isDarkBackGround=*/true);

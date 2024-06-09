@@ -2,12 +2,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <boost/locale.hpp>
 #include <cmath>  // for std::abs
 #include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <json.hpp>
-#include <boost/locale.hpp>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -267,6 +267,8 @@ class ResourceManager {
   // loads a geometry shader
   Shader LoadShader(const char* vShaderFile, const char* fShaderFile,
                     const char* gShaderFile, std::string name);
+  // Checks if a shader with the given name is loaded
+  bool HasShader(std::string name);
   // retrieves a stored sader
   Shader GetShader(std::string name);
   // loads (and generates) a texture from file
@@ -289,7 +291,8 @@ class ResourceManager {
     // Get the string from json (UTF-8 string)
     std::string utf8_str = res.get<std::string>();
 
-    return stringToU32String(utf8_str);stringToU32String(utf8_str);
+    return stringToU32String(utf8_str);
+    stringToU32String(utf8_str);
   }
 
   int GetAvailableID();
