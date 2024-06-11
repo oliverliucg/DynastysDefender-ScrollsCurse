@@ -1,5 +1,43 @@
 #include "Text.h"
 
+bool TypingEffect::Update(float dt) {
+  bool notCompleted = currentTextLength < fullText.size();
+  timer += dt;
+  cursorTimer += dt;
+  if (notCompleted) {
+    size_t newAddedTextLength = static_cast<size_t>(timer * speed);
+    if (newAddedTextLength > 0) {
+      timer -= newAddedTextLength / speed;
+      currentTextLength += newAddedTextLength;
+      if (currentTextLength > fullText.size()) {
+        currentTextLength = fullText.size();
+      }
+      // When new text is added, reset the cursor timer.
+      cursorTimer = 0.f;
+    }
+  } else {
+    timer = 0.f;
+  }
+  if (cursorEnabled) {
+    while (cursorTimer >= cursorInterval) {
+      cursorTimer -= cursorInterval;
+      cursorVisible = !cursorVisible;
+    }
+  } else {
+    cursorVisible = false;
+    cursorTimer = 0.f;
+  }
+  return notCompleted;
+}
+
+std::u32string TypingEffect::GetVisibleText() const {
+  std::u32string res = fullText.substr(0, currentTextLength);
+  if (cursorEnabled && cursorVisible) {
+    res += U'|';
+  }
+  return res;
+}
+
 Text::Text(glm::vec2 pos, float lineWidth, glm::vec4 boxBounds, glm::vec3 color,
            float scale, float lineSpacingFactor, float additionalPadding)
     : position(pos),
@@ -172,4 +210,40 @@ void Text::Draw(std::shared_ptr<TextRenderer> textRenderer,
       y = textBottomLeft + 1.5f * spacing;
     }
   }
+}
+
+bool Text::UpdateTypingEffect(float dt) {
+  if (!IsTypingEffectEnabled()) return false;
+  size_t cursorPosition = 0;
+  bool notCompleted = false;
+  for (size_t i = 0; i < typingEffects.size(); ++i) {
+    cursorPosition = i;
+    auto& typingEffect = typingEffects[i];
+    notCompleted = typingEffect.Update(dt);
+    if (notCompleted) {
+      break;
+    }
+    // if (i == typingEffects.size() - 1) {
+    //   // All typing effects are completed. No need to update anymore.
+    //   notCompleted = false;
+    // }
+  }
+  paragraphs[cursorPosition] = typingEffects[cursorPosition].GetVisibleText();
+  return notCompleted;
+}
+
+bool Text::IsTypingEffectEnabled() { return !typingEffects.empty(); }
+
+void Text::EnableTypingEffect(float speed) {
+  for (int i = 0; i < paragraphs.size(); ++i) {
+    typingEffects.emplace_back(paragraphs[i], 0, speed);
+    paragraphs[i].clear();
+  }
+}
+
+void Text::DisableTypingEffect() {
+  for (auto& typingEffect : typingEffects) {
+    paragraphs.emplace_back(typingEffect.fullText);
+  }
+  typingEffects.clear();
 }

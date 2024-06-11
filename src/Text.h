@@ -8,6 +8,53 @@
 #include "ResourceManager.h"
 #include "TextRenderer.h"
 
+constexpr float DEFAULT_CURSOR_INTERVAL = 0.5f;
+constexpr bool DEFAULT_CURSOR_VISIBILITY = true;
+constexpr float DEFAULT_ENGLISH_TYPING_SPEED = 10.f;
+
+inline std::unordered_map<Language, float> typingSpeeds = {
+    {Language::GERMAN, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::ENGLISH, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::SPANISH, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::ITALIAN, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::FRENCH, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::JAPANESE,
+     0.6f *
+         DEFAULT_ENGLISH_TYPING_SPEED},  // Japanese characters might take
+                                         // longer to "type" due to complexity.
+    {Language::KOREAN,
+     0.7f * DEFAULT_ENGLISH_TYPING_SPEED},  // Korean might be slightly faster
+                                            // than Japanese but slower than
+                                            // Latin scripts.
+    {Language::PORTUGUESE_BR, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::PORTUGUESE_PT, 1.0f * DEFAULT_ENGLISH_TYPING_SPEED},
+    {Language::RUSSIAN,
+     0.9f * DEFAULT_ENGLISH_TYPING_SPEED},  // Cyrillic script might be slightly
+                                            // faster than complex scripts but
+                                            // slower than Latin.
+    {Language::CHINESE_SIMPLIFIED,
+     0.5f * DEFAULT_ENGLISH_TYPING_SPEED},  // Chinese characters are complex
+                                            // and could be set to slowest.
+    {Language::CHINESE_TRADITIONAL, 0.5f * DEFAULT_ENGLISH_TYPING_SPEED}};
+
+struct TypingEffect {
+  std::u32string fullText;       // The full text to be displayed.
+  size_t currentTextLength = 0;  // The length of the text to be displayed.
+  float speed =
+      DEFAULT_ENGLISH_TYPING_SPEED;  // The speed at which the text is typed.
+  float timer = 0.f;                 // Timer to track the typing effect
+  float cursorTimer = 0.f;           // Timer for cursor flashing
+  float cursorInterval =
+      DEFAULT_CURSOR_INTERVAL;  // The interval between cursor blinks.
+  bool cursorVisible =
+      DEFAULT_CURSOR_VISIBILITY;  // Whether the cursor is visible.
+  bool cursorEnabled = true;      // Whether the cursor is enabled.
+
+  bool IsCompleted() const { return currentTextLength == fullText.size(); }
+  bool Update(float dt);
+  std::u32string GetVisibleText() const;
+};
+
 // This class represents a text object in the game.
 class Text {
  public:
@@ -51,11 +98,16 @@ class Text {
   glm::vec2 GetTextSize(std::shared_ptr<TextRenderer> textRenderer) const;
   Capsule& GetScrollIcon();
   bool IsScrollIconInitialized();
+  bool IsTypingEffectEnabled();
+  void EnableTypingEffect(float speed);
+  void DisableTypingEffect();
+  bool UpdateTypingEffect(float dt);
   void Draw(std::shared_ptr<TextRenderer> textRenderer,
             bool textCenteringEnabled = false);
 
  private:
   std::vector<std::u32string> paragraphs;
+  std::vector<TypingEffect> typingEffects;
   glm::vec2 position, center;
   glm::vec4 boxBounds;
   glm::vec3 color;

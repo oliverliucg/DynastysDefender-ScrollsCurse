@@ -173,8 +173,8 @@ void GameManager::Init() {
   // load textures
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/oliverliulogo.png", false, "logo");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/splash.png",
-                              true, "splash");
+  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/splash2.png",
+                              false, "splash");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/handynastry4.png", true, "background");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/arenagray.png",
@@ -1318,55 +1318,80 @@ void GameManager::Update(float dt) {
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
-    // Make the whole screen become clear from the chaos effect gradually.
-    float originalIntensity = 1.f;
-    float originalSampleOffsets = 1.f / 20000.f;
-    float targetIntensity = 0.5f;
-    float targetSampleOffsets = 1.f / 150.f;
-    if (postProcessor->GetIntensity() > targetIntensity &&
-        !timer->HasEvent("splash")) {
-      float newIntensity = postProcessor->GetIntensity() - 0.08f * dt;
-      /*float newIntensity = originalIntensity;*/
-      float newSampleOffsets =
-          originalSampleOffsets -
-          (originalIntensity - newIntensity) /
-              (originalIntensity - targetIntensity) *
-              (originalSampleOffsets - targetSampleOffsets);
-      targetSampleOffsets;
-      if (newIntensity < targetIntensity) {
-        newIntensity = targetIntensity;
-        newSampleOffsets = targetSampleOffsets;
-        // Stay at the target state for a while.
-        timer->SetEventTimer("splash", 6.f);
-        timer->StartEventTimer("splash");
-      }
-      postProcessor->SetIntensity(newIntensity);
-      postProcessor->SetSampleOffsets(newSampleOffsets);
-    } else if (timer->HasEvent("splash") &&
-               timer->IsEventTimerExpired("splash")) {
-      postProcessor->SetChaos(false);
-      postProcessor->SetSampleOffsets(0.f);
-      postProcessor->SetIntensity(1.f);
-      this->SetState(GameState::INITIAL);
-      this->GoToState(GameState::STORY);
-    } else if (timer->HasEvent("splash") &&
-               !timer->IsEventTimerExpired("splash")) {
-      originalSampleOffsets = targetSampleOffsets;
-      targetSampleOffsets = 1.f / 2.f;
-      originalIntensity = targetIntensity;
-      targetIntensity = 1.f;
-      if (postProcessor->GetSampleOffsets() < targetSampleOffsets) {
-        float newSampleOffsets = postProcessor->GetSampleOffsets() + 0.002 * dt;
-        float newIntensity = originalIntensity -
-                             (originalSampleOffsets - newSampleOffsets) /
-                                 (originalSampleOffsets - targetSampleOffsets) *
-                                 (originalIntensity - targetIntensity);
-        if (newSampleOffsets > targetSampleOffsets) {
-          newSampleOffsets = targetSampleOffsets;
+    if (this->targetState == GameState::UNDEFINED) {
+      // Make the whole screen become clear from the chaos effect gradually.
+      float originalIntensity = 1.f;
+      float originalSampleOffsets = 1.f / 30000.f;
+      float targetIntensity = 0.6f;
+      float targetSampleOffsets = 1.f / 500.f;
+      if (postProcessor->GetIntensity() > targetIntensity &&
+          !timer->HasEvent("splash")) {
+        float newIntensity = postProcessor->GetIntensity() - 0.08f * dt;
+        /*float newIntensity = originalIntensity;*/
+        float newSampleOffsets =
+            originalSampleOffsets -
+            (originalIntensity - newIntensity) /
+                (originalIntensity - targetIntensity) *
+                (originalSampleOffsets - targetSampleOffsets);
+        targetSampleOffsets;
+        if (newIntensity < targetIntensity) {
           newIntensity = targetIntensity;
+          newSampleOffsets = targetSampleOffsets;
+          // Stay at the target state for a while.
+          timer->SetEventTimer("splash", 3.f);
+          timer->StartEventTimer("splash");
         }
-        postProcessor->SetSampleOffsets(newSampleOffsets);
         postProcessor->SetIntensity(newIntensity);
+        postProcessor->SetSampleOffsets(newSampleOffsets);
+      } else if (timer->HasEvent("splash") &&
+                 (timer->IsEventTimerExpired("splash") ||
+                  postProcessor->GetIntensity() == 1.f)) {
+        postProcessor->SetChaos(false);
+        postProcessor->SetSampleOffsets(0.f);
+        postProcessor->SetIntensity(1.f);
+        this->SetState(GameState::INTRO);
+      } else if (timer->HasEvent("splash") &&
+                 !timer->IsEventTimerExpired("splash")) {
+        originalSampleOffsets = targetSampleOffsets;
+        targetSampleOffsets = 1.f / 10000.f;
+        originalIntensity = targetIntensity;
+        targetIntensity = 1.f;
+        if (postProcessor->GetSampleOffsets() > targetSampleOffsets) {
+          float newSampleOffsets =
+              postProcessor->GetSampleOffsets() - 0.002 * dt;
+          float newIntensity =
+              originalIntensity -
+              (originalSampleOffsets - newSampleOffsets) /
+                  (originalSampleOffsets - targetSampleOffsets) *
+                  (originalIntensity - targetIntensity);
+          if (newSampleOffsets < targetSampleOffsets) {
+            newSampleOffsets = targetSampleOffsets;
+            newIntensity = targetIntensity;
+          }
+          postProcessor->SetSampleOffsets(newSampleOffsets);
+          postProcessor->SetIntensity(newIntensity);
+        }
+      }
+    }
+    return;
+  } else if (this->state == GameState::INTRO) {
+    bool hasEvent = timer->HasEvent("intro");
+    (void)hasEvent;
+    // typing the introduction text
+    if (!timer->HasEvent("intro") &&
+        !texts.at("introduction")->UpdateTypingEffect(dt)) {
+      // stay for 1 second
+      timer->SetEventTimer("intro", 3.f);
+      timer->StartEventTimer("intro");
+    } else {
+      if (timer->HasEvent("intro")) {
+        assert(!texts.at("introduction")->UpdateTypingEffect(dt) &&
+               "The introduction text should be fully typed.");
+        // jump to the next state when the timer is expired
+        if (timer->IsEventTimerExpired("intro")) {
+          this->SetState(GameState::INITIAL);
+          this->GoToState(GameState::STORY);
+        }
       }
     }
     return;
@@ -2235,8 +2260,9 @@ void GameManager::Render() {
                                glm::vec2(this->width, this->height), 0.0f,
                                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     return;
-  } else if ((this->state == GameState::SPLASH_SCREEN ||
-              this->targetState == GameState::SPLASH_SCREEN)) {
+  } else if ((this->state == GameState::SPLASH_SCREEN &&
+              this->targetState == GameState::UNDEFINED) ||
+             this->targetState == GameState::SPLASH_SCREEN) {
     if (!this->postProcessor->IsChaos()) {
       return;
     }
@@ -2248,6 +2274,11 @@ void GameManager::Render() {
                                glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     postProcessor->EndRender();
     postProcessor->Render(glfwGetTime());
+    return;
+  } else if (this->state == GameState::INTRO) {
+    // type the introduction text
+    texts.at("introduction")
+        ->Draw(textRenderers.at(language), /*centered=*/true);
     return;
   }
 
@@ -2763,7 +2794,7 @@ void GameManager::LoadControlCharacters() {
   for (const auto& [language, benchmark] : benchmark_char_map) {
     benchmarkChars.insert(benchmark);
   }
-  std::u32string controlCharacters = U"gjpqyN ";
+  std::u32string controlCharacters = U"|gjpqyN ";
   for (const auto& benchmark : benchmarkChars) {
     controlCharacters.push_back(benchmark);
   }
@@ -2863,6 +2894,19 @@ void GameManager::LoadTexts() {
   } else {
     texts["prompttomainmenu"]->SetParagraph(
         0, resourceManager.GetText("prompttomainmenu"));
+  }
+
+  if (texts.find("introduction") == texts.end()) {
+    texts["introduction"] = std::make_shared<Text>(
+        /*pos=*/glm::vec2(this->width * 0.4f, this->height * 0.65f),
+        /*lineWidth=*/this->width * 0.75f);
+    texts["introduction"]->AddParagraph(
+        resourceManager.GetText("introduction"));
+    texts["introduction"]->SetColor(glm::vec3(1.f, 1.f, 1.f));
+    texts["introduction"]->SetScale(0.03f / kFontScale);
+    texts["introduction"]->SetCenter(
+        glm::vec2(this->width / 2.f, this->height / 2.f));
+    texts["introduction"]->EnableTypingEffect(typingSpeeds.at(this->language));
   }
 
   if (texts.find("time") == texts.end()) {

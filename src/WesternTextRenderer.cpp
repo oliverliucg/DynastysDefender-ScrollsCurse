@@ -279,6 +279,17 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(this->VAO);
 
+  // Has cursor at the end of the text.
+  bool hasCursor = !text.empty() && text.back() == U'|';
+  if (hasCursor) {
+    text.pop_back();
+  }
+
+  auto textSizeInfo =
+      GetTextSize(text, scale, lineWidth, lineSpacingFactor, additionalPadding);
+
+  float textSizeY = textSizeInfo.first.y;
+
   // iterate through all characters
   std::u32string::const_iterator c;
   // Find the word's start (inclusive) and end (exlusive) index.
@@ -305,11 +316,15 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
   std::vector<Character> characters;
   std::vector<float> xpositions, ypositions, widths, heights;
 
-  // Assume the text contains only one line.
-  glm::vec2 offset = glm::vec2(
-      0.f,
-      center.y - (y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
-                          scale * 0.5f));
+  //// Assume the text contains only one line.
+  // glm::vec2 offset = glm::vec2(
+  //     0.f,
+  //     center.y - (y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y
+  //     *
+  //                         scale * 0.5f));
+
+  // Consider both one-line and multi-line text.
+  glm::vec2 offset = glm::vec2(0.f, center.y - (y + textSizeY * 0.5f));
 
   while (wordIndex.second > wordIndex.first) {
     std::u32string word =
@@ -418,6 +433,22 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
     }
   }
 
+  // Append the cursor character at the end if it is needed.
+  if (hasCursor) {
+    Character ch = characterMap.at(U'|').at(CharStyle::REGULAR);
+    float xpos = x + ch.Bearing.x * scale;
+    float ypos =
+        y +
+        (this->characterMap.at(benchmarkChar).at(CharStyle::REGULAR).Bearing.y -
+         ch.Bearing.y) *
+            scale;
+    xpositions.emplace_back(xpos);
+    ypositions.emplace_back(ypos);
+    widths.emplace_back(ch.Size.x * scale);
+    heights.emplace_back(ch.Size.y * scale);
+    // offset.x = center.x - (initialX + lenOfLine * 0.5f);
+    characters.emplace_back(ch);
+  }
   offset.x = center.x - (initialX + lenOfLine * 0.5f);
   RenderLine(characters, xpositions, ypositions, widths, heights, offset);
 

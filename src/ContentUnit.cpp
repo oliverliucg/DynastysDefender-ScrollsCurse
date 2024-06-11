@@ -213,8 +213,8 @@ void OptionUnit::SetPosition(glm::vec2 pos) {
                   0));
   }
   if (text_on_center_) {
-    glm::vec2 textSize =
-        text_->GetText()->GetTextSize(text_->GetTextRenderer());
+    // glm::vec2 textSize =
+    //     text_->GetText()->GetTextSize(text_->GetTextRenderer());
 
     glm::vec2 imageSize = icon_->GetSize();
     // float offsetY = (imageSize.y - textSize.y) / 2.0f;

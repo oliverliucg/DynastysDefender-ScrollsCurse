@@ -278,6 +278,12 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(this->VAO);
 
+  // Has cursor at the end of the text.
+  bool hasCursor = !text.empty() && text.back() == U'|';
+  if (hasCursor) {
+    text.pop_back();
+  }
+
   // iterate through all characters
   std::u32string::const_iterator c;
 
@@ -392,6 +398,23 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
       lenOfLine = x - initialX;
     }
     word.clear();
+  }
+
+  // Append the cursor character at the end if it is needed.
+  if (hasCursor) {
+    Character ch = characterMap.at(U'|').at(CharStyle::REGULAR);
+    float xpos = x + ch.Bearing.x * scale;
+    float ypos =
+        y +
+        (this->characterMap.at(benchmarkChar).at(CharStyle::REGULAR).Bearing.y -
+         ch.Bearing.y) *
+            scale;
+    xpositions.emplace_back(xpos);
+    ypositions.emplace_back(ypos);
+    widths.emplace_back(ch.Size.x * scale);
+    heights.emplace_back(ch.Size.y * scale);
+    // offset.x = center.x - (initialX + lenOfLine * 0.5f);
+    characters.emplace_back(ch);
   }
 
   offset.x = center.x - (initialX + lenOfLine * 0.5f);
