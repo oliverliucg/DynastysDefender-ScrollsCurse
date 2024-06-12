@@ -103,37 +103,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
   if (gameManager->state == GameState::EXIT) {
     glfwSetWindowShouldClose(window, true);
   }
-
-  //// Swtich the screen mode.
-  // if (gameManager->targetScreenMode != ScreenMode::UNDEFINED &&
-  // gameManager->targetScreenMode != gameManager->screenMode) { 	int
-  // SCREEN_WIDTH = -1; 	int SCREEN_HEIGHT = -1; 	if
-  // (gameManager->targetScreenMode
-  //== ScreenMode::WINDOWED) { 		SCREEN_WIDTH = kWindowedModeSize.x;
-  // SCREEN_HEIGHT = kWindowedModeSize.y;
-  //	}
-  //	else if (gameManager->targetScreenMode == ScreenMode::FULLSCREEN) {
-  //		SCREEN_WIDTH = kFullScreenSize.x;
-  //		SCREEN_HEIGHT = kFullScreenSize.y;
-  //	}
-  //	gameManager->screenMode = gameManager->targetScreenMode;
-  //	gameManager->targetScreenMode = ScreenMode::UNDEFINED;
-
-  //	/*glfwSetWindowSize(window, SCREEN_WIDTH, SCREEN_HEIGHT);*/
-  //	if (gameManager->screenMode == ScreenMode::FULLSCREEN) {
-  //		switchToFullScreen(window);
-  //	}
-  //	else {
-  //		switchToWindowedMode(window, SCREEN_WIDTH, SCREEN_HEIGHT);
-  //	}
-  //	//glfwSetWindowShouldClose(window, false);
-
-  //	// Reconfigure the attibutes in the game that are affected by the change
-  // of screen size. 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-  //	SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-  //	gameManager->width = SCREEN_WIDTH;
-  //	gameManager->height = SCREEN_HEIGHT;
-  //}
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -141,6 +110,10 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
       static_cast<GameManager*>(glfwGetWindowUserPointer(window));
   // double mouseX, mouseY;
   // glfwGetCursorPos(window, &mouseX, &mouseY);
+
+  // if (xpos < 0 || ypos < 0 || xpos > kWindowSize.x || ypos > kWindowSize.y) {
+  //   std::cout << "mouse xpos: " << xpos << ", ypos: " << ypos << std::endl;
+  // }
 
   // Get the mouse position in the virtual screen
   SizePadding actualWindowSizePadding = Renderer::GetActualWindowSizePadding();
@@ -324,6 +297,9 @@ int main() {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+  //// Hide the default cursor
+  // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
   // Play background music
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   soundEngine.LoadSound("background",
@@ -405,6 +381,12 @@ int main() {
     glClearColor(0.039216f, 0.043137f, 0.070588f, 1.0f);
     // Clear the colorbuffer
     glClear(GL_COLOR_BUFFER_BIT);
+    // Hide the default cursor if needed.
+    if (gameManager.hideDefaultMouseCursor) {
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    } else {
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
     // Render
     gameManager.Render();
 

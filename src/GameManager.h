@@ -117,6 +117,7 @@ class GameManager {
   float mouseX, mouseY, mouseLastX, mouseLastY;
   float width, height;
   int level;
+  bool hideDefaultMouseCursor;
   // std::mutex inputMutex;  // Mutex to protect input handling
   GameManager(unsigned int width, unsigned int height);
   ~GameManager();

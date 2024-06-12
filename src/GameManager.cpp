@@ -13,6 +13,7 @@ GameManager::GameManager(unsigned int width, unsigned int height)
       width(static_cast<float>(width)),
       height(static_cast<float>(height)),
       level(1),
+      hideDefaultMouseCursor(false),
       activePage("") {
   // Initialize all key states to false
   memset(keys, false, sizeof(keys));
@@ -171,8 +172,8 @@ void GameManager::Init() {
       resourceManager.GetShader("postprocessing"), this->width, this->height);
 
   // load textures
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/oliverliulogo.png", false, "logo");
+  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/brush.png",
+                              true, "mouse");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/splash2.png",
                               false, "splash");
   resourceManager.LoadTexture(
@@ -1560,6 +1561,13 @@ void GameManager::Update(float dt) {
   // silk boundary after scrolling
   glm::vec4 silkBoundsAfter = this->scroll->GetSilkBounds();
 
+  // deterimine whether to hide the default mouse cursor based on the silk
+  // boundaries.
+  this->hideDefaultMouseCursor =
+      this->scroll->GetSilkLen() > 0 && this->mouseX >= silkBoundsAfter.x &&
+      this->mouseX <= silkBoundsAfter.z && this->mouseY >= silkBoundsAfter.y &&
+      this->mouseY <= silkBoundsAfter.w;
+
   // Update health damage texts.
   gameCharacters["guojie"]->GetHealth().UpdateDamageTexts(dt);
   gameCharacters["weiqing"]->GetHealth().UpdateDamageTexts(dt);
@@ -2625,6 +2633,21 @@ void GameManager::Render() {
         !this->timer->IsPaused("prompttomainmenu")) {
       texts["prompttomainmenu"]->Draw(textRenderer, true);
     }
+  }
+
+  // Render the mouse cursor on the silk area.
+
+  constexpr float kMouseCursorHeight = 287.f;
+  constexpr float kMouseCursorWidth = 287.f * 812.f / 861.f;
+  // if (this->mouseX < 0.f || this->mouseY < 0.f) {
+  //   std::cout << "Mouse Position is negative: " << this->mouseX << ", "
+  //             << this->mouseY << std::endl;
+  // }
+  if (hideDefaultMouseCursor) {
+    spriteRenderer->DrawSprite(resourceManager.GetTexture("mouse"),
+                               glm::vec2(this->mouseX, this->mouseY),
+                               glm::vec2(kMouseCursorWidth, kMouseCursorHeight),
+                               0.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
   }
 }
 
