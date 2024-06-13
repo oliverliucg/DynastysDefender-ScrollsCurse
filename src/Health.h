@@ -1,5 +1,6 @@
 #pragma once
 #include "Capsule.h"
+#include "ScissorBoxHandler.h"
 #include "Text.h"
 
 class Health {
@@ -26,13 +27,13 @@ class Health {
   void SetCurrentHealth(int currentHealth);
   // Set the position, size and color of the total health bar.
   void SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color);
-  // Set the position, size and color of the current health bar.
-  void SetCurrentHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color);
-  // Get the total health bar.
+  //// Set the position, size and color of the current health bar.
+  // void SetCurrentHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color);
+  //  Get the total health bar.
   Capsule& GetTotalHealthBar();
-  // Get the current health bar.
-  Capsule& GetCurrentHealthBar();
-  // Increase the current health by the given amount.
+  //// Get the current health bar.
+  // Capsule& GetCurrentHealthBar();
+  //  Increase the current health by the given amount.
   void IncreaseHealth(int amount);
   // Derease the current health by the given amount.
   void DecreaseHealth(int amount);
@@ -55,9 +56,13 @@ class Health {
   int currentHealth;
   // Capsule representing the total health
   Capsule totalHealthBar;
-  // Capsule representing the current health
-  Capsule currentHealthBar;
-  // Texts representing the amount of health being damaged.
+  // Color of the health bar, by default the edge is white and the fill is
+  // green.
+  glm::vec4 healthBarEdgeColor;
+  glm::vec4 healthBarFillColor;
+  //// Capsule representing the current health
+  // Capsule currentHealthBar;
+  //  Texts representing the amount of health being damaged.
   std::vector<Text> damageTexts;
   // The position where the damage text is initially created.
   glm::vec2 damageTextInitialPosition;
@@ -69,4 +74,7 @@ class Health {
   bool damagePopOutToRight;
   // The scale of the damage text.
   float damageTextScale;
+
+  // Get the bounding box of the current health bar.
+  glm::vec4 GetCurrentHealthBarBoundingBox();
 };

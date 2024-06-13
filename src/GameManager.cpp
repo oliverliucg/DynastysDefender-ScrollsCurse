@@ -378,10 +378,10 @@ void GameManager::Init() {
   totalHealthBarPos = glm::vec2(
       positions[GameCharacterState::FIGHTING].x + kBubbleRadius * 1.0f,
       positions[GameCharacterState::FIGHTING].y - kBubbleRadius * 0.9f);
-  gameCharacters["weiqing"]->GetHealth().SetTotalHealth(1);
+  gameCharacters["weiqing"]->GetHealth().SetTotalHealth(2);
   gameCharacters["weiqing"]->GetHealth().SetTotalHealthBar(
       totalHealthBarPos, totalHealthBarSize, glm::vec4(1.f, 1.f, 1.f, 1.f));
-  gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(1);
+  gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(2);
   gameCharacters["weiqing"]->SetHealthBarRelativeCenterRatios();
 
   // Set the rotation pivot for the characters

@@ -251,8 +251,8 @@ void GameCharacter::MoveTo(glm::vec2 position, float velocity, float dt) {
   //+ offset);
   //	this->GetHealth().GetCurrentHealthBar().SetCenter(this->GetHealth().GetCurrentHealthBar().GetCenter()
   //+ offset); 	std::cout << "new center: " <<
-  //this->GetHealth().GetTotalHealthBar().GetCenter().x << ", " <<
-  //this->GetHealth().GetTotalHealthBar().GetCenter().y << std::endl;
+  // this->GetHealth().GetTotalHealthBar().GetCenter().x << ", " <<
+  // this->GetHealth().GetTotalHealthBar().GetCenter().y << std::endl;
   // }
 }
 
@@ -306,17 +306,17 @@ void GameCharacter::SetHealthBarRelativeCenterRatios() {
   // Get total health bar's center
   glm::vec2 totalHealthBarCenter =
       this->health->GetTotalHealthBar().GetCenter();
-  // Get current health bar's center
-  glm::vec2 currentHealthBarCenter =
-      this->health->GetCurrentHealthBar().GetCenter();
-  // Set the relative center ratio for the total health bar
+  //// Get current health bar's center
+  // glm::vec2 currentHealthBarCenter =
+  //     this->health->GetCurrentHealthBar().GetCenter();
+  //  Set the relative center ratio for the total health bar
   glm::vec2 relativeCenterRatio =
       (totalHealthBarCenter - characterCenter) / GetSize();
   relativeCenterRatios[this->health->GetTotalHealthBar().GetID()]
                       [GameCharacterState::FIGHTING] = relativeCenterRatio;
   // Set the relative center ratio for the current health bar
-  relativeCenterRatio = (currentHealthBarCenter - characterCenter) / GetSize();
-  relativeCenterRatios[this->health->GetCurrentHealthBar().GetID()]
+  relativeCenterRatio = (totalHealthBarCenter - characterCenter) / GetSize();
+  relativeCenterRatios[this->health->GetTotalHealthBar().GetID()]
                       [GameCharacterState::FIGHTING] = relativeCenterRatio;
 }
 
@@ -355,17 +355,19 @@ void GameCharacter::UpdateHealthBarPosition() {
     glm::vec2 totalHealthBarCenter =
         characterCenter + relativeCenterRatio * GetSize();
     this->health->GetTotalHealthBar().SetCenter(totalHealthBarCenter);
-    id = this->health->GetCurrentHealthBar().GetID();
-    assert(relativeCenterRatios.count(id) > 0 &&
-           "The relative center ratio for the current health bar is not set");
-    assert(relativeCenterRatios[id].count(GameCharacterState::FIGHTING) > 0 &&
-           "The relative center ratio for the current health bar in the "
-           "fighting state is not set");
-    relativeCenterRatio =
-        relativeCenterRatios[id][GameCharacterState::FIGHTING];
-    glm::vec2 currentHealthBarCenter =
-        characterCenter + relativeCenterRatio * GetSize();
-    this->health->GetCurrentHealthBar().SetCenter(currentHealthBarCenter);
+    // id = this->health->GetTotalHealthBar().GetID();
+    // assert(relativeCenterRatios.count(id) > 0 &&
+    //        "The relative center ratio for the current health bar is not
+    //        set");
+    // assert(relativeCenterRatios[id].count(GameCharacterState::FIGHTING) > 0
+    // &&
+    //        "The relative center ratio for the current health bar in the "
+    //        "fighting state is not set");
+    // relativeCenterRatio =
+    //     relativeCenterRatios[id][GameCharacterState::FIGHTING];
+    /*   glm::vec2 currentHealthBarCenter =
+           characterCenter + relativeCenterRatio * GetSize();
+       this->health->GetCurrentHealthBar().SetCenter(currentHealthBarCenter);*/
   }
 }
 
