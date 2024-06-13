@@ -1007,49 +1007,6 @@ void GameManager::ProcessInput(float dt) {
       this->GoToState(GameState::STORY);
     }
   }
-  // else if (this->state == GameState::OPTION) {
-  //   glm::vec2 mousePosition = glm::vec2(this->mouseX, this->mouseY);
-  //   // check if the mouse is hovering over the buttons that are active.
-  //   auto it = buttons.begin();
-  //   while (it != buttons.end()) {
-  //     auto& [content, button] = *it++;
-  //     // continue if the button is not active
-  //     if (button->GetState() == ButtonState::kInactive) {
-  //       continue;
-  //     }
-  //     if (button->IsPositionInside(mousePosition)) {
-  //       // Check if the button is pressed
-  //       if (this->leftMousePressed) {
-  //         button->SetState(ButtonState::kPressed);
-  //         if (content == "windowed") {
-  //           this->screenMode = ScreenMode::WINDOWED;
-  //           this->SetState(GameState::EXIT);
-  //           this->GoToState(GameState::INITIAL);
-  //           this->buttons.clear();
-  //         } else if (content == "fullscreen") {
-  //           this->screenMode = ScreenMode::FULLSCREEN;
-  //           this->SetState(GameState::EXIT);
-  //           this->GoToState(GameState::INITIAL);
-  //           this->buttons.clear();
-  //         } else if (content == "exit") {
-  //           this->SetState(GameState::EXIT);
-  //         }
-
-  //        // Deactivate all the buttons.
-  //        for (auto& [content, button] : buttons) {
-  //          button->SetState(ButtonState::kInactive);
-  //        }
-  //        // assume that only one button is pressed at a time, so we break the
-  //        // loop.
-  //        break;
-  //      } else {
-  //        button->SetState(ButtonState::kHovered);
-  //      }
-  //    } else {
-  //      button->SetState(ButtonState::kNormal);
-  //    }
-  //  }
-  //}
 
   if (!activePage.empty()) {
     // Move the text content of the page "control" based on the scroll offset.
@@ -1225,8 +1182,6 @@ void GameManager::ProcessInput(float dt) {
               // assume that only one button is pressed at a time, so we break
               // the loop.
               break;
-            } else {
-              button->SetState(ButtonState::kHovered);
             }
           } else {
             button->SetState(ButtonState::kHovered);
@@ -1260,25 +1215,27 @@ void GameManager::ProcessInput(float dt) {
               continue;
             }
 
-            if (option->IsPositionInsideIcon(mousePosition) &&
-                option->GetState() != OptionState::kClicked) {
+            if (option->IsPositionInsideIcon(mousePosition)) {
               if (this->leftMousePressed) {
-                optionToBeClicked = option->GetName();
-                option->SetState(OptionState::kClicked);
-                if (activePage == "displaysettings") {
-                  optionAlreadyClicked =
-                      this->screenMode == ScreenMode::FULLSCREEN ? "fullscreen"
-                                                                 : "windowed";
-                  if (optionToBeClicked == "fullscreen") {
-                    this->GoToScreenMode(ScreenMode::FULLSCREEN);
-                  } else if (optionToBeClicked == "windowed") {
-                    this->GoToScreenMode(ScreenMode::WINDOWED);
+                if (option->GetState() == OptionState::kHovered) {
+                  optionToBeClicked = option->GetName();
+                  option->SetState(OptionState::kClicked);
+                  if (activePage == "displaysettings") {
+                    optionAlreadyClicked =
+                        this->screenMode == ScreenMode::FULLSCREEN
+                            ? "fullscreen"
+                            : "windowed";
+                    if (optionToBeClicked == "fullscreen") {
+                      this->GoToScreenMode(ScreenMode::FULLSCREEN);
+                    } else if (optionToBeClicked == "windowed") {
+                      this->GoToScreenMode(ScreenMode::WINDOWED);
+                    }
+                  } else if (activePage == "languagepreference") {
+                    optionAlreadyClicked = language_map.at(this->GetLanguage());
+                    this->SetLanguage(language_enum_map.at(optionToBeClicked));
                   }
-                } else if (activePage == "languagepreference") {
-                  optionAlreadyClicked = language_map.at(this->GetLanguage());
-                  this->SetLanguage(language_enum_map.at(optionToBeClicked));
+                  break;
                 }
-                break;
               } else {
                 if (option->GetState() != OptionState::kClicked) {
                   option->SetState(OptionState::kHovered);
