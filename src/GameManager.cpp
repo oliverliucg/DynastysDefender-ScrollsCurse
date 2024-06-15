@@ -410,7 +410,7 @@ void GameManager::Init() {
       resourceManager.GetTexture("particle1"), 3000);
   // Initialize text renderer and text box
   this->LoadTextRenderer();
-  this->LoadControlCharacters();
+  this->LoadCommonCharacters();
   this->LoadTexts();
   this->LoadButtons();
   // Create page "story" / "Main Menu"
@@ -787,7 +787,6 @@ void GameManager::Init() {
       CreateClickableOptionUnit(
           language_map[Language::CHINESE_TRADITIONAL], U"中文（繁體）",
           textRenderers.at(Language::CHINESE_TRADITIONAL));
-
   languagePreferences.at(ConfigManager::GetInstance().GetLanguage())
       ->SetState(OptionState::kClicked);
 
@@ -1757,7 +1756,6 @@ void GameManager::Update(float dt) {
       if (this->timer->GetEventStartTime("beforenarrowing") < 0.f) {
         this->timer->ResumeEventTimer("beforenarrowing");
       }
-
       if (this->timer->IsEventTimerExpired("beforenarrowing")) {
         // Stop the shake effect
         this->gameArenaShaking = false;
@@ -2714,25 +2712,25 @@ void GameManager::SetLanguage(Language newLanguage) {
   LoadTexts();
   LoadButtons();
   // Update page components' position based on the new language.
-  for (const auto& [pageName, page] : pages) {
-    // No need to update text renderers for the language preference page. As
-    // they are preloaded and fixed.
-    if (pageName == "languagepreference") {
-      continue;
-    }
-    page->SetCompenentsTextRenderer(textRenderers.at(language));
-    page->UpdateComponentsHeight();
-    page->SetPosition(glm::vec2(
-        this->gameBoard->GetPosition().x,
-        std::max(this->gameBoard->GetCenter().y - page->GetHeight() * 0.5f,
-                 this->gameBoard->GetPosition().y)));
+  // for (const auto& [pageName, page] : pages) {
+  //  // No need to update text renderers for the language preference page. As
+  //  // they are preloaded and fixed.
+  //  if (pageName == "languagepreference") {
+  //    continue;
+  //  }
+  //  page->SetCompenentsTextRenderer(textRenderers.at(language));
+  //  page->UpdateComponentsHeight();
+  //  page->SetPosition(glm::vec2(
+  //      this->gameBoard->GetPosition().x,
+  //      std::max(this->gameBoard->GetCenter().y - page->GetHeight() * 0.5f,
+  //               this->gameBoard->GetPosition().y)));
 
-    // Reinit the scroll icon of each section
-    for (const auto& sectionName : page->GetOrder()) {
-      auto section = page->GetSection(sectionName);
-      section->UpdateScrollIconAndSectionOffset();
-    }
-  }
+  //  // Reinit the scroll icon of each section
+  //  for (const auto& sectionName : page->GetOrder()) {
+  //    auto section = page->GetSection(sectionName);
+  //    section->UpdateScrollIconAndSectionOffset();
+  //  }
+  // }
 
   // Update the position of all components in the active page.
   if (!activePage.empty()) {
@@ -2769,16 +2767,15 @@ void GameManager::LoadTextRenderer() {
   }
 }
 
-void GameManager::LoadControlCharacters() {
+void GameManager::LoadCommonCharacters() {
   std::unordered_set<char32_t> benchmarkChars;
   for (const auto& [language, benchmark] : benchmark_char_map) {
     benchmarkChars.insert(benchmark);
   }
-  std::u32string controlCharacters = U"|gjpqyN ";
+  std::u32string controlCharacters = U"1234567890|gjpqyN ";
   for (const auto& benchmark : benchmarkChars) {
     controlCharacters.push_back(benchmark);
   }
-
   TextRenderer::Load(controlCharacters);
 }
 
@@ -2908,8 +2905,6 @@ void GameManager::LoadTexts() {
     std::cout << "this->scroll->GetTopRoller()->GetSize().y: "
               << this->scroll->GetTopRoller()->GetSize().y << std::endl;
     texts["time"]->SetCenter(centerTime);
-  } else {
-    texts["time"]->SetParagraph(0, U"30");
   }
 
   std::vector<std::string> clickableOptionNames = {"fullscreen", "windowed"};
@@ -2967,51 +2962,6 @@ void GameManager::LoadButtons() {
           0, resourceManager.GetText("button", buttonName));
     }
   }
-  // buttons["back"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "back"));
-  // buttons["control"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 9.5f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "control"));
-  // buttons["start"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 11.0f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "start"));
-  // buttons["exit"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f + kBubbleRadius * 5.0f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 5.5f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "exit"));
-  // buttons["restart"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 11.5f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 9.0f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "restart"));
-  // buttons["resume"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 2.5f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 10.0f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "resume"));
-  // buttons["stop"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f + kBubbleRadius * 7.0f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 6.0f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "stop"));
-  // buttons["displaysettings"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "displaysettings"));
-  // buttons["languagepreference"] = std::make_shared<Button>(
-  //     glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
-  //               this->height * 0.84f),
-  //     glm::vec2(kBubbleRadius * 18.f, kBubbleRadius * 3.0f),
-  //     resourceManager.GetText("button", "languagepreference"));
 }
 
 std::shared_ptr<TextRenderer> GameManager::GetTextRenderer() {
@@ -3742,7 +3692,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   std::shuffle(freeSlots.begin(), freeSlots.end(), rng);
 
   GameLevel gameLevel;
-  if (level == 1) {
+  if (level <= numGameLevels) {
     gameLevel.numColors = 1;
     gameLevel.numInitialBubbles = 10;
     gameLevel.maxInitialBubbleDepth = 22 * kBubbleRadius;
@@ -3750,7 +3700,7 @@ void GameManager::GenerateRandomStaticBubbles() {
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 1.f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 1.f;
     GenerateRandomStaticBubblesHelper(gameLevel);
-  } else if (level == 2) {
+  } /*else if (level == 2) {
     gameLevel.numColors = 3;
     gameLevel.numInitialBubbles = 30;
     gameLevel.maxInitialBubbleDepth = 24 * kBubbleRadius;
@@ -3782,7 +3732,8 @@ void GameManager::GenerateRandomStaticBubbles() {
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.4f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.4f;
     GenerateRandomStaticBubblesHelper(gameLevel);
-  } else if (level == 6) {
+  }
+  else if (level >= 6) {
     gameLevel.numColors = 10;
     gameLevel.numInitialBubbles = 110;
     gameLevel.maxInitialBubbleDepth = 32 * kBubbleRadius;
@@ -3790,7 +3741,7 @@ void GameManager::GenerateRandomStaticBubbles() {
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.25f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.25f;
     GenerateRandomStaticBubblesHelper(gameLevel);
-  }
+  }*/
 }
 
 float GameManager::GetNarrowingTimeInterval() {

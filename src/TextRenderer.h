@@ -38,7 +38,7 @@ class TextRenderer : public Renderer {
   TextRenderer(const Shader& shader, unsigned int width, unsigned int height,
                char32_t benchmarkChar = U'H');
   // pre-compiles a list of characters from the given font
-  static void Load(std::string font, unsigned int fontSize,
+  static void Load(const std::string& font, unsigned int fontSize,
                    CharStyle charStyle = CharStyle::REGULAR,
                    const std::vector<FT_ULong> charactersToLoad = {});
   // pre-compiles a list of characters

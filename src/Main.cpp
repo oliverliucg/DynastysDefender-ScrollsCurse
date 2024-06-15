@@ -301,10 +301,10 @@ int main() {
   // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
   // Play background music
-  SoundEngine& soundEngine = SoundEngine::GetInstance();
-  soundEngine.LoadSound("background",
-                        "C:/Users/xiaod/resources/audio/breakout_clip.wav");
-  soundEngine.PlaySound("background", true);
+  // SoundEngine& soundEngine = SoundEngine::GetInstance();
+  // soundEngine.LoadSound("background",
+  //                      "C:/Users/xiaod/resources/audio/breakout_clip.wav");
+  // soundEngine.PlaySound("background", true);
 
   // fixed time step
   const float kTimeStep = 1.f / 240.f;
@@ -394,8 +394,8 @@ int main() {
     glfwSwapBuffers(window);
   }
 
-  // Stop the background music
-  soundEngine.StopSound("background");
+  //// Stop the background music
+  // soundEngine.StopSound("background");
 
   // Delete all resources.
   ResourceManager::GetInstance().Clear();

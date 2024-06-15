@@ -235,6 +235,15 @@ std::string u32StringToString(std::u32string u32str);
 // convert string to u32string
 std::u32string stringToU32String(std::string str);
 
+// print the hexadeciaml representation of a char32_t
+void printChar32(char32_t c);
+
+// check if a char32_t is a control character
+bool isControlChar(char32_t c);
+
+// check if a char32_t is contained in a u32string
+bool isCharInU32String(char32_t c, std::u32string u32str);
+
 // Find the start (inclusive) and end index (exclusive) of a word in a string.
 std::pair<int, int> findWord(std::u32string text, int startIndex);
 

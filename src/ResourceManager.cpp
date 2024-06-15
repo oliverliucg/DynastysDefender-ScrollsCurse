@@ -315,6 +315,19 @@ std::u32string stringToU32String(std::string str) {
   return boost::locale::conv::utf_to_utf<char32_t>(str);
 }
 
+void printChar32(char32_t c) {
+  std::cout << "0x" << std::hex << std::uppercase << std::setw(8)
+            << std::setfill('0') << static_cast<unsigned int>(c) << std::endl;
+  // Reset the output format
+  std::cout << std::dec << std::nouppercase;
+}
+
+bool isControlChar(char32_t c) { return c < 0x0020 || c == 0x007F; }
+
+bool isCharInU32String(char32_t c, std::u32string u32str) {
+  return u32str.find(c) != std::u32string::npos;
+}
+
 std::pair<int, int> findWord(std::u32string text, int startIndex) {
   if (startIndex == text.size()) {
     return std::make_pair(startIndex, startIndex);

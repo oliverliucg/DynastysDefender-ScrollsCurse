@@ -100,9 +100,10 @@ std::u32string Text::GetParagraph(int index) const { return paragraphs[index]; }
 
 void Text::SetParagraph(int index, const std::u32string& text) {
   assert(index < paragraphs.size() && index >= 0 && "Index out of bounds");
+  TextRenderer::Load(text);
   TextRenderer::UnLoadIfNotUsed(paragraphs[index]);
   paragraphs[index] = text;
-  TextRenderer::Load(paragraphs[index]);
+  /*TextRenderer::Load(paragraphs[index]);*/
 }
 
 void Text::AddParagraph(const std::u32string& text) {

@@ -207,7 +207,7 @@ class GameManager {
       graduallyOpaqueObjects;
 
   // total number of game levels
-  const int numGameLevels = 2;
+  const int numGameLevels = 30;
 
   // Get the page name for a given game state.
   std::string GetPageName(GameState gameState);
@@ -246,7 +246,7 @@ class GameManager {
   // descenders like 'g', 'j', 'p', 'q', and 'y', that could be used to
   // determine the height of the text. Also load the space character that could
   // be used for tabulation.
-  void LoadControlCharacters();
+  void LoadCommonCharacters();
 
   // Load text based from resource file.
   void LoadTexts();

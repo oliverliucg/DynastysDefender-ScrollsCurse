@@ -5,34 +5,40 @@ std::unordered_map<char32_t, std::unordered_map<CharStyle, Character>>
 
 std::unordered_map<char32_t, int> TextRenderer::characterCount;
 
-void TextRenderer::Load(std::string font, unsigned int fontSize,
+void TextRenderer::Load(const std::string& font, unsigned int fontSize,
                         CharStyle charStyle,
                         const std::vector<FT_ULong> charactersToLoad) {
   FT_Library ft;
-  if (FT_Init_FreeType(&ft))  // all functions return a value different than 0
-                              // whenever an error occurred
-    std::cout << "ERROR::FREETYPE: Could not init FreeType Library"
+  if (FT_Init_FreeType(&ft)) {
+    std::cerr << "ERROR::FREETYPE: Could not init FreeType Library"
               << std::endl;
+    return;
+  }
   // load font as face
   FT_Face face;
-  if (FT_New_Face(ft, font.c_str(), 0, &face))
-    std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+  if (FT_New_Face(ft, font.c_str(), 0, &face)) {
+    std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
+    FT_Done_FreeType(ft);
+    return;
+  }
   // set size to load glyphs as
   FT_Set_Pixel_Sizes(face, 0, fontSize);
   // disable byte-alignment restriction
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  // std::vector<FT_ULong> charactersToLoad;
-  //// Add the first 128 ASCII characters
-  // for (FT_ULong c = 0; c < 128; ++c) {
-  //   charactersToLoad.emplace_back(c);
-  // }
-
   // pre - load / compile characters and store them
   for (const auto& c : charactersToLoad) {
+    assert(TextRenderer::characterMap.find(c) ==
+               TextRenderer::characterMap.end() ||
+           TextRenderer::characterMap.at(c).find(charStyle) ==
+                   TextRenderer::characterMap.at(c).end() &&
+               "One character should only be loaded once under the current "
+               "style.");
+
     // load character glyph
     if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-      std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+      std::cerr << "ERROR::FREETYPE: Failed to load Glyph for character code "
+                << std::hex << c << std::endl;
       continue;
     }
     // generate texture
@@ -74,7 +80,23 @@ void TextRenderer::Load(const std::u32string& charactersToLoad) {
   std::unordered_map<char32_t, std::pair<std::string, std::vector<FT_ULong>>>
       boldItalicCharacters;
   for (char32_t c : charactersToLoad) {
-    ++characterCount[c];
+    if (isControlChar(c)) {
+      continue;
+    }
+    if (characterMap.count(c) > 0) {
+      assert(characterCount.find(c) != characterCount.end() &&
+             characterCount.at(c) > 0 &&
+             "The count of the character should be greater than 0 when it "
+             "has been loaded.");
+      ++characterCount[c];
+      continue;
+    }
+    if (++characterCount[c] > 1) {
+      // continue to the next character as one chacter only needs to be loaded
+      // once.
+      continue;
+    }
+
     auto [fontStartHexRegular, fontPathRegular] =
         config.GetFontFilePath(c, CharStyle::REGULAR);
     auto [fontStartHexBold, fontPathBold] =
@@ -86,9 +108,6 @@ void TextRenderer::Load(const std::u32string& charactersToLoad) {
     if (fontPathRegular.empty()) {
       assert(fontPathBold.empty() && fontPathItalic.empty() &&
              fontPathBoldItalic.empty());
-      continue;
-    }
-    if (characterMap.count(c) > 0) {
       continue;
     }
 
@@ -130,19 +149,48 @@ void TextRenderer::Load(const std::u32string& charactersToLoad) {
 }
 
 void TextRenderer::UnLoadIfNotUsed(char32_t character) {
+  if (isControlChar(character)) {
+    assert(characterCount.find(character) == characterCount.end() &&
+           characterMap.find(character) == characterMap.end() &&
+           "Control character is not supposed to be loaded.");
+    return;
+  }
+  assert(characterCount.at(character) > 0 &&
+         characterMap.count(character) > 0 &&
+         "Character is supposed to be loaded.");
   if (--characterCount[character] == 0) {
-    if (character == 0x20) {
-      std::cout << "Space character is being removed!!" << std::endl;
-      std::cout << "Space character count: " << characterCount[character]
-                << std::endl;
+    characterCount.erase(character);
+    for (auto& styleChar : characterMap.at(character)) {
+      // Delete the texture.
+      glDeleteTextures(1, &styleChar.second.TextureID);
     }
     characterMap.erase(character);
   }
 }
 
 void TextRenderer::UnLoadIfNotUsed(const std::u32string& charactersToLoad) {
-  for (const auto& c : charactersToLoad) {
-    UnLoadIfNotUsed(c);
+  std::vector<unsigned int> texturesToDelete;
+  for (const auto& character : charactersToLoad) {
+    if (isControlChar(character)) {
+      assert(characterCount.find(character) == characterCount.end() &&
+             characterMap.find(character) == characterMap.end() &&
+             "Control character is not supposed to be loaded.");
+      continue;
+    }
+    assert(characterCount.find(character) != characterCount.end() &&
+           characterMap.find(character) != characterMap.end() &&
+           "Character is supposed to be loaded.");
+    if (--characterCount[character] == 0) {
+      characterCount.erase(character);
+      for (auto& styleChar : characterMap.at(character)) {
+        texturesToDelete.emplace_back(styleChar.second.TextureID);
+      }
+      characterMap.erase(character);
+    }
+  }
+  if (!texturesToDelete.empty()) {
+    // Delete the textures.
+    glDeleteTextures(texturesToDelete.size(), texturesToDelete.data());
   }
 }
 
