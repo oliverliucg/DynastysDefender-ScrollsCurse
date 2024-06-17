@@ -10,23 +10,45 @@ void ParticleSystem::Update(float dt) {}
 
 // render all particles
 void ParticleSystem::Draw(bool isDarkBackground) {
+  // Get the original blending function parameters
+  GLint originalSrc, originalDst;
+  glGetIntegerv(GL_BLEND_SRC_ALPHA, &originalSrc);
+  glGetIntegerv(GL_BLEND_DST_ALPHA, &originalDst);
+
   // use additive blending to give it a 'glow' effect
   if (isDarkBackground) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   this->shader.Use();
   for (auto& particle : this->particles) {
     if (particle.lifespan > 0.0f) {
+      bool isDeepColor = particle.isDeepColor;
       this->shader.SetFloat("scale", particle.scale);
       this->shader.SetVector2f("offset", particle.position);
-      this->shader.SetVector4f("color", particle.color);
+      glm::vec4 particleColor = particle.color;
+      if (!isDeepColor && !isDarkBackground) {
+        // glm::vec3 adjustedColor = adjustColorForBrightBackground(
+        //     glm::vec3(particleColor.x, particleColor.y, particleColor.z));
+        // particleColor = glm::vec4(adjustedColor, particleColor.w);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        // int src, dst;
+        // glGetIntegerv(GL_BLEND_SRC_ALPHA, &src);
+        // glGetIntegerv(GL_BLEND_DST_ALPHA, &dst);
+      }
+      this->shader.SetVector4f("color", particleColor);
       this->texture.Bind();
       glBindVertexArray(this->VAO);
       glDrawArrays(GL_TRIANGLES, 0, 6);
       glBindVertexArray(0);
+      if (!isDeepColor && !isDarkBackground) {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      }
     }
   }
 
-  // don't forget to reset to default blending mode
+  // Reset to default blending mode
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // Restore the original blend function
+  if (isDarkBackground) glBlendFunc(originalSrc, originalDst);
 }
 
 void ParticleSystem::init() {
@@ -83,6 +105,23 @@ glm::vec4 ParticleSystem::slightlyVaryColor(glm::vec4 color) {
 
   float a = 1.0;
   return glm::vec4(color.r, color.g, color.b, a);
+
+  // Define the maximum variation you want in each color component.
+  // For example, +/- 0.05 ensures the color variation is subtle.
+  float variationRange = 0.05f;
+
+  // Adjust each color component by a random amount within the variation range.
+  float newR = glm::clamp(
+      color.r + glm::linearRand(-variationRange, variationRange), 0.0f, 1.0f);
+  float newG = glm::clamp(
+      color.g + glm::linearRand(-variationRange, variationRange), 0.0f, 1.0f);
+  float newB = glm::clamp(
+      color.b + glm::linearRand(-variationRange, variationRange), 0.0f, 1.0f);
+
+  // Keep the alpha value the same as the input color.
+  float newA = color.a;
+
+  return glm::vec4(newR, newG, newB, newA);
 }
 
 glm::vec2 ParticleSystem::getRandomVelocity() {

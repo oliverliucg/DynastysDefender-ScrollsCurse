@@ -5,6 +5,7 @@
 struct ExplosionInfo {
   glm::vec2 center;
   glm::vec4 color;
+  bool isDeepColor;
   int numParticles = 150;
   float explosionPointRadiusX = 0.f;
   float explosionPointRadiusY = -1.f;
@@ -16,8 +17,8 @@ class ExplosionSystem : public ParticleSystem {
   // constructor
   ExplosionSystem(Shader shader, Texture2D texture, unsigned int amount);
   // Create explosion
-  void CreateExplosion(glm::vec2 center, glm::vec4 color, int numParticles,
-                       float explosionPointRadiusX = 0.f,
+  void CreateExplosion(glm::vec2 center, glm::vec4 color, bool isDeepColor,
+                       int numParticles, float explosionPointRadiusX = 0.f,
                        float explosionPointRadiusY = -1.f,
                        glm::vec2 scaleRange = glm::vec2(kBubbleRadius / 45.f,
                                                         kBubbleRadius / 9.f));

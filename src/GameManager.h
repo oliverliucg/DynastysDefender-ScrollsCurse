@@ -98,6 +98,12 @@ struct GameLevel {
   // Probability that a new bubble is generated as a neighbor of an existing
   // bubble of the same color
   float probabilityNewBubbleIsNeighborOfBubbleOfSameColor;
+  // possibility that the new bubble is new color compared to the last bubble
+  float probabilityNewBubbleIsNewColor;
+  // time interval for narrowing the game board vertically
+  float narrowingTimeInterval;
+  // scale of the bubble
+  float bubbleScale;
 };
 
 class GameManager {

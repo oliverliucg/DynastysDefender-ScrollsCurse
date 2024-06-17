@@ -17,7 +17,7 @@ enum class GameBoardColor {
 // A hash map of the colors of the game board
 static std::unordered_map<GameBoardColor, glm::vec3> GameBoardColorMap = {
     {GameBoardColor::ORIGINAL, glm::vec3(1.0f, 1.0f, 1.0f)},
-    {GameBoardColor::GRAY, glm::vec3(0.20079f, 0.20902f, 0.22973f)},
+    {GameBoardColor::GRAY, glm::vec3(0.75f, 0.75f, 0.75f)},
 };
 
 // GameBoard is a class that represents the game board for the game Puzzle

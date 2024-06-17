@@ -22,8 +22,10 @@ Shooter::Shooter(glm::vec2 pos, glm::vec2 size, glm::vec2 rotationPivot,
   glm::vec2 rotationPivotForNextBubble(distance / nextBubble.GetSize());
   nextBubble.SetRotationPivot(rotationPivotForNextBubble);
   // Initialize the ray
+  //ray = Ray(rotationCenter, GetShootingDirection(),
+  //          glm::vec4(0.24314, 0.08627, 0.00392, 1.0f));
   ray = Ray(rotationCenter, GetShootingDirection(),
-            glm::vec4(colorMap[Color::White], 1.0f));
+            glm::vec4(1.f, 1.f, 1.f, 1.0f));
 }
 
 Shooter::~Shooter() {}

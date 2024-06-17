@@ -184,6 +184,18 @@ bool isSameColor(glm::vec3 rgb1, glm::vec3 rgb2);
 // Convert a color to a Color enum
 Color colorToEnum(glm::vec3 rgb);
 
+// Color is deep or not
+bool isDeepColor(glm::vec3 rgb);
+
+// ggb to hsv
+glm::vec3 rgb2hsv(glm::vec3 rgb);
+
+// hsv to rgb
+glm::vec3 hsv2rgb(glm::vec3 hsv);
+
+// Adjust color for bright background
+glm::vec3 adjustColorForBrightBackground(glm::vec3 color);
+
 // Check if a point has higher y value than a line
 bool isPointHigherYThanLine(glm::vec2 point, glm::vec3 lineParams);
 

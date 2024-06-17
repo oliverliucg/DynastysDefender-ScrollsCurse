@@ -378,10 +378,11 @@ void GameManager::Init() {
   totalHealthBarPos = glm::vec2(
       positions[GameCharacterState::FIGHTING].x + kBubbleRadius * 1.0f,
       positions[GameCharacterState::FIGHTING].y - kBubbleRadius * 0.9f);
-  gameCharacters["weiqing"]->GetHealth().SetTotalHealth(2);
+  const float totalHealthOfWeiqing = 3;
+  gameCharacters["weiqing"]->GetHealth().SetTotalHealth(totalHealthOfWeiqing);
   gameCharacters["weiqing"]->GetHealth().SetTotalHealthBar(
       totalHealthBarPos, totalHealthBarSize, glm::vec4(1.f, 1.f, 1.f, 1.f));
-  gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(2);
+  gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(totalHealthOfWeiqing);
   gameCharacters["weiqing"]->SetHealthBarRelativeCenterRatios();
 
   // Set the rotation pivot for the characters
@@ -1500,7 +1501,7 @@ void GameManager::Update(float dt) {
       // 0.388235f, 0.174671f, 0.16863f, 1.0f
       explosionInfo.emplace_back(
           this->scroll->GetCenter(),
-          glm::vec4(0.388235f, 0.174671f, 0.16863f, 1.0f), 2000,
+          glm::vec4(0.388235f, 0.174671f, 0.16863f, 1.0f), false, 2000,
           this->scroll->GetSilkWidth() * 0.5f,
           this->scroll->GetSilkLen() * 0.5f,
           glm::vec2(2 * kBubbleRadius / 15.f, 4 * kBubbleRadius / 15.f));
@@ -1678,7 +1679,8 @@ void GameManager::Update(float dt) {
         std::vector<ExplosionInfo> explosionInfo;
         for (auto& [id, bubble] : explodings) {
           explosionInfo.emplace_back(bubble->GetCenter(), bubble->GetColor(),
-                                     150, bubble->GetRadius() * 0.6f);
+                                     isDeepColor(bubble->GetColor()), 150,
+                                     bubble->GetRadius() * 0.6f);
         }
         explosionSystem->CreateExplosions(explosionInfo);
         explodings.clear();
@@ -2435,7 +2437,7 @@ void GameManager::Render() {
         shooter->GetRay().Draw(rayRenderer);
 
         // Particles
-        explosionSystem->Draw();
+        explosionSystem->Draw(/*isDarkBackground=*/false);
 
         // Draw all moving bubbles
         for (auto& bubble : moves) {
@@ -2693,45 +2695,8 @@ void GameManager::SetLanguage(Language newLanguage) {
   // Store the language to the global config.
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetLanguage(this->language);
-  // LoadTextRenderer();
-  // if (newLanguage == Language::RUSSIAN) {
-  //   std::u32string russianWord = U"Начать";
-  //   for (char32_t c : russianWord) {
-  //    // Set up the output format
-  //       std::cout << "Hexadecimal value of 'あ': 0x"
-  //                 << std::hex                 // Set the number base to
-  //                 hexadecimal
-  //                 << std::setfill('0')        // Set '0' as the fill
-  //                 character
-  //                 << std::setw(8)             // Set width to 8 digits
-  //                 << static_cast<uint32_t>(c)  // Cast to uint32_t to ensure
-  //                 proper handling
-  //                 << std::endl;
-  //}
-  // }
   LoadTexts();
   LoadButtons();
-  // Update page components' position based on the new language.
-  // for (const auto& [pageName, page] : pages) {
-  //  // No need to update text renderers for the language preference page. As
-  //  // they are preloaded and fixed.
-  //  if (pageName == "languagepreference") {
-  //    continue;
-  //  }
-  //  page->SetCompenentsTextRenderer(textRenderers.at(language));
-  //  page->UpdateComponentsHeight();
-  //  page->SetPosition(glm::vec2(
-  //      this->gameBoard->GetPosition().x,
-  //      std::max(this->gameBoard->GetCenter().y - page->GetHeight() * 0.5f,
-  //               this->gameBoard->GetPosition().y)));
-
-  //  // Reinit the scroll icon of each section
-  //  for (const auto& sectionName : page->GetOrder()) {
-  //    auto section = page->GetSection(sectionName);
-  //    section->UpdateScrollIconAndSectionOffset();
-  //  }
-  // }
-
   // Update the position of all components in the active page.
   if (!activePage.empty()) {
     pages.at(activePage)->UpdatePosition();
@@ -3692,7 +3657,19 @@ void GameManager::GenerateRandomStaticBubbles() {
   std::shuffle(freeSlots.begin(), freeSlots.end(), rng);
 
   GameLevel gameLevel;
-  if (level <= numGameLevels) {
+  gameLevel.numColors = level <= colorMap.size() ? level : colorMap.size();
+  gameLevel.numInitialBubbles = 10 + level * 5;
+  gameLevel.maxInitialBubbleDepth =
+      this->gameBoard->GetSize().y * level / numGameLevels;
+  gameLevel.probabilityNewBubbleIsNeighborOfLastAdded =
+      1.f - 1.f / numGameLevels * level;
+  gameLevel.probabilityNewBubbleIsNeighborOfBubble =
+      1.f - 1.f / numGameLevels * level;
+  gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor =
+      1.f - 1.f / numGameLevels * level;
+  gameLevel.narrowingTimeInterval = numGameLevels * 0.5f - 0.3f * level;
+  GenerateRandomStaticBubblesHelper(gameLevel);
+  /*if (level <= numGameLevels) {
     gameLevel.numColors = 1;
     gameLevel.numInitialBubbles = 10;
     gameLevel.maxInitialBubbleDepth = 22 * kBubbleRadius;
@@ -3700,7 +3677,7 @@ void GameManager::GenerateRandomStaticBubbles() {
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 1.f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 1.f;
     GenerateRandomStaticBubblesHelper(gameLevel);
-  } /*else if (level == 2) {
+  } else if (level == 2) {
     gameLevel.numColors = 3;
     gameLevel.numInitialBubbles = 30;
     gameLevel.maxInitialBubbleDepth = 24 * kBubbleRadius;
@@ -3745,17 +3722,19 @@ void GameManager::GenerateRandomStaticBubbles() {
 }
 
 float GameManager::GetNarrowingTimeInterval() {
-  float baseTime = 6.f;
+  // float baseTime = 6.f;
 
-  float decreasingFactor = 0.9f;
+  // float decreasingFactor = 0.9f;
 
-  float time = baseTime * pow(decreasingFactor, level - 1);  // level >= 1
+  // float time = baseTime * pow(decreasingFactor, level - 1);  // level >= 1
 
-  // minimum time interval is 6 seconds
-  if (time < 6.f) {
-    time = 6.f;
-  }
-  return time;
+  //// minimum time interval is 6 seconds
+  // if (time < 6.f) {
+  //   time = 6.f;
+  // }
+  // return time;
+
+  return numGameLevels * 0.5f - 0.3f * level;
 }
 
 std::vector<glm::vec2> GameManager::GetCommonFreeSlots(

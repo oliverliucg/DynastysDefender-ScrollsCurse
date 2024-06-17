@@ -155,6 +155,97 @@ Color colorToEnum(glm::vec3 rgb) {
   return Color::Red;
 }
 
+bool isDeepColor(glm::vec3 rgb) {
+  Color color = colorToEnum(rgb);
+  return color == Color::Pink || color == Color::Purple ||
+         color == Color::Blue || color == Color::Red;
+}
+
+glm::vec3 rgb2hsv(glm::vec3 rgb) {
+  float r = rgb.r, g = rgb.g, b = rgb.b;
+  float max = std::max({r, g, b});
+  float min = std::min({r, g, b});
+  float delta = max - min;
+
+  float h, s, v = max;
+
+  if (delta < 0.00001f) {
+    s = 0;
+    h = 0;  // Undefined, maybe nan?
+  } else {
+    if (max > 0.0f) {  // NOTE: if Max is == 0, this divide would cause a crash
+      s = (delta / max);  // s
+    } else {
+      s = 0.0f;
+      h = std::numeric_limits<float>::quiet_NaN();  // its now undefined
+      return glm::vec3(h, s, v);
+    }
+    if (r >= max)           // > is bogus, just keeps compilor happy
+      h = (g - b) / delta;  // between yellow & magenta
+    else if (g >= max)
+      h = 2.0f + (b - r) / delta;  // between cyan & yellow
+    else
+      h = 4.0f + (r - g) / delta;  // between magenta & cyan
+
+    h *= 60.0f;  // degrees
+
+    if (h < 0.0f) h += 360.0f;
+  }
+  return glm::vec3(h, s, v);
+}
+
+glm::vec3 hsv2rgb(glm::vec3 hsv) {
+  float h = hsv.x, s = hsv.y, v = hsv.z;
+  float r, g, b;
+
+  int i = int(h / 60.0f) % 6;
+  float f = (h / 60.0f) - i;
+  float p = v * (1 - s);
+  float q = v * (1 - f * s);
+  float t = v * (1 - (1 - f) * s);
+
+  switch (i) {
+    case 0:
+      r = v, g = t, b = p;
+      break;
+    case 1:
+      r = q, g = v, b = p;
+      break;
+    case 2:
+      r = p, g = v, b = t;
+      break;
+    case 3:
+      r = p, g = q, b = v;
+      break;
+    case 4:
+      r = t, g = p, b = v;
+      break;
+    case 5:
+      r = v, g = p, b = q;
+      break;
+  }
+
+  return glm::vec3(r, g, b);
+}
+
+glm::vec3 adjustColorForBrightBackground(glm::vec3 color) {
+  // convert RGB to HSV
+  glm::vec3 hsv = rgb2hsv(color);
+
+  // Increase the saturation
+  hsv.y = std::min(hsv.y * 1.5f, 1.0f);
+
+  // Adjust the brightness
+  hsv.z = std::min(hsv.z * 0.8f, 1.0f);
+
+  // Convert back to RGB
+  // std::cout << "hsv: " << hsv.x << " " << hsv.y << " " << hsv.z << std::endl;
+  // auto newColor = hsv2rgb(hsv);
+  // std::cout << "newColor: " << newColor.r << " " << newColor.g << " "
+  //          << newColor.b << std::endl;
+  return hsv2rgb(hsv);
+}
+
 int randomWeightedSelect(std::vector<float> weights) {
   // Calculate the sum of all weights
   float sum = 0.0f;

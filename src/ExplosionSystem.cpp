@@ -5,7 +5,7 @@ ExplosionSystem::ExplosionSystem(Shader shader, Texture2D texture,
     : ParticleSystem(shader, texture, amount) {}
 
 void ExplosionSystem::CreateExplosion(glm::vec2 center, glm::vec4 color,
-                                      int numParticles,
+                                      bool isDeepColor, int numParticles,
                                       float explosionPointRadiusX,
                                       float explosionPointRadiusY,
                                       glm::vec2 scaleRange) {
@@ -51,6 +51,7 @@ void ExplosionSystem::CreateExplosion(glm::vec2 center, glm::vec4 color,
     }
     this->particles[unusedParticle].velocity = getRandomVelocity();
     this->particles[unusedParticle].color = slightlyVaryColor(color);
+    this->particles[unusedParticle].isDeepColor = isDeepColor;
     this->particles[unusedParticle].lifespan = getRandomLifespan();
     this->particles[unusedParticle].scale = getRandomScale(scaleRange);
   }
@@ -62,12 +63,13 @@ void ExplosionSystem::CreateExplosions(
   for (const auto& info : explosionInfo) {
     glm::vec2 center = info.center;
     glm::vec4 color = info.color;
+    bool isDeepColor = info.isDeepColor;
     int numParticles = info.numParticles;
     float explosionPointRadiusX = info.explosionPointRadiusX;
     float explosionPointRadiusY = info.explosionPointRadiusY;
     glm::vec2 scaleRange = info.scaleRange;
-    CreateExplosion(center, color, numParticles, explosionPointRadiusX,
-                    explosionPointRadiusY, scaleRange);
+    CreateExplosion(center, color, isDeepColor, numParticles,
+                    explosionPointRadiusX, explosionPointRadiusY, scaleRange);
   }
 
   // Play explosion sound

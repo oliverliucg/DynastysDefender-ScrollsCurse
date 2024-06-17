@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/random.hpp>
 #include <tuple>
 #include <vector>
 
@@ -13,6 +14,7 @@
 struct Particle {
   glm::vec2 position, velocity;
   glm::vec4 color;
+  bool isDeepColor;
   float lifespan;
   float scale;
   float fadeOutSpeed;
@@ -21,6 +23,7 @@ struct Particle {
       : position(0.0f),
         velocity(0.0f),
         color(1.0f),
+        isDeepColor(false),
         lifespan(0.0f),
         scale(1.0f),
         fadeOutSpeed(1.0f) {}
