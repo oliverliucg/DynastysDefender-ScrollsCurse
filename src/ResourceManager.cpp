@@ -75,14 +75,14 @@ float timeToTravel(float distance, glm::vec2 velocity) {
   return distance / glm::length(velocity);
 }
 
-glm::vec2 rotateVector(glm::vec2 vector, float angle, glm::vec2 point) {
+glm::vec2 rotateVector(glm::vec2 endPoint, float angle, glm::vec2 startPoint) {
   // translate the vector so that the point is at the origin
-  vector -= point;
+  endPoint -= startPoint;
   // rotate the vector using glm::rotate
-  vector = glm::rotate(vector, angle);
+  endPoint = glm::rotate(endPoint, angle);
   // translate the vector back to its original position
-  vector += point;
-  return vector;
+  endPoint += startPoint;
+  return endPoint;
 }
 
 int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b) {

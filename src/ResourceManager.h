@@ -140,7 +140,8 @@ float timeToTravel(float distance, glm::vec2 velocity);
 
 // Rotate a vector by a given angle around a point. clockwise is positive while
 // counter-clockwise is negative
-glm::vec2 rotateVector(glm::vec2 vector, float angle, glm::vec2 point);
+glm::vec2 rotateVector(glm::vec2 vector, float angle,
+                       glm::vec2 point = glm::vec2(0.0f, 0.0f));
 
 // Get the sign of the cross product of two vectors
 int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b);

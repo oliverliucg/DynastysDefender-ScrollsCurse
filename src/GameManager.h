@@ -281,7 +281,7 @@ class GameManager {
 
   // Check if the bubble is neighbor with the given free slot.
   bool IsNeighbor(glm::vec2 bubbleCenter, glm::vec2 slotCenter,
-                  float absError = 1e-2);
+                  float absError = 0.5);
 
   // Get common neighbor free slots among the given bubbles.
   std::vector<glm::vec2> GetCommonFreeSlots(
@@ -299,7 +299,7 @@ class GameManager {
 
   // Get the unique id of all neighbor static bubbles of the given bubble.
   std::vector<int> GetNeighborIds(std::unique_ptr<Bubble>& bubble,
-                                  float absError = 1e-2);
+                                  float absError = 0.5f);
 
   // Get the unique id of all neighbor static bubbles of the given group of
   // bubbles.
@@ -327,6 +327,12 @@ class GameManager {
   // board and close to the given bubble.
   std::vector<int> FindCloseUpperBubbles(std::unique_ptr<Bubble>& bubble);
 
+  // Find the left bubble of the given bubble in the same row.
+  int FindLeftBubble(std::unique_ptr<Bubble>& bubble);
+
+  // Find the right bubble of the given bubble in the same row.
+  int FindRightBubble(std::unique_ptr<Bubble>& bubble);
+
   // Fine tune the position of the collided moving bubble to a free slot
   // neighboring a neighbor of the colliding static bubble.
   bool FineTuneToNeighbor(int bubbleId, int staticBubbleId);
@@ -338,6 +344,26 @@ class GameManager {
   // Fine tune the position of the collided moving bubble to a free slot
   // neighboring a close static bubble at the upper boundary of the game board.
   bool FineTuneToCloseUpper(int bubbleId);
+
+  // Adjusts the position of a moving bubble to ensure it correctly occupies a
+  // free slot after collision.
+  //
+  // This function fine-tunes the position of a bubble when it collides with
+  // another or reaches the boundary:
+  // 1. When adjacent to a static bubble:
+  //    - The function aligns the moving bubble into a free neighboring slot.
+  //    - The alignment is based on the angle with the static bubble's right
+  //    neighbor, which must be a multiple of 30 degrees.
+  // 2. When the bubble reaches the upper boundary of the game board:
+  //    - The function places it in a slot along the boundary.
+  //    - The distance to the nearest slot is determined by one of the following
+  //    formulas, where n is a non-negative integer (n >= 0):
+  //      a. 2*sqrt(2) + n*4
+  //      b. 2*sqrt(3) + n*4
+  //      c. n*4
+  //
+  // Returns true if fine tunning succeessfully updates the bubble's position.
+  bool FineTuneToCorrectPosition(int bubbleId);
 
   // Helper function of IsConnectedToTop
   bool IsConnectedToTopHelper(std::unique_ptr<Bubble>& bubble, bool* visited,

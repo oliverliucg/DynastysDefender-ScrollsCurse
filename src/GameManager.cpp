@@ -1607,30 +1607,30 @@ void GameManager::Update(float dt) {
       std::vector<int> candidateIds;
       std::vector<int> neighborIds = GetNeighborIds(bubble);
 
+      bool funeTuneDone = false;
+
       // If the new bubble only has 1 neighbor, then we try to adjust the
       // position of the bubble to make it have more neighbors.
       if (neighborIds.size() == 1) {
         // Fine tuning the position of the collidef moving bubbles to the best
         // free slot.
         int staticBubbleId = neighborIds[0];
-        bool done = FineTuneToNeighbor(id, staticBubbleId);
-        if (!done) {
-          done = FineTuneToClose(id, staticBubbleId);
+        funeTuneDone = FineTuneToNeighbor(id, staticBubbleId);
+        if (!funeTuneDone) {
+          funeTuneDone = FineTuneToClose(id, staticBubbleId);
         }
       } else if (neighborIds.size() == 0) {
         // If the bubble has no neighbor, it must be at the top of the game
         // board.
-        if (!IsAtUpperBoundary(bubble->GetPosition())) {
-          std::cout << "The bubble is not at the top of the game board."
-                    << std::endl;
-          std::cout << "Bubble position: " << bubble->GetPosition().x << " "
-                    << bubble->GetPosition().y << std::endl;
-        } else {
-          // Fine tuning the position of the collidef moving bubbles to the best
-          // free slot at the upper boundary of the game board.
-          bool done = FineTuneToCloseUpper(id);
-          (void)done;
-        }
+        assert(IsAtUpperBoundary(bubble->GetPosition()) &&
+               "The bubble should be at the top of the game board.");
+        // Fine tuning the position of the collidef moving bubbles to the best
+        // free slot at the upper boundary of the game board.
+        funeTuneDone = FineTuneToCloseUpper(id);
+      }
+
+      if (!funeTuneDone) {
+        FineTuneToCorrectPosition(id);
       }
 
       // Add the bubble to the static bubbles
@@ -2697,6 +2697,26 @@ void GameManager::SetLanguage(Language newLanguage) {
   configManager.SetLanguage(this->language);
   LoadTexts();
   LoadButtons();
+  // Update page components' position based on the new language.
+  for (const auto& [pageName, page] : pages) {
+    // No need to update text renderers for the language preference page. As
+    // they are preloaded and fixed.
+    if (pageName == "languagepreference") {
+      continue;
+    }
+    page->SetCompenentsTextRenderer(textRenderers.at(language));
+    page->UpdateComponentsHeight();
+    page->SetPosition(glm::vec2(
+        this->gameBoard->GetPosition().x,
+        std::max(this->gameBoard->GetCenter().y - page->GetHeight() * 0.5f,
+                 this->gameBoard->GetPosition().y)));
+
+    // Reinit the scroll icon of each section
+    for (const auto& sectionName : page->GetOrder()) {
+      auto section = page->GetSection(sectionName);
+      section->UpdateScrollIconAndSectionOffset();
+    }
+  }
   // Update the position of all components in the active page.
   if (!activePage.empty()) {
     pages.at(activePage)->UpdatePosition();
@@ -3115,6 +3135,40 @@ std::vector<int> GameManager::FindCloseUpperBubbles(
   return closeUpperIds;
 }
 
+int GameManager::FindLeftBubble(std::unique_ptr<Bubble>& bubble) {
+  int leftId = -1;
+  float minDistance = std::numeric_limits<float>::max();
+  for (auto& [id, staticBubble] : statics) {
+    // the center y should be the same
+    if (areFloatsEqual(staticBubble->GetCenter().y, bubble->GetCenter().y,
+                       1e-1)) {
+      float distance = bubble->GetCenter().x - staticBubble->GetCenter().x;
+      if (distance > 0 && distance < minDistance) {
+        minDistance = distance;
+        leftId = id;
+      }
+    }
+  }
+  return leftId;
+}
+
+int GameManager::FindRightBubble(std::unique_ptr<Bubble>& bubble) {
+  int rightId = -1;
+  float minDistance = std::numeric_limits<float>::max();
+  for (auto& [id, staticBubble] : statics) {
+    // the center y should be the same
+    if (areFloatsEqual(staticBubble->GetCenter().y, bubble->GetCenter().y,
+                       1e-1)) {
+      float distance = staticBubble->GetCenter().x - bubble->GetCenter().x;
+      if (distance > 0 && distance < minDistance) {
+        minDistance = distance;
+        rightId = id;
+      }
+    }
+  }
+  return rightId;
+}
+
 bool GameManager::FineTuneToCloseUpper(int bubbleId) {
   // Get all the static bubbles that are connected to the top of the game board
   // and close to the current bubble.
@@ -3162,6 +3216,120 @@ bool GameManager::FineTuneToCloseUpper(int bubbleId) {
     return true;
   }
   // No fine tuning happened.
+  return false;
+}
+
+bool GameManager::FineTuneToCorrectPosition(int bubbleId) {
+  assert(moves.count(bubbleId) > 0 && "Failed to find the bubble by ID.");
+  auto& bubble = moves[bubbleId];
+  std::vector<int> neighborIds = GetNeighborIds(bubble);
+  glm::vec4 boundaries = gameBoard->GetValidBoundaries();
+  if (neighborIds.empty()) {
+    assert(IsAtUpperBoundary(bubble->GetPosition()) &&
+           "The bubble is not at the upper boundary.");
+    int leftId = FindLeftBubble(bubble);
+    int rightId = FindRightBubble(bubble);
+    assert((leftId != -1 || rightId != -1) &&
+           "At least one static bubble can be found at the upper boundary.");
+    float leftDistance = bubble->GetPosition().x - boundaries.x;
+    float rightDistance =
+        boundaries.z - 2 * kBubbleRadius - bubble->GetPosition().x;
+    float offSetToLeft = -1.f;
+    float offSetToRight = -1.f;
+    if (leftId != -1) {
+      // Get the distance between the left static bubble and the current bubble.
+      float leftDistance1 =
+          bubble->GetCenter().x - statics.at(leftId)->GetCenter().x;
+      assert(leftDistance1 > 0 &&
+             !areFloatsGreater(leftDistance1, leftDistance) &&
+             "The distance calculation bettween bubbles is wrong");
+      leftDistance = leftDistance1;
+      while (leftDistance >= 4 * kBubbleRadius) {
+        leftDistance -= 4 * kBubbleRadius;
+        if (leftDistance < 0) {
+          leftDistance = 0;
+        }
+      }
+      if (leftDistance < 2 * std::sqrt(2) * kBubbleRadius) {
+        offSetToLeft = leftDistance;
+        offSetToRight = 2 * std::sqrt(2) * kBubbleRadius - leftDistance;
+      } else if (leftDistance < 2 * std::sqrt(3) * kBubbleRadius) {
+        offSetToLeft =
+            2 * std::sqrt(3) * kBubbleRadius - 2 * std::sqrt(2) * kBubbleRadius;
+        offSetToRight = 2 * std::sqrt(3) * kBubbleRadius - leftDistance;
+      } else if (leftDistance < 4 * kBubbleRadius) {
+        offSetToLeft = 4 * kBubbleRadius - 2 * std::sqrt(3) * kBubbleRadius;
+        offSetToRight = 4 * kBubbleRadius - leftDistance;
+      }
+    } else if (rightId != -1) {
+      // Get the distance between the right static bubble and the current
+      // bubble.
+      float rightDistance1 =
+          statics.at(rightId)->GetCenter().x - bubble->GetCenter().x;
+      assert(rightDistance1 > 0 &&
+             !areFloatsGreater(rightDistance1, rightDistance) &&
+             "The distance calculation bettween bubbles is wrong");
+      rightDistance = rightDistance1;
+      while (rightDistance >= 4 * kBubbleRadius) {
+        rightDistance -= 4 * kBubbleRadius;
+        if (rightDistance < 0) {
+          rightDistance = 0;
+        }
+      }
+      if (rightDistance < 2 * std::sqrt(2) * kBubbleRadius) {
+        offSetToRight = rightDistance;
+        offSetToLeft = 2 * std::sqrt(2) * kBubbleRadius - rightDistance;
+      } else if (rightDistance < 2 * std::sqrt(3) * kBubbleRadius) {
+        offSetToRight =
+            2 * std::sqrt(3) * kBubbleRadius - 2 * std::sqrt(2) * kBubbleRadius;
+        offSetToLeft = 2 * std::sqrt(3) * kBubbleRadius - rightDistance;
+      } else if (rightDistance < 4 * kBubbleRadius) {
+        offSetToRight = 4 * kBubbleRadius - 2 * std::sqrt(3) * kBubbleRadius;
+        offSetToLeft = 4 * kBubbleRadius - rightDistance;
+      }
+    }
+    assert(offSetToLeft >= 0.f && offSetToRight >= 0.f &&
+           "The offset to the left and the right should be greater than or "
+           "equal to 0.");
+    if (offSetToLeft < offSetToRight) {
+      bubble->SetPosition(bubble->GetPosition() - glm::vec2(offSetToLeft, 0.f));
+    } else {
+      bubble->SetPosition(bubble->GetPosition() +
+                          glm::vec2(offSetToRight, 0.f));
+    }
+    return std::min(offSetToLeft, offSetToRight) == 0.f;
+  } else if (neighborIds.size() == 1) {
+    // Fine-tune the bubble's position to ensure its angle with a single
+    // neighbor is a multiple of 30 degrees, measured clockwise from the right
+    // side.
+    int neighborId = neighborIds[0];
+    auto& neighborBubble = statics[neighborId];
+    glm::vec2 curDirection =
+        glm::normalize(bubble->GetCenter() - neighborBubble->GetCenter());
+    glm::vec2 baseDirection = glm::vec2(1.f, 0.f);
+    // calculate the cosine of the angle between the two vectors
+    float cosAngle = glm::dot(curDirection, baseDirection);
+    float curAngle = glm::acos(cosAngle);
+    if (curDirection.y < 0.f) {
+      curAngle = 2 * glm::pi<float>() - curAngle;
+    }
+    float targetAngle =
+        std::floor(curAngle / (glm::pi<float>() / 6)) * glm::pi<float>() / 6;
+    if (targetAngle <= curAngle) {
+      float diff1 = curAngle - targetAngle;
+      float diff2 = targetAngle + glm::pi<float>() / 6 - curAngle;
+      if (diff1 > diff2) {
+        targetAngle += glm::pi<float>() / 6;
+      }
+    }
+    targetAngle = std::round(targetAngle / (glm::pi<float>() / 6)) *
+                  (glm::pi<float>() / 6);
+    glm::vec2 targetDirection = rotateVector(baseDirection, targetAngle);
+    glm::vec2 targetCenter =
+        neighborBubble->GetCenter() + 2 * kBubbleRadius * targetDirection;
+    bubble->SetPosition(targetCenter - glm::vec2(kBubbleRadius, kBubbleRadius));
+    return true;
+  }
   return false;
 }
 
@@ -3335,7 +3503,7 @@ std::vector<int> GameManager::FindConnectedBubblesOfSameColor(int bubbleId) {
     }
     connectedBubbleIds.push_back(currentId);
     // Get the neighbors of the current bubble
-    std::vector<int> neighborIds = GetNeighborIds(statics[currentId], 0.1f);
+    std::vector<int> neighborIds = GetNeighborIds(statics[currentId]);
     for (auto& neighborId : neighborIds) {
       // If the neighbor has the same color as the bubble and it is not in the
       // connected bubble ids, then we add it to the queue.
@@ -3434,23 +3602,30 @@ float GameManager::GetFreeSlotWeight(glm::vec3 color, glm::vec2 slotCenter) {
       }
     }
   }
+
+  // incrase weight if it's at the upper boundary
+  if (IsAtUpperBoundary(slotCenter - glm::vec2(kBubbleRadius, kBubbleRadius))) {
+    weight += 1.0f;
+  }
+
   return weight;
 }
 
 std::vector<glm::vec2> GameManager::GetPotentialNeighborFreeSlots(
     glm::vec2 bubbleCenter) {
   std::vector<glm::vec2> neighborCenters;
-  // The angle between two neighbors is 60 degrees.
-  float angle = glm::radians(60.0f);
+  // The angle between two neighbors is mutiple of 30 degrees.
+  float angle = glm::radians(30.0f);
+  float totalNeighborNum = std::round(2 * glm::pi<float>() / angle);
   // The first neighbor is the right neighbor.
   glm::vec2 rightNeighbor = bubbleCenter + glm::vec2(2 * kBubbleRadius, 0.0f);
-  neighborCenters.push_back(rightNeighbor);
+  neighborCenters.emplace_back(rightNeighbor);
 
   // Get the other 5 neighbors
-  for (size_t neighborNum = 1; neighborNum < 6; ++neighborNum) {
+  for (size_t neighborNum = 1; neighborNum < totalNeighborNum; ++neighborNum) {
     glm::vec2 neighborCenter =
         rotateVector(rightNeighbor, angle * neighborNum, bubbleCenter);
-    neighborCenters.push_back(neighborCenter);
+    neighborCenters.emplace_back(neighborCenter);
   }
 
   // Remove the neighbors that are outside the boundaries
