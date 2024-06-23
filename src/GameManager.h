@@ -123,7 +123,9 @@ class GameManager {
   float mouseX, mouseY, mouseLastX, mouseLastY;
   float width, height;
   int level;
+  int64_t score;
   bool hideDefaultMouseCursor;
+
   // std::mutex inputMutex;  // Mutex to protect input handling
   GameManager(unsigned int width, unsigned int height);
   ~GameManager();
@@ -177,6 +179,9 @@ class GameManager {
 
   // Bubbles that are exploding.
   std::unordered_map<int, std::unique_ptr<Bubble>> explodings;
+
+  // Stores individual scores gained during game play
+  std::vector<int> scoreIncrements;
 
   // Arrows
   std::vector<std::shared_ptr<Arrow>> arrows;
@@ -412,4 +417,19 @@ class GameManager {
 
   // Reset the state of each game character.
   void ResetGameCharacters();
+
+  // Calculate the score based on the number of bubbles, the bubble size, the
+  // bubble type (exploding or falling), the game level, and the timed used in
+  // the current round.
+  int CalculateScore(int numBubbles, float bubbleRadius, BubbleState bubbleType,
+                     int gameLevel, float timeUsed);
+
+  // Increase the score by the given value.
+  void IncreaseScore(int64_t value);
+
+  // Decrease the score by the given value.
+  void DecreaseScore(int64_t value);
+
+  // Reset the score to zero or the given value.
+  void ResetScore(int64_t value = 0);
 };

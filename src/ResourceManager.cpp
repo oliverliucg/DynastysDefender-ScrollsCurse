@@ -75,14 +75,14 @@ float timeToTravel(float distance, glm::vec2 velocity) {
   return distance / glm::length(velocity);
 }
 
-glm::vec2 rotateVector(glm::vec2 endPoint, float angle, glm::vec2 startPoint) {
+glm::vec2 rotateVector(glm::vec2 point, float angle, glm::vec2 pivot) {
   // translate the vector so that the point is at the origin
-  endPoint -= startPoint;
+  point -= pivot;
   // rotate the vector using glm::rotate
-  endPoint = glm::rotate(endPoint, angle);
+  point = glm::rotate(point, angle);
   // translate the vector back to its original position
-  endPoint += startPoint;
-  return endPoint;
+  point += pivot;
+  return point;
 }
 
 int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b) {
@@ -388,6 +388,19 @@ glm::vec2 calculateVelocity(glm::vec2 initialVelocity, glm::vec2 acceleration,
 std::u32string intToU32String(int64_t num) {
   std::string str = std::to_string(num);
   return std::u32string(str.begin(), str.end());
+}
+
+int64_t u32StringToInt(std::u32string u32str) {
+  for (size_t i = 0; i < u32str.size(); ++i) {
+    if (u32str[i] == 0x002B || u32str[i] == 0x002D) {
+      assert(i == 0 && "The sign must be at the beginning of the string.");
+    } else {
+      assert(u32str[i] >= 0x0030 && u32str[i] <= 0x0039 &&
+             "The input string is not a number.");
+    }
+  }
+  std::string str(u32str.begin(), u32str.end());
+  return std::stoll(str);
 }
 
 std::string u32StringToString(std::u32string u32str) {

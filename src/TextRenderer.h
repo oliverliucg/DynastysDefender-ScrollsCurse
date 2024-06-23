@@ -64,6 +64,11 @@ class TextRenderer : public Renderer {
       float lineSpacingFactor, float additionalPadding, glm::vec2 center,
       glm::vec3 color, float alpha) = 0;
 
+  virtual std::pair<float, float> RenderRightAlignedText(
+      std::u32string text, float x, float y, float scale, float lineWidth,
+      float lineSpacingFactor, float additionalPadding, glm::vec3 color,
+      float alpha) = 0;
+
   char32_t GetBenchmarkChar() const { return benchmarkChar; }
 
  protected:

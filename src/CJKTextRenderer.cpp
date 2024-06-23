@@ -324,6 +324,8 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
       word.push_back(text[i]);
       continue;
     } else if (text[i] == U'\n') {
+      offset.x = center.x - (initialX + lenOfLine * 0.5f);
+      RenderLine(characters, xpositions, ypositions, widths, heights, offset);
       y += lineSpacing;
       x = initialX;
       lenOfLine = 0.f;
@@ -420,6 +422,150 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
   offset.x = center.x - (initialX + lenOfLine * 0.5f);
   RenderLine(characters, xpositions, ypositions, widths, heights, offset);
 
+  glBindVertexArray(0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  return std::make_pair(
+      y + characterMap[benchmarkChar][CharStyle::REGULAR].Size.y * scale,
+      lineSpacing);
+}
+
+std::pair<float, float> CJKTextRenderer::RenderRightAlignedText(
+    std::u32string text, float x, float y, float scale, float lineWidth,
+    float lineSpacingFactor, float additionalPadding, glm::vec3 color,
+    float alpha) {
+  // activate corresponding render state
+  this->shader.Use();
+  this->shader.SetVector3f("textColor", color);
+  this->shader.SetFloat("alpha", alpha);
+  glActiveTexture(GL_TEXTURE0);
+  glBindVertexArray(this->VAO);
+
+  // iterate through all characters
+  std::u32string::const_iterator c;
+
+  // Memorize the initial x and y position.
+  float initialX = x;
+
+  float lenOfLine = 0.f;
+
+  // Space between lines
+  float lineSpacing = characterMap[benchmarkChar][CharStyle::REGULAR].Size.y *
+                          scale * lineSpacingFactor +
+                      additionalPadding;
+
+  //  A boolean value for whether the word is the first word of the line. For
+  //  CJK characters, each character can be seen as a word.
+  bool firstWord = true;
+
+  // char style
+  CharStyle charStyle = CharStyle::REGULAR;
+
+  std::u32string word;
+
+  std::vector<Character> characters;
+  std::vector<float> xpositions, ypositions, widths, heights;
+
+  for (size_t i = 0; i < text.size(); ++i) {
+    // For CJK characters, we don't need to check if it is a space, each
+    // character can be seen as a word. When it is '{', '}', '[', ']', '\t', we
+    // would continue to find the next character.
+    if (text[i] == U'{' || text[i] == U'}' || text[i] == U'[' ||
+        text[i] == U']') {
+      word.push_back(text[i]);
+      continue;
+    } else if (text[i] == U'\n') {
+      RenderLine(characters, xpositions, ypositions, widths, heights,
+                 glm::vec2(-lenOfLine, 0.f));
+      y += lineSpacing;
+      x = initialX;
+      lenOfLine = 0.f;
+      firstWord = true;
+      continue;
+    }
+    word.push_back(text[i]);
+    auto wordStyles = getEachCharacterStyle(word, charStyle);
+    word = wordStyles.first;
+    auto styles = wordStyles.second;
+    assert((word.size() == 1 || word.size() == tabSize) &&
+           styles.size() == word.size() + 1 &&
+           "The word should only contain one character.");
+    charStyle = styles.back();
+
+    // Get the x where the word ends.
+    float endX = x;
+    for (c = word.begin(); c != word.end(); ++c) {
+      charStyle = styles[c - word.begin()];
+      Character ch = characterMap.at(*c).at(charStyle);
+      // If it is the last character of the word, then add the bearing.x and
+      // size.x to the endX.
+      if (c == std::prev(word.end())) {
+        endX += (ch.Bearing.x + ch.Size.x) * scale;
+      } else {
+        // now advance cursors for next glyph
+        endX += (ch.Advance >> 6) * scale;  // bitshift by 6 to get value in
+                                            // pixels (1/64th times 2^6 = 64)
+      }
+    }
+
+    if (lenOfLine + endX - x > lineWidth) {
+      RenderLine(characters, xpositions, ypositions, widths, heights,
+                 glm::vec2(-lenOfLine, 0.f));
+      y += lineSpacing;
+      x = initialX;
+      lenOfLine = 0.f;
+      assert(!firstWord &&
+             "The width of the line should at least have space for one word.");
+      firstWord = true;
+    } else {
+      firstWord = false;
+    }
+
+    // Move the end index of the word to the start of the next word.
+    while (i + 1 < text.size() && text[i + 1] == U' ') {
+      ++i;
+      word.append(U" ");
+      styles.emplace_back(styles.back());
+    }
+    /*char32_t charOfLargeBearingY = benchmarkChar;*/
+    for (c = word.begin(); c != word.end(); ++c) {
+      charStyle = styles[c - word.begin()];
+      Character ch = characterMap.at(*c).at(charStyle);
+
+      float xpos = x + ch.Bearing.x * scale;
+      // float benchMarkBearingY =
+      //     this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y;
+      // float curCharBearingY = ch.Bearing.y;
+      // if (curCharBearingY > benchMarkBearingY) {
+      //   // print the hex string of the current char:
+      //   if (*c != 0xFF09 && *c != 0xFF08) {
+      //       std::cout << "larger breaing Y
+      //       apprear!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
+      //       charOfLargeBearingY = *c;
+      //     }
+      // }
+      float ypos =
+          y + (this->characterMap.at(benchmarkChar).at(charStyle).Bearing.y -
+               ch.Bearing.y) *
+                  scale;
+
+      float w = ch.Size.x * scale;
+      float h = ch.Size.y * scale;
+      // store the position, width, and height of the character.
+      characters.emplace_back(ch);
+      xpositions.emplace_back(xpos);
+      ypositions.emplace_back(ypos);
+      widths.emplace_back(w);
+      heights.emplace_back(h);
+      // now advance cursors for next glyph
+      x += (ch.Advance >> 6) * scale;  // bitshift by 6 to get value in pixels
+                                       // (1/64th times 2^6 = 64)
+      lenOfLine = x - initialX;
+    }
+    word.clear();
+  }
+  RenderLine(characters, xpositions, ypositions, widths, heights,
+             glm::vec2(-lenOfLine, 0.f));
   glBindVertexArray(0);
   glBindTexture(GL_TEXTURE_2D, 0);
 

@@ -193,15 +193,24 @@ glm::vec2 Text::GetTextSize(std::shared_ptr<TextRenderer> textRenderer) const {
 }
 
 void Text::Draw(std::shared_ptr<TextRenderer> textRenderer,
-                bool textCenteringEnabled) {
+                bool textCenteringEnabled, bool textRightAligned) {
   float x = position.x;
   float y = position.y;
   if (!textCenteringEnabled) {
-    for (int i = 0; i < paragraphs.size(); ++i) {
-      auto [textBottomLeft, spacing] = textRenderer->RenderText(
-          paragraphs[i], x, y, scale, lineWidth, lineSpacingFactor,
-          additionalPadding, color, alpha);
-      y = textBottomLeft + 1.5f * spacing;
+    if (!textRightAligned) {
+      for (int i = 0; i < paragraphs.size(); ++i) {
+        auto [textBottomLeft, spacing] = textRenderer->RenderText(
+            paragraphs[i], x, y, scale, lineWidth, lineSpacingFactor,
+            additionalPadding, color, alpha);
+        y = textBottomLeft + 1.5f * spacing;
+      }
+    } else {
+      for (int i = 0; i < paragraphs.size(); ++i) {
+        auto [textBottomLeft, spacing] = textRenderer->RenderRightAlignedText(
+            paragraphs[i], x, y, scale, lineWidth, lineSpacingFactor,
+            additionalPadding, color, alpha);
+        y = textBottomLeft + 1.5f * spacing;
+      }
     }
   } else {
     for (int i = 0; i < paragraphs.size(); ++i) {
@@ -248,3 +257,6 @@ void Text::DisableTypingEffect() {
   }
   typingEffects.clear();
 }
+
+void Text::SetLineSpacingFactor(float factor) { lineSpacingFactor = factor; }
+void Text::SetAdditionalPadding(float padding) { additionalPadding = padding; }

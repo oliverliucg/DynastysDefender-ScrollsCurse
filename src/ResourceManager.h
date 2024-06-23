@@ -73,6 +73,10 @@ struct ViewPortInfo {
 
 extern std::unordered_map<Color, glm::vec3> colorMap;
 
+const glm::vec3 kScoreColorPink = glm::vec3(1.0f, 0.0f, 0.56471f);
+const glm::vec3 kScoreColorOrange = glm::vec3(1.0f, 0.65f, 0.0f);
+const float kScoreAlpha = 0.5f;
+
 //// Small window for choosing game mode
 // extern glm::vec2 kOptionWindowSize;
 
@@ -140,8 +144,8 @@ float timeToTravel(float distance, glm::vec2 velocity);
 
 // Rotate a vector by a given angle around a point. clockwise is positive while
 // counter-clockwise is negative
-glm::vec2 rotateVector(glm::vec2 vector, float angle,
-                       glm::vec2 point = glm::vec2(0.0f, 0.0f));
+glm::vec2 rotateVector(glm::vec2 point, float angle,
+                       glm::vec2 pivot = glm::vec2(0.0f, 0.0f));
 
 // Get the sign of the cross product of two vectors
 int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b);
@@ -241,6 +245,9 @@ glm::vec2 calculateVelocity(glm::vec2 initialVelocity, glm::vec2 acceleration,
 
 // convert int to u32string
 std::u32string intToU32String(int64_t num);
+
+// convert u32string to int
+int64_t u32StringToInt(std::u32string u32str);
 
 // convert u32string to string
 std::string u32StringToString(std::u32string u32str);

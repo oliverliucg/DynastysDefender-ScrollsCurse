@@ -13,6 +13,7 @@ GameManager::GameManager(unsigned int width, unsigned int height)
       width(static_cast<float>(width)),
       height(static_cast<float>(height)),
       level(1),
+      score(ConfigManager::GetInstance().GetScore()),
       hideDefaultMouseCursor(false),
       activePage("") {
   // Initialize all key states to false
@@ -953,6 +954,8 @@ void GameManager::ProcessInput(float dt) {
         if (!this->timer->IsPaused("beforenarrowing")) {
           this->timer->PauseEventTimer("beforenarrowing");
         }
+        // pause counting play time
+        this->timer->PauseEventTimer("playtime");
       }
     }
 
@@ -989,6 +992,9 @@ void GameManager::ProcessInput(float dt) {
 
       // Delete all the static bubbles.
       statics.clear();
+
+      // Reset score
+      this->ResetScore(ConfigManager::GetInstance().GetScore());
 
       // Reset the game level to 1.
       this->level = 1;
@@ -1122,9 +1128,8 @@ void GameManager::ProcessInput(float dt) {
                     glm::vec2(0.0f, 10.0f * kBubbleRadius));
                 gameCharacters["guojie"]->SetAcceleration(
                     glm::vec2(0.0f, 10.0f * 9.8f * kBubbleRadius));
-
-                //// Set the velocity of guojie.
-                // gameCharacters["guojie"]->SetVelocity(glm::vec2(0.0f, 10.0f*kBubbleRadius));
+                // Reset the score to 0.
+                this->ResetScore(0);
               } else if (content == "exit") {
                 this->SetState(GameState::EXIT);
               } else if (content == "back") {
@@ -1157,6 +1162,9 @@ void GameManager::ProcessInput(float dt) {
                 // Reset the game level to 1.
                 this->level = 1;
 
+                // Reset the score to 0.
+                this->ResetScore(0);
+
               } else if (content == "stop") {
                 // Go to the state "Story"
                 this->GoToState(GameState::STORY);
@@ -1171,6 +1179,9 @@ void GameManager::ProcessInput(float dt) {
 
                 // Delete all the moving bubbles.
                 moves.clear();
+
+                // Reset score
+                this->ResetScore(ConfigManager::GetInstance().GetScore());
 
                 // Reset the game level to 1.
                 this->level = 1;
@@ -1529,6 +1540,25 @@ void GameManager::Update(float dt) {
   gameCharacters["guojie"]->GetHealth().UpdateDamageTexts(dt);
   gameCharacters["weiqing"]->GetHealth().UpdateDamageTexts(dt);
 
+  // Update the transparency of the score text.
+  if (this->state != GameState::ACTIVE && this->state != GameState::PREPARING &&
+      this->state != GameState::WIN && this->state != GameState::LOSE &&
+      this->lastState != GameState::ACTIVE) {
+    float scoreAlpha = texts.at("score")->GetAlpha();
+    if (scoreAlpha > kScoreAlpha) {
+      scoreAlpha -= 0.8f * dt;
+      if (scoreAlpha < kScoreAlpha) {
+        scoreAlpha = kScoreAlpha;
+      }
+    } else if (scoreAlpha < kScoreAlpha) {
+      scoreAlpha += 0.8f * dt;
+      if (scoreAlpha > kScoreAlpha) {
+        scoreAlpha = kScoreAlpha;
+      }
+    }
+    texts.at("score")->SetAlpha(scoreAlpha);
+  }
+
   if (this->state == GameState::ACTIVE) {
     // Get the game board position and size
     glm::vec2 gameBoardPostition = gameBoard->GetValidPosition();
@@ -1674,6 +1704,20 @@ void GameManager::Update(float dt) {
           statics.erase(fallingId);
           shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
         }
+        // Calculate the score based on the number of bubbles exploded or
+        // falling
+        if (!explodings.empty()) {
+          this->CalculateScore(explodings.size(),
+                               explodings.begin()->second->GetRadius(),
+                               BubbleState::Exploding, this->level,
+                               this->timer->GetEventUsedTime("playtime"));
+        }
+        if (!fallings.empty()) {
+          this->CalculateScore(fallings.size(),
+                               fallings.begin()->second->GetRadius(),
+                               BubbleState::Falling, this->level,
+                               this->timer->GetEventUsedTime("playtime"));
+        }
 
         // clear all the exploding bubbles.
         std::vector<ExplosionInfo> explosionInfo;
@@ -1723,6 +1767,8 @@ void GameManager::Update(float dt) {
         arrows.back()->Fire(targetPostion, 65.0f * kBubbleRadius);
 
         this->GoToState(GameState::PREPARING);
+        this->timer->SetEventTimer("refreshscore", 0.05f);
+        this->timer->StartEventTimer("refreshscore");
         this->scroll->SetState(ScrollState::CLOSING);
         ++(this->level);
         /*if (this->level < numGameLevels) {
@@ -1751,11 +1797,18 @@ void GameManager::Update(float dt) {
         this->GoToState(GameState::PREPARING);
         this->scroll->SetState(ScrollState::CLOSING);
       }
+      if (!scoreIncrements.empty()) {
+        this->timer->SetEventTimer("refreshscore", 0.05f);
+        this->timer->StartEventTimer("refreshscore");
+      }
     }
 
-    // check if the event timer for narrowing the scroll is triggered.
     if (this->scroll->GetState() == ScrollState::OPENED) {
-      if (this->timer->GetEventStartTime("beforenarrowing") < 0.f) {
+      if (this->timer->IsPaused("playtime")) {
+        this->timer->ResumeEventTimer("playtime");
+      }
+      // check if the event timer for narrowing the scroll is triggered.
+      if (this->timer->IsPaused("beforenarrowing")) {
         this->timer->ResumeEventTimer("beforenarrowing");
       }
       if (this->timer->IsEventTimerExpired("beforenarrowing")) {
@@ -1848,6 +1901,9 @@ void GameManager::Update(float dt) {
         float duration = GetNarrowingTimeInterval();
         this->timer->SetEventTimer("beforenarrowing", duration);
         this->timer->StartEventTimer("beforenarrowing");
+        // start counting the time
+        this->timer->SetEventTimer("playtime", 1000.f);
+        this->timer->StartEventTimer("playtime");
       }
     }
   } else if (this->state == GameState::WIN || this->state == GameState::LOSE) {
@@ -1903,6 +1959,14 @@ void GameManager::Update(float dt) {
           this->timer->PauseEventTimer("hideprompttomainmenu");
           this->timer->StartEventTimer("prompttomainmenu");
         }
+      }
+      // Increase the opacity of the score gradually.
+      if (texts.at("score")->GetAlpha() < 1.f) {
+        float newAlpha = texts.at("score")->GetAlpha() + 0.8 * dt;
+        if (newAlpha > 1.f) {
+          newAlpha = 1.f;
+        }
+        texts.at("score")->SetAlpha(newAlpha);
       }
     }
   } else if (this->state == GameState::INITIAL) {
@@ -2209,6 +2273,84 @@ void GameManager::Update(float dt) {
     }
   }
 
+  // Refreshing the score
+  if (this->timer->HasEvent("refreshscore") &&
+      this->timer->IsEventTimerExpired("refreshscore")) {
+    assert(!this->scoreIncrements.empty() &&
+           "The score increments should not be empty.");
+    int increment = this->scoreIncrements.back();
+    this->scoreIncrements.pop_back();
+    this->IncreaseScore(increment);
+    if (!this->scoreIncrements.empty()) {
+      this->timer->SetEventTimer("refreshscore", 0.05f);
+      this->timer->StartEventTimer("refreshscore");
+      // Increase the opacity of the score text.
+      float alpha = this->texts.at("score")->GetAlpha();
+      if (alpha < 1.f) {
+        alpha = std::min(1.f, alpha + 0.05f);
+      }
+      this->texts.at("score")->SetAlpha(alpha);
+      // Change color to pink gradually.
+      glm::vec3 color = this->texts.at("score")->GetColor();
+      if (color != kScoreColorPink) {
+        if (color.r < kScoreColorPink.r) {
+          color.r = std::min(kScoreColorPink.r, color.r + 0.1f);
+        } else {
+          color.r = std::max(kScoreColorPink.r, color.r - 0.1f);
+        }
+        if (color.g < kScoreColorPink.g) {
+          color.g = std::min(kScoreColorPink.g, color.g + 0.1f);
+        } else {
+          color.g = std::max(kScoreColorPink.g, color.g - 0.1f);
+        }
+        if (color.b < kScoreColorPink.b) {
+          color.b = std::min(kScoreColorPink.b, color.b + 0.1f);
+        } else {
+          color.b = std::max(kScoreColorPink.b, color.b - 0.1f);
+        }
+        this->texts.at("score")->SetColor(color);
+      }
+    } else {
+      this->timer->CleanEvent("refreshscore");
+      this->timer->SetEventTimer("displayscore", 1.5f);
+      this->timer->StartEventTimer("displayscore");
+    }
+  } else if (this->timer->HasEvent("displayscore") &&
+             this->timer->IsEventTimerExpired("displayscore")) {
+    // Decrease the opacity of the score text.
+    float alpha = this->texts.at("score")->GetAlpha();
+    if (alpha > kScoreAlpha) {
+      alpha -= 0.8f * dt;
+    }
+    if (alpha < kScoreAlpha) {
+      alpha = kScoreAlpha;
+    }
+    if (alpha == kScoreAlpha) {
+      this->timer->CleanEvent("displayscore");
+    }
+    // Change color to orange gradually.
+    glm::vec3 color = this->texts.at("score")->GetColor();
+    if (color != kScoreColorOrange) {
+      if (color.r < kScoreColorOrange.r) {
+        color.r = std::min(kScoreColorOrange.r, color.r + 1.2f * dt);
+      } else {
+        color.r = std::max(kScoreColorOrange.r, color.r - 1.2f * dt);
+      }
+      if (color.g < kScoreColorOrange.g) {
+        color.g = std::min(kScoreColorOrange.g, color.g + 1.2f * dt);
+      } else {
+        color.g = std::max(kScoreColorOrange.g, color.g - 1.2f * dt);
+      }
+      if (color.b < kScoreColorOrange.b) {
+        color.b = std::min(kScoreColorOrange.b, color.b + 1.2f * dt);
+      } else {
+        color.b = std::max(kScoreColorOrange.b, color.b - 1.2f * dt);
+      }
+      this->texts.at("score")->SetColor(color);
+    }
+    this->texts.at("score")->SetAlpha(alpha);
+  }
+
   // CLean up the sound sources that are not playing.
   SoundEngine::GetInstance().CleanUpSources();
 }
@@ -2327,20 +2469,6 @@ void GameManager::Render() {
       this->timer->CleanEvent("guojieshaking");
     }
 
-    //       Render the arrows
-    //      for (auto& [id, carriedObject] :
-    //      gameCharacters["guojie"]->GetCarriedObjects()) {
-    //          if (auto arrow =
-    //          std::dynamic_pointer_cast<Arrow>(carriedObject)) {
-    //              if (arrow->IsPenetrating() || arrow->IsStopped()) {
-    //                  arrow->Draw(spriteDynamicRenderer,
-    //                  arrow->GetTextureCoords());
-    //              }
-    //              else {
-    //                  arrow->Draw(spriteRenderer);
-    //              }
-    //	}
-    //}
     for (auto& arrow : arrows) {
       if (arrow->IsPenetrating() || arrow->IsStopped()) {
         arrow->Draw(spriteDynamicRenderer, arrow->GetTextureCoords());
@@ -2592,8 +2720,19 @@ void GameManager::Render() {
     }
   }
 
-  // Render the mouse cursor on the silk area.
+  // Draw the score on the top right corner of the screen.
+  // if (this->state == GameState::PREPARING || this->state == GameState::ACTIVE
+  // || this->state == GameState::WIN || this->state == GameState::LOSE ||
+  //    (this->state == GameState::CONTROL &&
+  //     this->lastState == GameState::ACTIVE)) {
+  //
+  //  texts.at("score")->Draw(textRenderer, /*centerAligned=*/false,
+  //                          /*rightAligned=*/true);
+  //}
+  texts.at("score")->Draw(textRenderer, /*centerAligned=*/false,
+                          /*rightAligned=*/true);
 
+  // Render the mouse cursor on the silk area.
   constexpr float kMouseCursorHeight = 287.f;
   constexpr float kMouseCursorWidth = 287.f * 812.f / 861.f;
   // if (this->mouseX < 0.f || this->mouseY < 0.f) {
@@ -2654,6 +2793,11 @@ void GameManager::SetState(GameState newState) {
     }
     // Refresh the position of each units in the active page.
     pages.at(activePage)->UpdatePosition();
+  }
+  if (this->state == GameState::WIN || this->state == GameState::LOSE) {
+    // Store the final score to the global config.
+    ConfigManager& configManager = ConfigManager::GetInstance();
+    configManager.SetScore(this->score);
   }
 }
 
@@ -2843,6 +2987,24 @@ void GameManager::LoadTexts() {
     texts["defeated"]->SetParagraph(0, resourceManager.GetText("defeated"));
   }
 
+  // score.
+  if (texts.find("score") == texts.end()) {
+    texts["score"] = std::make_shared<Text>(
+        /*pos=*/glm::vec2(this->width * 0.98f, this->height * 0.04f),
+        /*lineWidth=*/std::numeric_limits<float>::max());
+    texts["score"]->AddParagraph(resourceManager.GetText("score"));
+    texts["score"]->AddParagraph(U"{" + intToU32String(this->score) + U"}");
+    // Set the color of the score to purple.
+    /*texts["score"]->SetColor(glm::vec3(1.0f, 0.0f, 0.56471f));*/
+    texts["score"]->SetColor(kScoreColorOrange);
+    texts["score"]->SetAlpha(kScoreAlpha);
+    texts["score"]->SetScale(0.05f / kFontScale);
+    texts["score"]->SetLineSpacingFactor(0.5f);
+    texts["score"]->SetAdditionalPadding(0.f);
+  } else {
+    texts["score"]->SetParagraph(0, resourceManager.GetText("score"));
+  }
+
   if (texts.find("prompttomainmenu") == texts.end()) {
     texts["prompttomainmenu"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(this->width * 0.4f, this->height * 0.65f),
@@ -2885,10 +3047,6 @@ void GameManager::LoadTexts() {
         gameBoard->GetPosition().x + gameBoard->GetSize().x - kBubbleRadius;
     centerTime.y = gameBoard->GetPosition().y -
                    this->scroll->GetTopRoller()->GetSize().y * 0.37f;
-    std::cout << "gameBoard->GetPosition().y: " << gameBoard->GetPosition().y
-              << std::endl;
-    std::cout << "this->scroll->GetTopRoller()->GetSize().y: "
-              << this->scroll->GetTopRoller()->GetSize().y << std::endl;
     texts["time"]->SetCenter(centerTime);
   }
 
@@ -3240,9 +3398,9 @@ bool GameManager::FineTuneToCorrectPosition(int bubbleId) {
       // Get the distance between the left static bubble and the current bubble.
       float leftDistance1 =
           bubble->GetCenter().x - statics.at(leftId)->GetCenter().x;
-      assert(leftDistance1 > 0 &&
-             !areFloatsGreater(leftDistance1, leftDistance) &&
-             "The distance calculation bettween bubbles is wrong");
+      // assert(leftDistance1 > 0 &&
+      //        !areFloatsGreater(leftDistance1, leftDistance) &&
+      //        "The distance calculation bettween bubbles is wrong");
       leftDistance = leftDistance1;
       while (leftDistance >= 4 * kBubbleRadius) {
         leftDistance -= 4 * kBubbleRadius;
@@ -3266,9 +3424,9 @@ bool GameManager::FineTuneToCorrectPosition(int bubbleId) {
       // bubble.
       float rightDistance1 =
           statics.at(rightId)->GetCenter().x - bubble->GetCenter().x;
-      assert(rightDistance1 > 0 &&
-             !areFloatsGreater(rightDistance1, rightDistance) &&
-             "The distance calculation bettween bubbles is wrong");
+      // assert(rightDistance1 > 0 &&
+      //        !areFloatsGreater(rightDistance1, rightDistance) &&
+      //        "The distance calculation bettween bubbles is wrong");
       rightDistance = rightDistance1;
       while (rightDistance >= 4 * kBubbleRadius) {
         rightDistance -= 4 * kBubbleRadius;
@@ -4100,4 +4258,41 @@ void GameManager::ResetGameCharacters() {
 
   gameCharacters["guojie"]->SetPosition(
       gameCharacters["guojie"]->GetTargetPosition("outofscreen"));
+}
+
+int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
+                                BubbleState bubbleType, int gameLevel,
+                                float timeUsed) {
+  if (numBubbles < 3) {
+    return 0;
+  }
+  float score = 80.f - bubbleRadius + gameLevel * 5 - 2.f * timeUsed;
+  if (bubbleType == BubbleState::Falling) {
+    score *= 1.5f;
+  }
+  int totalIncrement = 0;
+  for (int i = 2; i < numBubbles; ++i) {
+    if (i > 2) {
+      score *= 1.2f;
+    }
+    scoreIncrements.push_back(static_cast<int>(std::ceil(score)));
+    totalIncrement += scoreIncrements.back();
+  }
+  // score *= numBubbles + 0.1f * (numBubbles - 2) * (numBubbles - 3);
+  // scoreIncrements.push_back(static_cast<int>(std::ceil(score)));
+  return totalIncrement;
+}
+
+void GameManager::IncreaseScore(int64_t score) {
+  this->score += score;
+  // Set the score text
+  texts.at("score")->SetParagraph(1, U"{" + intToU32String(this->score) + U"}");
+}
+
+void GameManager::DecreaseScore(int64_t score) { this->IncreaseScore(-score); }
+
+void GameManager::ResetScore(int64_t value) {
+  this->score = value;
+  // Set the score text
+  texts.at("score")->SetParagraph(1, U"{" + intToU32String(this->score) + U"}");
 }

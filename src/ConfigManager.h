@@ -114,6 +114,10 @@ class ConfigManager {
   void SetLanguage(Language language);
   // Get the language preference
   Language GetLanguage() const;
+  // Set the score.
+  void SetScore(int64_t score);
+  // Get the score.
+  int64_t GetScore() const;
   // Get path to font file for a certain character
   std::pair<char32_t, std::string> GetFontFilePath(char32_t character,
                                                    CharStyle style) const;

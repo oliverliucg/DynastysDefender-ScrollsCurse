@@ -102,8 +102,10 @@ class Text {
   void EnableTypingEffect(float speed);
   void DisableTypingEffect();
   bool UpdateTypingEffect(float dt);
+  void SetLineSpacingFactor(float factor);
+  void SetAdditionalPadding(float padding);
   void Draw(std::shared_ptr<TextRenderer> textRenderer,
-            bool textCenteringEnabled = false);
+            bool textCenteringEnabled = false, bool textRightAligned = false);
 
  private:
   std::vector<std::u32string> paragraphs;

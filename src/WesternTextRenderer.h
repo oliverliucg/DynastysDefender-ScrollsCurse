@@ -24,4 +24,9 @@ class WesternTextRenderer : public TextRenderer {
       float lineSpacingFactor = 1.2f, float additionalPadding = 10.0f,
       glm::vec2 center = kWindowSize * 0.5f, glm::vec3 color = glm::vec3(0.0f),
       float alpha = 1.0f) override;
+
+  std::pair<float, float> RenderRightAlignedText(
+      std::u32string text, float x, float y, float scale, float lineWidth,
+      float lineSpacingFactor, float additionalPadding,
+      glm::vec3 color = glm::vec3(0.0f), float alpha = 1.0f) override;
 };

@@ -104,6 +104,23 @@ Language ConfigManager::GetLanguage() const {
   }
 }
 
+void ConfigManager::SetScore(int64_t score) {
+  // Set the score in the JSON object
+  config_["score"] = score;
+  // Write JSON object to file
+  std::ofstream config_file(config_path_);
+  if (!config_file.is_open()) {
+    std::cerr << "Failed to open configuration file for writing: "
+              << config_path_ << std::endl;
+    return;
+  }
+  config_file << config_.dump(4);  // 4 spaces for pretty print
+}
+
+int64_t ConfigManager::GetScore() const {
+  return config_.at("score").get<int64_t>();
+}
+
 std::pair<char32_t, std::string> ConfigManager::GetFontFilePath(
     char32_t character, CharStyle style) const {
   std::string style_str = char_style_map.at(style);
