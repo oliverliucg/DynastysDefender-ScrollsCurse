@@ -55,6 +55,7 @@ enum class GameState {
   STORY_END,
   ACTIVE,
   CONTROL,
+  DIFFICULTY_SETTINGS,
   DISPLAY_SETTINGS,
   LANGUAGE_PREFERENCE,
   MENU,
@@ -87,8 +88,10 @@ struct GameLevel {
   int numColors;
   // The number of bubbles that are generated at the beginning of the game
   int numInitialBubbles;
-  // The maximum depth that the initial bubbles can reach
-  float maxInitialBubbleDepth;
+  // The least distance between the bubble and the bottom of the game board
+  float minDistanceToBottom;
+  // The least distance between the bubble and the center of the shooter
+  float minDistanceToShooter;
   // Probability that a new bubble is generated adjacent to the most recently
   // added bubble
   float probabilityNewBubbleIsNeighborOfLastAdded;
@@ -102,14 +105,13 @@ struct GameLevel {
   float probabilityNewBubbleIsNewColor;
   // time interval for narrowing the game board vertically
   float narrowingTimeInterval;
-  // scale of the bubble
-  float bubbleScale;
 };
 
 class GameManager {
  public:
   GameState state, lastState, targetState;
   TransitionState transitionState;
+  Difficulty difficulty;
   ScreenMode screenMode, targetScreenMode;
   Language language;
   bool keys[1024];
@@ -218,7 +220,7 @@ class GameManager {
       graduallyOpaqueObjects;
 
   // total number of game levels
-  const int numGameLevels = 30;
+  int GetNumGameLevels();
 
   // Get the page name for a given game state.
   std::string GetPageName(GameState gameState);
@@ -238,17 +240,23 @@ class GameManager {
   // Go to screen mode.
   void GoToScreenMode(ScreenMode newScreenMode);
 
+  // Set the screen mode of the game.
+  void SetScreenMode(ScreenMode newScreenMode);
+
   // Get the screen mode of the game.
   ScreenMode GetScreenMode() const;
 
-  // Set the screen mode of the game.
-  void SetScreenMode(ScreenMode newScreenMode);
+  // Set the language of the game.
+  void SetLanguage(Language newLanguage);
 
   // Get the language of the game.
   Language GetLanguage() const { return language; }
 
-  // Set the language of the game.
-  void SetLanguage(Language newLanguage);
+  // Set the difficulty of the game.
+  void SetDifficulty(Difficulty newDifficulty);
+
+  // Get the difficulty of the game.
+  Difficulty GetDifficulty() const;
 
   // Load the font based on the language.
   void LoadTextRenderer();
@@ -388,7 +396,9 @@ class GameManager {
   std::vector<glm::vec2> GetPotentialNeighborFreeSlots(glm::vec2 bubbleCenter);
 
   // Update the free slots of the game board after inserting a new bubble.
-  void UpdateFreeSlots(std::unique_ptr<Bubble>& bubble);
+  void UpdateFreeSlots(std::unique_ptr<Bubble>& bubble,
+                       float minDistanceToBottom = 0.f,
+                       float minDistanceToShooter = 0.f);
 
   // Generate random static bubbles on the free slots of the game board.
   void GenerateRandomStaticBubblesHelper(GameLevel gameLevel);

@@ -7,6 +7,7 @@ GameManager::GameManager(unsigned int width, unsigned int height)
       lastState(GameState::UNDEFINED),
       targetState(GameState::UNDEFINED),
       transitionState(TransitionState::START),
+      difficulty(ConfigManager::GetInstance().GetDifficulty()),
       screenMode(ConfigManager::GetInstance().GetScreenMode()),
       targetScreenMode(ScreenMode::UNDEFINED),
       language(ConfigManager::GetInstance().GetLanguage()),
@@ -328,10 +329,12 @@ void GameManager::Init() {
       glm::vec2(positions[GameCharacterState::FIGHTING].x - kBaseUnit * 1.0f,
                 positions[GameCharacterState::FIGHTING].y - kBaseUnit * 0.9f);
   glm::vec2 totalHealthBarSize = glm::vec2(kBaseUnit * 8.f, kBaseUnit * 0.7f);
-  gameCharacters["guojie"]->GetHealth().SetTotalHealth(this->numGameLevels);
+  gameCharacters["guojie"]->GetHealth().SetTotalHealth(
+      this->GetNumGameLevels());
   gameCharacters["guojie"]->GetHealth().SetTotalHealthBar(
       totalHealthBarPos, totalHealthBarSize, glm::vec4(1.f, 1.f, 1.f, 1.f));
-  gameCharacters["guojie"]->GetHealth().SetCurrentHealth(this->numGameLevels);
+  gameCharacters["guojie"]->GetHealth().SetCurrentHealth(
+      this->GetNumGameLevels());
   gameCharacters["guojie"]->GetHealth().SetDamagePopOutDirection(false);
   gameCharacters["guojie"]->SetHealthBarRelativeCenterRatios();
   // Set the rotation pivot for the characters
@@ -422,6 +425,9 @@ void GameManager::Init() {
       "startbuttonunit", buttons["start"], textRenderer, colorRenderer);
   auto controlButtonUnit = std::make_shared<ButtonUnit>(
       "controlbuttonunit", buttons["control"], textRenderer, colorRenderer);
+  auto difficultyButtonUnit = std::make_shared<ButtonUnit>(
+      "difficultybuttonunit", buttons["difficulty"], textRenderer,
+      colorRenderer);
   auto displaySettingsButtonUnit = std::make_shared<ButtonUnit>(
       "displaysettingsbuttonunit", buttons["displaysettings"], textRenderer,
       colorRenderer);
@@ -518,13 +524,16 @@ void GameManager::Init() {
   auto buttonSection = std::make_shared<PageSection>("storybuttonsection");
   buttonSection->AddContent(startButtonUnit);
   buttonSection->AddContent(controlButtonUnit);
+  buttonSection->AddContent(difficultyButtonUnit);
   buttonSection->AddContent(displaySettingsButtonUnit);
   buttonSection->AddContent(languagePreferenceButtonUnit);
   buttonSection->AddContent(exitButtonUnit);
   buttonSection->SetInterUnitSpacing("startbuttonunit", "controlbuttonunit",
                                      0.1f * kBaseUnit);
+  buttonSection->SetInterUnitSpacing("controlbuttonunit",
+                                     "difficultybuttonunit", 0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing(
-      "controlbuttonunit", "displaysettingsbuttonunit", 0.1f * kBaseUnit);
+      "difficultybuttonunit", "displaysettingsbuttonunit", 0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing("displaysettingsbuttonunit",
                                      "languagepreferencebuttonunit",
                                      0.1f * kBaseUnit);
@@ -683,6 +692,62 @@ void GameManager::Init() {
         this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x -
             Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
   }
+
+  // Create page "difficulty"
+  auto easyMode = CreateClickableOptionUnit(
+      "easy", resourceManager.GetText("difficulty", "easy"));
+  auto mediumMode = CreateClickableOptionUnit(
+      "medium", resourceManager.GetText("difficulty", "medium"));
+  auto hardMode = CreateClickableOptionUnit(
+      "hard", resourceManager.GetText("difficulty", "hard"));
+  switch (this->GetDifficulty()) {
+    case Difficulty::EASY:
+      easyMode->SetState(OptionState::kClicked);
+      break;
+    case Difficulty::MEDIUM:
+      mediumMode->SetState(OptionState::kClicked);
+      break;
+    case Difficulty::HARD:
+      hardMode->SetState(OptionState::kClicked);
+      break;
+    default:
+      break;
+  }
+  textSection = std::make_shared<PageSection>("difficultytextsection");
+  buttonSection = std::make_shared<PageSection>("difficultybuttonsection");
+  textSection->AddContent(easyMode);
+  textSection->AddContent(mediumMode);
+  textSection->AddContent(hardMode);
+  textSection->SetInterUnitSpacing("easy", "medium", 0.5f * kBaseUnit);
+  textSection->SetInterUnitSpacing("medium", "hard", 0.5f * kBaseUnit);
+  buttonSection->AddContent(backButtonUnit);
+  pages["difficulty"] = std::make_unique<Page>("difficulty");
+  pages["difficulty"]->AddSection(textSection);
+  pages["difficulty"]->AddSection(buttonSection);
+  // Set the top, bottom and left spacing of the page "difficulty".
+  pages["difficulty"]->SetTopSpacing(0.5f * kBaseUnit);
+  pages["difficulty"]->SetBottomSpacing(0.5f * kBaseUnit);
+  pages["difficulty"]->SetLeftSpacing(0.5f * kBaseUnit);
+  // Set the inter spacing between the sections of the page "difficulty".
+  pages["difficulty"]->SetInterSectionSpacing("difficultytextsection",
+                                              "difficultybuttonsection",
+                                              kCommonInterSectionSpacing);
+  interspacingBetweenTextAndButton =
+      pages["difficulty"]->GetInterSectionSpacing("difficultytextsection",
+                                                  "difficultybuttonsection");
+  maxHeightForTextSection =
+      gameBoard->GetSize().y - buttonSection->GetHeight() -
+      pages["difficulty"]->GetBottomSpacing() -
+      pages["difficulty"]->GetTopSpacing() - interspacingBetweenTextAndButton;
+  textSection->SetMaxHeight(maxHeightForTextSection);
+  textSection->SetMaxWidth(gameBoard->GetSize().x -
+                           pages["difficulty"]->GetLeftSpacing() -
+                           0.5 * kBaseUnit);
+  pages["difficulty"]->SetPosition(
+      glm::vec2(this->gameBoard->GetPosition().x,
+                std::max(this->gameBoard->GetCenter().y -
+                             pages["difficulty"]->GetHeight() * 0.5f,
+                         this->gameBoard->GetPosition().y)));
 
   // Create page "Display Settings"
   auto displaysetting1 = CreateClickableOptionUnit(
@@ -1104,6 +1169,8 @@ void GameManager::ProcessInput(float dt) {
                     std::max(this->gameBoard->GetCenter().y -
                                  pages.at("control")->GetHeight() * 0.5f,
                              this->gameBoard->GetPosition().y)));
+              } else if (content == "difficulty") {
+                this->GoToState(GameState::DIFFICULTY_SETTINGS);
               } else if (content == "displaysettings") {
                 this->GoToState(GameState::DISPLAY_SETTINGS);
               } else if (content == "languagepreference") {
@@ -1229,7 +1296,17 @@ void GameManager::ProcessInput(float dt) {
                 if (option->GetState() == OptionState::kHovered) {
                   optionToBeClicked = option->GetName();
                   option->SetState(OptionState::kClicked);
-                  if (activePage == "displaysettings") {
+                  if (activePage == "difficulty") {
+                    optionAlreadyClicked =
+                        difficulty_map.at(this->GetDifficulty());
+                    if (optionToBeClicked == "easy") {
+                      this->SetDifficulty(Difficulty::EASY);
+                    } else if (optionToBeClicked == "medium") {
+                      this->SetDifficulty(Difficulty::MEDIUM);
+                    } else if (optionToBeClicked == "hard") {
+                      this->SetDifficulty(Difficulty::HARD);
+                    }
+                  } else if (activePage == "displaysettings") {
                     optionAlreadyClicked =
                         this->screenMode == ScreenMode::FULLSCREEN
                             ? "fullscreen"
@@ -1387,7 +1464,7 @@ void GameManager::Update(float dt) {
   } else if (this->scroll->GetState() == ScrollState::RETRACTING) {
     this->scroll->Retract(dt);
     if (this->scroll->GetState() == ScrollState::RETRACTED) {
-      if (this->level <= this->numGameLevels &&
+      if (this->level <= this->GetNumGameLevels() &&
           gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() > 0) {
         this->timer->SetEventTimer("scrollInSleeve", 0.8f);
         this->timer->StartEventTimer("scrollInSleeve");
@@ -1474,7 +1551,7 @@ void GameManager::Update(float dt) {
                              b->GetPenetrationPosition().x;
                     });
         }
-        // if (arrow->IsStopped() && this->level > this->numGameLevels) {
+        // if (arrow->IsStopped() && this->level > this->GetNumGameLevels()) {
         //     gameCharacters["guojie"]->SetState(GameCharacterState::SAD);
         // }
       }
@@ -1767,10 +1844,10 @@ void GameManager::Update(float dt) {
         this->timer->StartEventTimer("refreshscore");
         this->scroll->SetState(ScrollState::CLOSING);
         ++(this->level);
-        /*if (this->level < numGameLevels) {
+        /*if (this->level < GetNumGameLevels()) {
                 ++(this->level);
         }*/
-        /*               if (this->level < numGameLevels) {
+        /*               if (this->level < GetNumGameLevels()) {
                                            this->GoToState(GameState::PREPARING);
                                            this->scroll->SetState(ScrollState::CLOSING);
                                            ++(this->level);
@@ -2113,7 +2190,8 @@ void GameManager::Update(float dt) {
         gameBoard->SetState(GameBoardState::INGAME);
       }
     }
-  } else if (this->state == GameState::DISPLAY_SETTINGS ||
+  } else if (this->state == GameState::DIFFICULTY_SETTINGS ||
+             this->state == GameState::DISPLAY_SETTINGS ||
              this->state == GameState::LANGUAGE_PREFERENCE) {
     if (this->targetState != GameState::UNDEFINED &&
         this->scroll->GetState() == ScrollState::CLOSED) {
@@ -2624,6 +2702,7 @@ void GameManager::Render() {
              this->state == GameState::INITIAL ||
              this->state == GameState::STORY ||
              this->state == GameState::CONTROL ||
+             this->state == GameState::DIFFICULTY_SETTINGS ||
              this->state == GameState::DISPLAY_SETTINGS ||
              this->state == GameState::LANGUAGE_PREFERENCE) {
     gameCharacters["weizifu"]->Draw(spriteRenderer);
@@ -2742,12 +2821,27 @@ void GameManager::Render() {
   }
 }
 
+int GameManager::GetNumGameLevels() {
+  switch (difficulty) {
+    case Difficulty::EASY:
+      return 10;
+    case Difficulty::MEDIUM:
+      return 20;
+    case Difficulty::HARD:
+      return 30;
+    default:
+      return 20;
+  }
+}
+
 std::string GameManager::GetPageName(GameState gameState) {
   switch (gameState) {
     case GameState::STORY:
       return "story";
     case GameState::CONTROL:
       return "control";
+    case GameState::DIFFICULTY_SETTINGS:
+      return "difficulty";
     case GameState::DISPLAY_SETTINGS:
       return "displaysettings";
     case GameState::LANGUAGE_PREFERENCE:
@@ -2861,6 +2955,17 @@ void GameManager::SetLanguage(Language newLanguage) {
     pages.at(activePage)->UpdatePosition();
   }
 }
+
+void GameManager::SetDifficulty(Difficulty newDifficulty) {
+  assert(newDifficulty != Difficulty::UNDEFINED &&
+         "The difficulty is not defined.");
+  this->difficulty = newDifficulty;
+  // Store the difficulty to the global config.
+  ConfigManager& configManager = ConfigManager::GetInstance();
+  configManager.SetDifficulty(this->difficulty);
+}
+
+Difficulty GameManager::GetDifficulty() const { return this->difficulty; }
 
 void GameManager::LoadTextRenderer() {
   ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -3077,10 +3182,11 @@ void GameManager::LoadTexts() {
 void GameManager::LoadButtons() {
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   //  Create buttons
-  std::vector<std::string> buttonNames = {
-      "back", "control",         "start",
-      "exit", "restart",         "resume",
-      "stop", "displaysettings", "languagepreference"};
+  std::vector<std::string> buttonNames = {"back",       "control",
+                                          "start",      "exit",
+                                          "restart",    "resume",
+                                          "stop",       "displaysettings",
+                                          "difficulty", "languagepreference"};
   for (const auto& buttonName : buttonNames) {
     if (buttons.find(buttonName) == buttons.end()) {
       buttons[buttonName] = std::make_shared<Button>(
@@ -3811,7 +3917,9 @@ std::vector<glm::vec2> GameManager::GetPotentialNeighborFreeSlots(
   return neighborCenters;
 }
 
-void GameManager::UpdateFreeSlots(std::unique_ptr<Bubble>& bubble) {
+void GameManager::UpdateFreeSlots(std::unique_ptr<Bubble>& bubble,
+                                  float minDistanceToBottom,
+                                  float minDistanceToShooter) {
   // Get the center of the bubble
   glm::vec2 bubbleCenter = bubble->GetCenter();
   // Remove the free slots whose distance to the bubble center is less than
@@ -3828,7 +3936,22 @@ void GameManager::UpdateFreeSlots(std::unique_ptr<Bubble>& bubble) {
   std::vector<glm::vec2> potentialFreeSlots =
       GetPotentialNeighborFreeSlots(bubble->GetCenter());
 
-  // Add the potential free slots to the free slots if they are not in the free
+  // Remove the potential free slots whose distance to the shooter is less than
+  // minDistanceToShooter and whose distance to the bottom is less than
+  // minDistanceToBottom.
+  glm::vec2 shooterCenter = this->shooter->GetCarriedBubble().GetCenter();
+  float gameBoardBottomBound = this->gameBoard->GetBoundaries()[3];
+  potentialFreeSlots.erase(
+      std::remove_if(potentialFreeSlots.begin(), potentialFreeSlots.end(),
+                     [&](glm::vec2 slotCenter) {
+                       return glm::distance(slotCenter, shooterCenter) <
+                                  minDistanceToShooter ||
+                              slotCenter.y >
+                                  gameBoardBottomBound - minDistanceToBottom;
+                     }),
+      potentialFreeSlots.end());
+
+  // Add the potential free slots to the free slots if they are not in free
   // slots.
   for (auto& center1 : potentialFreeSlots) {
     bool alreadyInFreeSlots = false;
@@ -3897,10 +4020,10 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
         lastAddedFreeSlots = GetPotentialNeighborFreeSlots(
             statics[lastAddedBubbleID]->GetCenter());
       }
-      //// Get the common free slots of the last added free slots and the
-      /// provided free slots.
-      // std::vector<glm::vec2> commonFreeSlots =
-      // GetCommonFreeSlots(lastAddedFreeSlots, freeSlots);
+      // Get the common free slots of the last added free slots and the
+      // available free slots.
+      std::vector<glm::vec2> commonFreeSlots =
+          GetCommonFreeSlots(lastAddedFreeSlots, freeSlots);
       //  Randomly select a free slot from the common free slots.
       int randomIndex = rand() % lastAddedFreeSlots.size();
       centerForNewBubble = lastAddedFreeSlots[randomIndex];
@@ -3954,21 +4077,24 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
 }
 
 void GameManager::GenerateRandomStaticBubbles() {
+  // The radius of the bubble decreases as per 10 levels.
+  kBubbleRadius = kBaseUnit * std::pow(0.9f, (level - 1) / 10);
+
+  // The game level
   GameLevel gameLevel;
   gameLevel.numColors = level <= colorMap.size() ? level : colorMap.size();
   gameLevel.numInitialBubbles = 10 + level * 5;
-  gameLevel.maxInitialBubbleDepth =
-      this->gameBoard->GetSize().y * level / numGameLevels;
+  gameLevel.minDistanceToBottom =
+      4 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
+  gameLevel.minDistanceToShooter =
+      5 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
   gameLevel.probabilityNewBubbleIsNeighborOfLastAdded =
-      1.f - 1.f / numGameLevels * level;
+      1.f - 1.f / GetNumGameLevels() * level;
   gameLevel.probabilityNewBubbleIsNeighborOfBubble =
-      1.f - 1.f / numGameLevels * level;
+      1.f - 1.f / GetNumGameLevels() * level;
   gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor =
-      1.f - 1.f / numGameLevels * level;
-  gameLevel.narrowingTimeInterval = numGameLevels * 0.5f - 0.3f * level;
-
-  // The radius of the bubble decreases as per 10 levels.
-  kBubbleRadius = kBaseUnit * std::pow(0.9f, (level - 1) / 10);
+      1.f - 1.f / GetNumGameLevels() * level;
+  gameLevel.narrowingTimeInterval = 15.f - 0.3f * level;
 
   // Get the boundaries of the game board (left, upper, right, lower)
   glm::vec4 boundaries =
@@ -3995,7 +4121,7 @@ void GameManager::GenerateRandomStaticBubbles() {
 
   this->shooter->UpdateCarriedBubbleRadius(kBubbleRadius);
   GenerateRandomStaticBubblesHelper(gameLevel);
-  /*if (level <= numGameLevels) {
+  /*if (level <= GetNumGameLevels()) {
     gameLevel.numColors = 1;
     gameLevel.numInitialBubbles = 10;
     gameLevel.maxInitialBubbleDepth = 22 * kBaseUnit;
@@ -4060,7 +4186,7 @@ float GameManager::GetNarrowingTimeInterval() {
   // }
   // return time;
 
-  return numGameLevels * 0.5f - 0.3f * level;
+  return 15.f - 0.3f * level;
 }
 
 std::vector<glm::vec2> GameManager::GetCommonFreeSlots(

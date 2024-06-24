@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 
+enum class Difficulty { UNDEFINED, EASY, MEDIUM, HARD };
+
 enum class ScreenMode { UNDEFINED, WINDOWED, FULLSCREEN };
 
 enum class CharStyle { UNDEFINED, REGULAR, BOLD, ITALIC, BOLD_ITALIC };
@@ -26,8 +28,16 @@ enum class Language {
   CHINESE_TRADITIONAL
 };
 
-// Specialize std::hash for Language enum
 namespace std {
+
+// Specilize std::hash for Difficulty enum
+template <>
+struct hash<Difficulty> {
+  std::size_t operator()(const Difficulty& diff) const noexcept {
+    return std::hash<int>()(static_cast<int>(diff));
+  }
+};
+// Specialize std::hash for Language enum
 template <>
 struct hash<Language> {
   std::size_t operator()(const Language& lang) const noexcept {
@@ -44,6 +54,12 @@ struct hash<CharStyle> {
 };
 
 }  // namespace std
+
+// Define the difficulty map
+inline std::unordered_map<Difficulty, std::string> difficulty_map = {
+    {Difficulty::EASY, "easy"},
+    {Difficulty::MEDIUM, "medium"},
+    {Difficulty::HARD, "hard"}};
 
 // Define the language map
 inline std::unordered_map<Language, std::string> language_map = {
@@ -114,6 +130,10 @@ class ConfigManager {
   void SetLanguage(Language language);
   // Get the language preference
   Language GetLanguage() const;
+  // Set the difficulty
+  void SetDifficulty(Difficulty difficulty);
+  // Get the difficulty
+  Difficulty GetDifficulty() const;
   // Set the score.
   void SetScore(int64_t score);
   // Get the score.

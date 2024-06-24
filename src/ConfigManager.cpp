@@ -104,6 +104,48 @@ Language ConfigManager::GetLanguage() const {
   }
 }
 
+void ConfigManager::SetDifficulty(Difficulty difficulty) {
+  // Set the difficulty in the JSON object
+  switch (difficulty) {
+    case Difficulty::EASY:
+      config_["difficulty"] = "easy";
+      break;
+    case Difficulty::MEDIUM:
+      config_["difficulty"] = "medium";
+      break;
+    case Difficulty::HARD:
+      config_["difficulty"] = "hard";
+      break;
+    default:
+      std::cerr << "Invalid difficulty value: " << static_cast<int>(difficulty)
+                << std::endl;
+      return;
+  }
+  // Write JSON object to file
+  std::ofstream config_file(config_path_);
+  if (!config_file.is_open()) {
+    std::cerr << "Failed to open configuration file for writing: "
+              << config_path_ << std::endl;
+    return;
+  }
+  config_file << config_.dump(4);  // 4 spaces for pretty print
+}
+
+Difficulty ConfigManager::GetDifficulty() const {
+  std::string difficulty = config_.at("difficulty");
+  if (difficulty == "easy") {
+    return Difficulty::EASY;
+  } else if (difficulty == "medium") {
+    return Difficulty::MEDIUM;
+  } else if (difficulty == "hard") {
+    return Difficulty::HARD;
+  } else {
+    std::cerr << "Invalid difficulty value in configuration file: "
+              << difficulty << std::endl;
+    return Difficulty::MEDIUM;
+  }
+}
+
 void ConfigManager::SetScore(int64_t score) {
   // Set the score in the JSON object
   config_["score"] = score;
