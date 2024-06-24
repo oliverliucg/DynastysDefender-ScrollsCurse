@@ -324,11 +324,10 @@ void GameManager::Init() {
   gameCharacters["guojie"]->SetFaceDirection(false);
 
   // Set health for characters weiqing and guojie
-  glm::vec2 totalHealthBarPos = glm::vec2(
-      positions[GameCharacterState::FIGHTING].x - kBubbleRadius * 1.0f,
-      positions[GameCharacterState::FIGHTING].y - kBubbleRadius * 0.9f);
-  glm::vec2 totalHealthBarSize =
-      glm::vec2(kBubbleRadius * 8.f, kBubbleRadius * 0.7f);
+  glm::vec2 totalHealthBarPos =
+      glm::vec2(positions[GameCharacterState::FIGHTING].x - kBaseUnit * 1.0f,
+                positions[GameCharacterState::FIGHTING].y - kBaseUnit * 0.9f);
+  glm::vec2 totalHealthBarSize = glm::vec2(kBaseUnit * 8.f, kBaseUnit * 0.7f);
   gameCharacters["guojie"]->GetHealth().SetTotalHealth(this->numGameLevels);
   gameCharacters["guojie"]->GetHealth().SetTotalHealthBar(
       totalHealthBarPos, totalHealthBarSize, glm::vec4(1.f, 1.f, 1.f, 1.f));
@@ -342,8 +341,8 @@ void GameManager::Init() {
       "landing", gameCharacters["guojie"]->GetPosition());
   // Set the target position "out of the screen"
   gameCharacters["guojie"]->SetTargetPosition(
-      "outofscreen", gameCharacters["guojie"]->GetPosition() -
-                         glm::vec2(0, 40 * kBubbleRadius));
+      "outofscreen",
+      gameCharacters["guojie"]->GetPosition() - glm::vec2(0, 40 * kBaseUnit));
 
   // Wei Qing
   positions.clear();
@@ -376,9 +375,9 @@ void GameManager::Init() {
       glm::vec2(0.5f, 0.5f), textures);
 
   // Set health for characters weiqing and guojie
-  totalHealthBarPos = glm::vec2(
-      positions[GameCharacterState::FIGHTING].x + kBubbleRadius * 1.0f,
-      positions[GameCharacterState::FIGHTING].y - kBubbleRadius * 0.9f);
+  totalHealthBarPos =
+      glm::vec2(positions[GameCharacterState::FIGHTING].x + kBaseUnit * 1.0f,
+                positions[GameCharacterState::FIGHTING].y - kBaseUnit * 0.9f);
   const float totalHealthOfWeiqing = 3;
   gameCharacters["weiqing"]->GetHealth().SetTotalHealth(totalHealthOfWeiqing);
   gameCharacters["weiqing"]->GetHealth().SetTotalHealthBar(
@@ -464,7 +463,7 @@ void GameManager::Init() {
   float horizontalSpacing = liucheIconTextUnit->GetHorizontalSpacing() +
                             liucheIconSize.x - weizifuIconUnit->GetSize().x;
   weizifuIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
-  const float weiqingIconOffset = -0.75f * kBubbleRadius;
+  const float weiqingIconOffset = -0.75f * kBaseUnit;
   auto weiqingIconUnit = std::make_shared<ImageUnit>(
       "weiqingiconunit",
       /*pos=*/glm::vec2(0.f), /*size=*/
@@ -485,7 +484,7 @@ void GameManager::Init() {
                       liucheIconSize.x - weiqingIconUnit->GetSize().x -
                       weiqingIconOffset;
   weiqingIconTextUnit->SetHorizontalSpacing(horizontalSpacing);
-  const float guojieIconOffset = -0.3f * kBubbleRadius;
+  const float guojieIconOffset = -0.3f * kBaseUnit;
   auto guojieIconUnit = std::make_shared<ImageUnit>(
       "guojieiconunit",
       /*pos=*/glm::vec2(0.f), /*size=*/
@@ -523,23 +522,23 @@ void GameManager::Init() {
   buttonSection->AddContent(languagePreferenceButtonUnit);
   buttonSection->AddContent(exitButtonUnit);
   buttonSection->SetInterUnitSpacing("startbuttonunit", "controlbuttonunit",
-                                     0.1f * kBubbleRadius);
+                                     0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing(
-      "controlbuttonunit", "displaysettingsbuttonunit", 0.1f * kBubbleRadius);
+      "controlbuttonunit", "displaysettingsbuttonunit", 0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing("displaysettingsbuttonunit",
                                      "languagepreferencebuttonunit",
-                                     0.1f * kBubbleRadius);
+                                     0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing("languagepreferencebuttonunit",
-                                     "exitbuttonunit", 0.1f * kBubbleRadius);
+                                     "exitbuttonunit", 0.1f * kBaseUnit);
   pages["story"] = std::make_unique<Page>("story");
   pages["story"]->AddSection(textSection);
   pages["story"]->AddSection(buttonSection);
   // Set the top, bottom and left spacing of the page "story".
-  pages["story"]->SetTopSpacing(0.5f * kBubbleRadius);
-  pages["story"]->SetBottomSpacing(0.5f * kBubbleRadius);
-  pages["story"]->SetLeftSpacing(0.5f * kBubbleRadius);
+  pages["story"]->SetTopSpacing(0.5f * kBaseUnit);
+  pages["story"]->SetBottomSpacing(0.5f * kBaseUnit);
+  pages["story"]->SetLeftSpacing(0.5f * kBaseUnit);
   // Set the inter spacing between the sections of the page "story".
-  const float kCommonInterSectionSpacing = 1.f * kBubbleRadius;
+  const float kCommonInterSectionSpacing = 1.f * kBaseUnit;
   pages["story"]->SetInterSectionSpacing(
       "storytextsection", "storybuttonsection", kCommonInterSectionSpacing);
 
@@ -549,7 +548,7 @@ void GameManager::Init() {
   glm::vec2 commonButtonSize = glm::vec2(
       gameBoard->GetSize().x -
           2 * (commonButtionPosition.x - pages["story"]->GetPosition().x),
-      kBubbleRadius * 2.0f);
+      kBaseUnit * 2.0f);
   for (const auto& buttonName : buttonSection->GetOrder()) {
     std::shared_ptr<ButtonUnit> buttonUnit =
         std::dynamic_pointer_cast<ButtonUnit>(
@@ -567,13 +566,13 @@ void GameManager::Init() {
       pages["story"]->GetBottomSpacing() - pages["story"]->GetTopSpacing() -
       interspacingBetweenTextAndButton;
   textSection->SetInterUnitSpacing("storytextunit", "liucheicontextunit",
-                                   3.5f * kBubbleRadius);
+                                   3.5f * kBaseUnit);
   textSection->SetInterUnitSpacing("liucheicontextunit", "weizifuicontextunit",
-                                   2.f * kBubbleRadius);
+                                   2.f * kBaseUnit);
   textSection->SetInterUnitSpacing("weizifuicontextunit", "weiqingicontextunit",
-                                   2.f * kBubbleRadius);
+                                   2.f * kBaseUnit);
   textSection->SetInterUnitSpacing("weiqingicontextunit", "guojieicontextunit",
-                                   2.f * kBubbleRadius);
+                                   2.f * kBaseUnit);
   textSection->SetUnitHorizontalOffset("weiqingicontextunit",
                                        weiqingIconOffset);
   textSection->SetUnitHorizontalOffset("guojieicontextunit", guojieIconOffset);
@@ -624,20 +623,20 @@ void GameManager::Init() {
   buttonSection->AddContent(restartButtonUnit);
   buttonSection->AddContent(stopButtonUnit);
   buttonSection->SetInterUnitSpacing("resumebuttonunit", "restartbuttonunit",
-                                     0.1f * kBubbleRadius);
+                                     0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing("restartbuttonunit", "stopbuttonunit",
-                                     0.1f * kBubbleRadius);
+                                     0.1f * kBaseUnit);
   buttonSection->SetInterUnitSpacing("stopbuttonunit", "backbuttonunit",
-                                     0.1f * kBubbleRadius);
+                                     0.1f * kBaseUnit);
   buttonSection->SetOrder({"resumebuttonunit", "restartbuttonunit",
                            "stopbuttonunit", "backbuttonunit"});
   pages["control"] = std::make_unique<Page>("control");
   pages["control"]->AddSection(textSection);
   pages["control"]->AddSection(buttonSection);
   // Set the top, bottom and left spacing of the page "control".
-  pages["control"]->SetTopSpacing(0.5f * kBubbleRadius);
-  pages["control"]->SetBottomSpacing(0.5f * kBubbleRadius);
-  pages["control"]->SetLeftSpacing(0.5f * kBubbleRadius);
+  pages["control"]->SetTopSpacing(0.5f * kBaseUnit);
+  pages["control"]->SetBottomSpacing(0.5f * kBaseUnit);
+  pages["control"]->SetLeftSpacing(0.5f * kBaseUnit);
   // Set the inter spacing between the sections of the page "control".
   pages["control"]->SetInterSectionSpacing(
       "controltextsection", "controlbuttonsection", kCommonInterSectionSpacing);
@@ -648,7 +647,7 @@ void GameManager::Init() {
   commonButtonSize = glm::vec2(
       gameBoard->GetSize().x -
           2 * (commonButtionPosition.x - pages["control"]->GetPosition().x),
-      kBubbleRadius * 2.0f);
+      kBaseUnit * 2.0f);
   for (const auto& buttonName : buttonSection->GetOrder()) {
     std::shared_ptr<ButtonUnit> buttonUnit =
         std::dynamic_pointer_cast<ButtonUnit>(
@@ -668,7 +667,7 @@ void GameManager::Init() {
   textSection->SetMaxHeight(maxHeightForTextSection);
   textSection->SetMaxWidth(gameBoard->GetSize().x -
                            pages["control"]->GetLeftSpacing() -
-                           0.5 * kBubbleRadius);
+                           0.5 * kBaseUnit);
   pages["control"]->SetPosition(glm::vec2(
       this->gameBoard->GetPosition().x,
       std::max(
@@ -698,16 +697,15 @@ void GameManager::Init() {
   buttonSection = std::make_shared<PageSection>("displaysettingbuttonsection");
   textSection->AddContent(displaysetting1);
   textSection->AddContent(displaysetting2);
-  textSection->SetInterUnitSpacing("fullscreen", "windowed",
-                                   0.5f * kBubbleRadius);
+  textSection->SetInterUnitSpacing("fullscreen", "windowed", 0.5f * kBaseUnit);
   buttonSection->AddContent(backButtonUnit);
   pages["displaysettings"] = std::make_unique<Page>("displaysettings");
   pages["displaysettings"]->AddSection(textSection);
   pages["displaysettings"]->AddSection(buttonSection);
   // Set the top, bottom and left spacing of the page "Display Settings".
-  pages["displaysettings"]->SetTopSpacing(0.5f * kBubbleRadius);
-  pages["displaysettings"]->SetBottomSpacing(0.5f * kBubbleRadius);
-  pages["displaysettings"]->SetLeftSpacing(0.5f * kBubbleRadius);
+  pages["displaysettings"]->SetTopSpacing(0.5f * kBaseUnit);
+  pages["displaysettings"]->SetBottomSpacing(0.5f * kBaseUnit);
+  pages["displaysettings"]->SetLeftSpacing(0.5f * kBaseUnit);
   // Set the inter spacing between the sections of the page "Display Settings".
   pages["displaysettings"]->SetInterSectionSpacing(
       "displaysettingtextsection", "displaysettingbuttonsection",
@@ -723,7 +721,7 @@ void GameManager::Init() {
   textSection->SetMaxHeight(maxHeightForTextSection);
   textSection->SetMaxWidth(gameBoard->GetSize().x -
                            pages["displaysettings"]->GetLeftSpacing() -
-                           0.5 * kBubbleRadius);
+                           0.5 * kBaseUnit);
   pages["displaysettings"]->SetPosition(
       glm::vec2(this->gameBoard->GetPosition().x,
                 std::max(this->gameBoard->GetCenter().y -
@@ -739,9 +737,9 @@ void GameManager::Init() {
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForOpening());
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
   // Set the narrowing, closing, and opening velocity of the scroll
-  scroll->SetVelocityForNarrowing(kBubbleRadius);
-  scroll->SetVelocityForClosing(48 * kBubbleRadius);
-  scroll->SetVelocityForOpening(96 * kBubbleRadius);
+  scroll->SetVelocityForNarrowing(kBaseUnit);
+  scroll->SetVelocityForClosing(48 * kBaseUnit);
+  scroll->SetVelocityForOpening(96 * kBaseUnit);
   // Set the target position for scroll retracting, deploying, and attacking
   scroll->SetTargetPositionForRetracting(
       glm::vec2(this->width * 0.16f, this->height * 0.83f));
@@ -815,7 +813,7 @@ void GameManager::Init() {
     if (i > 0) {
       textSection->SetInterUnitSpacing(
           language_map[languagePreferenceOrder[i - 1]],
-          language_map[languagePreferenceOrder[i]], 0.5f * kBubbleRadius);
+          language_map[languagePreferenceOrder[i]], 0.5f * kBaseUnit);
     }
   }
 
@@ -825,9 +823,9 @@ void GameManager::Init() {
   pages[languagePreferencePageName]->AddSection(textSection);
   pages[languagePreferencePageName]->AddSection(buttonSection);
   // Set the top, bottom and left spacing of the page "Display Settings".
-  pages[languagePreferencePageName]->SetTopSpacing(0.5f * kBubbleRadius);
-  pages[languagePreferencePageName]->SetBottomSpacing(0.5f * kBubbleRadius);
-  pages[languagePreferencePageName]->SetLeftSpacing(0.5f * kBubbleRadius);
+  pages[languagePreferencePageName]->SetTopSpacing(0.5f * kBaseUnit);
+  pages[languagePreferencePageName]->SetBottomSpacing(0.5f * kBaseUnit);
+  pages[languagePreferencePageName]->SetLeftSpacing(0.5f * kBaseUnit);
   // Set the inter spacing between the sections of the page "Display Settings".
   pages[languagePreferencePageName]->SetInterSectionSpacing(
       languagePreferencePageName + textSectionBaseName,
@@ -845,7 +843,7 @@ void GameManager::Init() {
   textSection->SetMaxHeight(maxHeightForTextSection);
   textSection->SetMaxWidth(gameBoard->GetSize().x -
                            pages[languagePreferencePageName]->GetLeftSpacing() -
-                           0.5 * kBubbleRadius);
+                           0.5 * kBaseUnit);
   pages[languagePreferencePageName]->SetPosition(glm::vec2(
       this->gameBoard->GetPosition().x,
       std::max(this->gameBoard->GetCenter().y -
@@ -862,9 +860,9 @@ void GameManager::Init() {
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
   // Set the narrowing, closing, and opening velocity of the scroll
-  scroll->SetVelocityForNarrowing(kBubbleRadius);
-  scroll->SetVelocityForClosing(48 * kBubbleRadius);
-  scroll->SetVelocityForOpening(96 * kBubbleRadius);
+  scroll->SetVelocityForNarrowing(kBaseUnit);
+  scroll->SetVelocityForClosing(48 * kBaseUnit);
+  scroll->SetVelocityForOpening(96 * kBaseUnit);
   // Set the target position for scroll retracting, deploying, and attacking
   scroll->SetTargetPositionForRetracting(
       glm::vec2(this->width * 0.16f, this->height * 0.83f));
@@ -1125,9 +1123,9 @@ void GameManager::ProcessInput(float dt) {
                     gameCharacters["guojie"]->GetTargetPosition("landing"));
                 // Set the initial velocity and acceleration of guojie.
                 gameCharacters["guojie"]->SetVelocity(
-                    glm::vec2(0.0f, 10.0f * kBubbleRadius));
+                    glm::vec2(0.0f, 10.0f * kBaseUnit));
                 gameCharacters["guojie"]->SetAcceleration(
-                    glm::vec2(0.0f, 10.0f * 9.8f * kBubbleRadius));
+                    glm::vec2(0.0f, 10.0f * 9.8f * kBaseUnit));
                 // Reset the score to 0.
                 this->ResetScore(0);
               } else if (content == "exit") {
@@ -1515,7 +1513,7 @@ void GameManager::Update(float dt) {
           glm::vec4(0.388235f, 0.174671f, 0.16863f, 1.0f), false, 2000,
           this->scroll->GetSilkWidth() * 0.5f,
           this->scroll->GetSilkLen() * 0.5f,
-          glm::vec2(2 * kBubbleRadius / 15.f, 4 * kBubbleRadius / 15.f));
+          glm::vec2(2 * kBaseUnit / 15.f, 4 * kBaseUnit / 15.f));
       explosionSystem->CreateExplosions(explosionInfo);
 
       // Set the scroll to DISABLED state.
@@ -1674,7 +1672,6 @@ void GameManager::Update(float dt) {
       // And if they together form a group of more than 2 bubbles, then we
       // remove them.
       std::vector<int> connectedBubbleIds = FindConnectedBubblesOfSameColor(id);
-
       if (connectedBubbleIds.size() > 2) {
         // Remove the connected bubbles from the static bubbles and push them
         // into explodings.
@@ -1743,28 +1740,27 @@ void GameManager::Update(float dt) {
                           gameCharacters["guojie"]->GetSize().x / 2.0f,
                       gameCharacters["guojie"]->GetPosition().y +
                           gameCharacters["guojie"]->GetSize().y * 0.53f);
-        // Randomly add offset to the target position within a circle of radius
-        // kBubbleRadius.
+        // Randomly add offset to the target position within a circle of
+        // kBaseUnit.
         float angle = static_cast<float>(rand()) /
                       static_cast<float>(RAND_MAX) * 2 * glm::pi<float>();
         float radius = static_cast<float>(rand()) /
-                       static_cast<float>(RAND_MAX) * kBubbleRadius * 0.65f;
+                       static_cast<float>(RAND_MAX) * kBaseUnit * 0.65f;
         glm::vec2 offset =
             glm::vec2(radius * std::cos(angle), radius * std::sin(angle));
         targetPostion += offset;
 
         arrows.emplace_back(std::make_shared<Arrow>(
             glm::vec2(
-                gameCharacters["weiqing"]->GetPosition().x - 2 * kBubbleRadius,
-                gameCharacters["weiqing"]->GetPosition().y +
-                    5.5 * kBubbleRadius),
+                gameCharacters["weiqing"]->GetPosition().x - 2 * kBaseUnit,
+                gameCharacters["weiqing"]->GetPosition().y + 5.5 * kBaseUnit),
             glm::vec2(this->width / 13.6708861f, this->height / 70.f),
             ResourceManager::GetInstance().GetTexture("arrow3")));
         /*arrows.emplace_back(glm::vec2(gameCharacters["guojie"]->GetPosition().x
          * + 3 * kBubbleRadius, gameCharacters["guojie"]->GetPosition().y + 5.5
          * * kBubbleRadius), glm::vec2(this->width / 13.6708861f, this->height
          * / 70.f), ResourceManager::GetInstance().GetTexture("arrow3"));*/
-        arrows.back()->Fire(targetPostion, 65.0f * kBubbleRadius);
+        arrows.back()->Fire(targetPostion, 65.0f * kBaseUnit);
 
         this->GoToState(GameState::PREPARING);
         this->timer->SetEventTimer("refreshscore", 0.05f);
@@ -1817,7 +1813,7 @@ void GameManager::Update(float dt) {
         // Narrow the scroll
         this->scroll->SetState(ScrollState::NARROWING);
         this->scroll->SetTargetSilkLenForNarrowing(gameBoardSize.y -
-                                                   2 * kBubbleRadius);
+                                                   2 * kBaseUnit);
         // Restart the event timer for narrowing the scroll.
         this->timer->StartEventTimer("beforenarrowing");
         // Pause the event timer for narrowing the scroll.
@@ -1978,7 +1974,7 @@ void GameManager::Update(float dt) {
       // down.
       if (scrollCenterY < 0.f && scroll->GetVelocity() == glm::vec2(0.f, 0.f)) {
         glm::vec2 scrollCenter = scroll->GetCenter();
-        scroll->SetVelocity(glm::vec2(0.0f, 26 * kBubbleRadius));
+        scroll->SetVelocity(glm::vec2(0.0f, 26 * kBaseUnit));
         float stopPoint = this->height * 0.545f;
         float timeToStop =
             2.f * (stopPoint - scrollCenter.y) / scroll->GetVelocity().y;
@@ -1991,7 +1987,7 @@ void GameManager::Update(float dt) {
 
         if (scroll->GetVelocity().y <= 0.f &&
             areFloatsEqual(scrollCenterY, this->height * 0.5f,
-                           kBubbleRadius * 0.04f)) {
+                           kBaseUnit * 0.04f)) {
           // Set the center of the scroll to be at the center of the screen.
           scroll->SetCenter(glm::vec2(this->width / 2.0f, this->height / 2.0f));
           // Set the velocity and acceleration of the scroll to be 0.
@@ -2037,7 +2033,7 @@ void GameManager::Update(float dt) {
       float offset = textSection->GetOffset();
       targetOffset = std::min(0.f, targetOffset);
       if (offset > targetOffset) {
-        offset = std::max(offset - 5 * kBubbleRadius * dt, targetOffset);
+        offset = std::max(offset - 5 * kBaseUnit * dt, targetOffset);
         this->pages.at("story")
             ->GetSection("storytextsection")
             ->SetOffset(offset);
@@ -2129,7 +2125,6 @@ void GameManager::Update(float dt) {
   // Check if the characters are moving to the target position.
   for (auto& [name, character] : gameCharacters) {
     if (character->IsMoving()) {
-      /*float characterVelocity = 30 * kBubbleRadius;*/
       float characterVelocity = glm::length(
           character->GetVelocity() + character->GetAcceleration() * dt * 0.5f);
       glm::vec2 characterDirection =
@@ -2142,7 +2137,7 @@ void GameManager::Update(float dt) {
        * this->frameCount << std::endl;*/
       shadowTrailSystem->respawnParticles(
           *character, 40, characterVelocityVec * 0.1f,
-          glm::vec2(kBubbleRadius * 0.2f, kBubbleRadius * 0.4f),
+          glm::vec2(kBaseUnit * 0.2f, kBaseUnit * 0.4f),
           glm::vec2(character->GetSize().x * 0.46f,
                     character->GetSize().y * 0.48f));
 
@@ -2498,9 +2493,9 @@ void GameManager::Render() {
 
           // start shake effect
           float shakingStrengthForX =
-              kBubbleRadius * 0.6048f;  // Shaking intensity for the X axis
+              kBaseUnit * 0.6048f;  // Shaking intensity for the X axis
           float shakingStrengthForY =
-              kBubbleRadius * 0.3402f;  // Shaking intensity for the Y axis
+              kBaseUnit * 0.3402f;  // Shaking intensity for the Y axis
           float timeMultiplierForX =
               60.0f;  // Controls the frequency of shaking along the X axis
           float timeMultiplierForY =
@@ -2920,9 +2915,9 @@ void GameManager::LoadTexts() {
   textsToLoad.push_back(resourceManager.GetText("story", "2"));
   if (texts.find("story") == texts.end()) {
     texts["story"] = std::make_shared<Text>(
-        /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBubbleRadius / 2.0f,
-                          gameBoard->GetPosition().y + kBubbleRadius / 2.0f),
-        /*lineWidth=*/gameBoard->GetSize().x - 2 * kBubbleRadius);
+        /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBaseUnit / 2.0f,
+                          gameBoard->GetPosition().y + kBaseUnit / 2.0f),
+        /*lineWidth=*/gameBoard->GetSize().x - 2 * kBaseUnit);
     for (const auto& textToLoad : textsToLoad) {
       texts["story"]->AddParagraph(textToLoad);
     }
@@ -2940,9 +2935,9 @@ void GameManager::LoadTexts() {
   textsToLoad.push_back(resourceManager.GetText("control", "4"));
   if (texts.find("control") == texts.end()) {
     texts["control"] = std::make_shared<Text>(
-        /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBubbleRadius / 2.0f,
-                          gameBoard->GetPosition().y + kBubbleRadius / 2.0f),
-        /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+        /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBaseUnit / 2.0f,
+                          gameBoard->GetPosition().y + kBaseUnit / 2.0f),
+        /*lineWidth=*/gameBoard->GetSize().x - kBaseUnit);
     for (const auto& textToLoad : textsToLoad) {
       texts["control"]->AddParagraph(textToLoad);
     }
@@ -3035,16 +3030,16 @@ void GameManager::LoadTexts() {
 
   if (texts.find("time") == texts.end()) {
     texts["time"] = std::make_shared<Text>(
-        /*pos=*/glm::vec2(gameBoard->GetPosition().x + gameBoard->GetSize().x -
-                              2 * kBubbleRadius,
-                          gameBoard->GetPosition().y - kBubbleRadius),
+        /*pos=*/glm::vec2(
+            gameBoard->GetPosition().x + gameBoard->GetSize().x - 2 * kBaseUnit,
+            gameBoard->GetPosition().y - kBaseUnit),
         /*lineWidth=*/gameBoard->GetSize().x);
     texts["time"]->AddParagraph(U"30");
     texts["time"]->SetScale(0.025f / kFontScale);
     // Get the center of the text "time"
     glm::vec2 centerTime;
     centerTime.x =
-        gameBoard->GetPosition().x + gameBoard->GetSize().x - kBubbleRadius;
+        gameBoard->GetPosition().x + gameBoard->GetSize().x - kBaseUnit;
     centerTime.y = gameBoard->GetPosition().y -
                    this->scroll->GetTopRoller()->GetSize().y * 0.37f;
     texts["time"]->SetCenter(centerTime);
@@ -3068,7 +3063,7 @@ void GameManager::LoadTexts() {
     if (texts.find(gameCharacterName + "intro") == texts.end()) {
       texts[gameCharacterName + "intro"] = std::make_shared<Text>(
           /*pos=*/glm::vec2(0.f),
-          /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+          /*lineWidth=*/gameBoard->GetSize().x - kBaseUnit);
       texts[gameCharacterName + "intro"]->AddParagraph(
           resourceManager.GetText("characterintro", gameCharacterName));
       texts[gameCharacterName + "intro"]->SetScale(0.0216f / kFontScale);
@@ -3082,13 +3077,6 @@ void GameManager::LoadTexts() {
 void GameManager::LoadButtons() {
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   //  Create buttons
-  // Button menuButton = Button(glm::vec2(this->width / 2.0f - kBubbleRadius
-  // * 4.0f, this->height * 0.84f), glm::vec2(kBubbleRadius * 8.f,
-  // kBubbleRadius* 3.0f), "Menu"); glm::vec2 commonButtionPosition =
-  // glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f, this->height * 0.84f);
-  // glm::vec2 commonButtonSize =
-  // glm::vec2(gameBoard->GetSize().x-2*(commonButtionPosition.x-gameBoard->GetPosition().x),
-  // kBubbleRadius * 3.0f);
   std::vector<std::string> buttonNames = {
       "back", "control",         "start",
       "exit", "restart",         "resume",
@@ -3096,9 +3084,9 @@ void GameManager::LoadButtons() {
   for (const auto& buttonName : buttonNames) {
     if (buttons.find(buttonName) == buttons.end()) {
       buttons[buttonName] = std::make_shared<Button>(
-          glm::vec2(this->width / 2.0f - kBubbleRadius * 4.5f,
+          glm::vec2(this->width / 2.0f - kBaseUnit * 4.5f,
                     this->height * 0.84f),
-          glm::vec2(kBubbleRadius * 6.5f, kBubbleRadius * 3.0f),
+          glm::vec2(kBaseUnit * 6.5f, kBaseUnit * 3.0f),
           resourceManager.GetText("button", buttonName));
     } else {
       buttons[buttonName]->GetText().SetParagraph(
@@ -3773,7 +3761,7 @@ std::vector<glm::vec2> GameManager::GetPotentialNeighborFreeSlots(
     glm::vec2 bubbleCenter) {
   std::vector<glm::vec2> neighborCenters;
   // The angle between two neighbors is mutiple of 30 degrees.
-  float angle = glm::radians(30.0f);
+  constexpr float angle = glm::radians(30.0f);
   float totalNeighborNum = std::round(2 * glm::pi<float>() / angle);
   // The first neighbor is the right neighbor.
   glm::vec2 rightNeighbor = bubbleCenter + glm::vec2(2 * kBubbleRadius, 0.0f);
@@ -3966,6 +3954,22 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
 }
 
 void GameManager::GenerateRandomStaticBubbles() {
+  GameLevel gameLevel;
+  gameLevel.numColors = level <= colorMap.size() ? level : colorMap.size();
+  gameLevel.numInitialBubbles = 10 + level * 5;
+  gameLevel.maxInitialBubbleDepth =
+      this->gameBoard->GetSize().y * level / numGameLevels;
+  gameLevel.probabilityNewBubbleIsNeighborOfLastAdded =
+      1.f - 1.f / numGameLevels * level;
+  gameLevel.probabilityNewBubbleIsNeighborOfBubble =
+      1.f - 1.f / numGameLevels * level;
+  gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor =
+      1.f - 1.f / numGameLevels * level;
+  gameLevel.narrowingTimeInterval = numGameLevels * 0.5f - 0.3f * level;
+
+  // The radius of the bubble decreases as per 10 levels.
+  kBubbleRadius = kBaseUnit * std::pow(0.9f, (level - 1) / 10);
+
   // Get the boundaries of the game board (left, upper, right, lower)
   glm::vec4 boundaries =
       glm::vec4(gameBoard->GetPosition().x, gameBoard->GetPosition().y,
@@ -3989,23 +3993,12 @@ void GameManager::GenerateRandomStaticBubbles() {
   // Shuffle the free slots
   std::shuffle(freeSlots.begin(), freeSlots.end(), rng);
 
-  GameLevel gameLevel;
-  gameLevel.numColors = level <= colorMap.size() ? level : colorMap.size();
-  gameLevel.numInitialBubbles = 10 + level * 5;
-  gameLevel.maxInitialBubbleDepth =
-      this->gameBoard->GetSize().y * level / numGameLevels;
-  gameLevel.probabilityNewBubbleIsNeighborOfLastAdded =
-      1.f - 1.f / numGameLevels * level;
-  gameLevel.probabilityNewBubbleIsNeighborOfBubble =
-      1.f - 1.f / numGameLevels * level;
-  gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor =
-      1.f - 1.f / numGameLevels * level;
-  gameLevel.narrowingTimeInterval = numGameLevels * 0.5f - 0.3f * level;
+  this->shooter->UpdateCarriedBubbleRadius(kBubbleRadius);
   GenerateRandomStaticBubblesHelper(gameLevel);
   /*if (level <= numGameLevels) {
     gameLevel.numColors = 1;
     gameLevel.numInitialBubbles = 10;
-    gameLevel.maxInitialBubbleDepth = 22 * kBubbleRadius;
+    gameLevel.maxInitialBubbleDepth = 22 * kBaseUnit;
     gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 1.f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 1.f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 1.f;
@@ -4013,7 +4006,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   } else if (level == 2) {
     gameLevel.numColors = 3;
     gameLevel.numInitialBubbles = 30;
-    gameLevel.maxInitialBubbleDepth = 24 * kBubbleRadius;
+    gameLevel.maxInitialBubbleDepth = 24 * kBaseUnit;
     gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.85f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.85f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.85f;
@@ -4021,7 +4014,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   } else if (level == 3) {
     gameLevel.numColors = 5;
     gameLevel.numInitialBubbles = 50;
-    gameLevel.maxInitialBubbleDepth = 26 * kBubbleRadius;
+    gameLevel.maxInitialBubbleDepth = 26 * kBaseUnit;
     gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.7f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.7f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.7f;
@@ -4029,7 +4022,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   } else if (level == 4) {
     gameLevel.numColors = 7;
     gameLevel.numInitialBubbles = 70;
-    gameLevel.maxInitialBubbleDepth = 28 * kBubbleRadius;
+    gameLevel.maxInitialBubbleDepth = 28 * kBaseUnit;
     gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.55f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.55f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.55f;
@@ -4037,7 +4030,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   } else if (level == 5) {
     gameLevel.numColors = 9;
     gameLevel.numInitialBubbles = 90;
-    gameLevel.maxInitialBubbleDepth = 32 * kBubbleRadius;
+    gameLevel.maxInitialBubbleDepth = 32 * kBaseUnit;
     gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.4f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.4f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.4f;
@@ -4046,7 +4039,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   else if (level >= 6) {
     gameLevel.numColors = 10;
     gameLevel.numInitialBubbles = 110;
-    gameLevel.maxInitialBubbleDepth = 32 * kBubbleRadius;
+    gameLevel.maxInitialBubbleDepth = 32 * kBaseUnit;
     gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.25f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.25f;
     gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.25f;
@@ -4189,7 +4182,7 @@ std::shared_ptr<OptionUnit> GameManager::CreateClickableOptionUnit(
   // Create the text unit
   texts[name] = std::make_shared<Text>(
       /*pos=*/glm::vec2(0.f),
-      /*lineWidth=*/gameBoard->GetSize().x - kBubbleRadius);
+      /*lineWidth=*/gameBoard->GetSize().x - kBaseUnit);
   texts[name]->AddParagraph(text);
   texts[name]->SetScale(0.0018f * imageUnit->GetHeight());
   if (textRenderer == nullptr) {

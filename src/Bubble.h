@@ -54,6 +54,7 @@ class Bubble : public GameObject {
   void Move(float deltaTime);
 
   // Getters and setters
+  void SetRadius(float radius);
   float GetRadius() const;
   glm::vec2 GetCenter() const;
 

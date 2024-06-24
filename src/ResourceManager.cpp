@@ -26,8 +26,9 @@ std::unordered_map<Color, glm::vec3> colorMap = {
 // const glm::vec2 kWindowSize = glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 float screenScale = 1.0f;
-float kBubbleRadius = kWindowSize.y / 42.f;
-float kVelocityUnit = 2 * kBubbleRadius;
+float kBaseUnit = kWindowSize.y / 42.f;
+float kBubbleRadius = kBaseUnit;
+float kVelocityUnit = 2 * kBaseUnit;
 glm::vec2 kBubbleSize = glm::vec2(kBubbleRadius * 2, kBubbleRadius * 2);
 float kFontScale = 0.2f;
 float kFontSize = kWindowSize.y * kFontScale;

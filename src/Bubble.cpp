@@ -126,6 +126,13 @@ bool Bubble::Move(float deltaTime, glm::vec4 boundaries,
 
 void Bubble::Move(float deltaTime) { position += velocity * deltaTime; }
 
+void Bubble::SetRadius(float radius) {
+  glm::vec2 center = GetCenter();
+  this->radius = radius;
+  this->size = glm::vec2(radius * 2.0f, radius * 2.0f);
+  this->position = center - glm::vec2(radius, radius);
+}
+
 float Bubble::GetRadius() const { return radius; }
 
 glm::vec2 Bubble::GetCenter() const {

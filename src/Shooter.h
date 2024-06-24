@@ -55,6 +55,9 @@ class Shooter : public GameObject {
   glm::vec4 GetNewBubbleColor(
       const std::unordered_map<int, std::unique_ptr<Bubble>>& statics);
 
+  // Update carriedBubble radius.
+  void UpdateCarriedBubbleRadius(float radius);
+
  private:
   // The bubble that the shooter is carrying.
   Bubble carriedBubble;

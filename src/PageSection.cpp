@@ -1,6 +1,6 @@
 #include "PageSection.h"
 
-const float PageSection::kScrollIconWidth = 0.5f * kBubbleRadius;
+const float PageSection::kScrollIconWidth = 0.5f * kBaseUnit;
 
 PageSection::PageSection(const std::string& name)
     : name_(name),
@@ -205,9 +205,9 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer,
   scroll_icon_ = std::make_unique<Capsule>();
   // Set the size of the scroll icon. The height of the scroll icon is based on
   // the difference between height and max_height_. The minimum height of the
-  // scroll icon is 0.8 * kBubbleRadius.
+  // scroll icon is 0.8 * kBaseUnit.
   float scroll_height =
-      std::max(0.8f * kBubbleRadius, (max_height_ / height) * max_height_);
+      std::max(0.8f * kBaseUnit, (max_height_ / height) * max_height_);
   scroll_icon_->SetSize(
       glm::vec2(PageSection::kScrollIconWidth, scroll_height));
   // Set the center of the icon to be at the right bottom of the text box.
@@ -285,9 +285,9 @@ void PageSection::UpdateScrollIconAndSectionOffset() {
   float offsetProportion = curOffset / expectedOffset;
   // Set the size of the scroll icon. The height of the scroll icon is based on
   // the difference between height and max_height_. The minimum height of the
-  // scroll icon is 0.8 * kBubbleRadius.
+  // scroll icon is 0.8 * kBaseUnit.
   float scroll_height =
-      std::max(0.8f * kBubbleRadius, (max_height_ / height) * max_height_);
+      std::max(0.8f * kBaseUnit, (max_height_ / height) * max_height_);
   scroll_icon_->SetSize(
       glm::vec2(PageSection::kScrollIconWidth, scroll_height));
 

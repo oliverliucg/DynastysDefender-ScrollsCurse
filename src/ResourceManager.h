@@ -73,15 +73,15 @@ struct ViewPortInfo {
 
 extern std::unordered_map<Color, glm::vec3> colorMap;
 
-const glm::vec3 kScoreColorPink = glm::vec3(1.0f, 0.0f, 0.56471f);
-const glm::vec3 kScoreColorOrange = glm::vec3(1.0f, 0.65f, 0.0f);
-const float kScoreAlpha = 0.5f;
+constexpr glm::vec3 kScoreColorPink = glm::vec3(1.0f, 0.0f, 0.56471f);
+constexpr glm::vec3 kScoreColorOrange = glm::vec3(1.0f, 0.65f, 0.0f);
+constexpr float kScoreAlpha = 0.5f;
 
 //// Small window for choosing game mode
 // extern glm::vec2 kOptionWindowSize;
 
 // Virtual screen size that the game is designed for
-const glm::vec2 kVirtualScreenSize = glm::vec2(3840, 2160);
+constexpr glm::vec2 kVirtualScreenSize = glm::vec2(3840, 2160);
 const SizePadding kVirtualScreenSizePadding =
     SizePadding(3840, 2160, 0, 0, 0, 0);
 
@@ -99,6 +99,9 @@ extern glm::vec2 kWindowSize;
 //// scale of width to make the proportion of game objects consistent
 // const float kWidthScale = 27/28.0f;
 extern float screenScale;
+
+// Define the base unit for the game
+extern float kBaseUnit;
 
 // Regular bubbble's radius and size.
 extern float kBubbleRadius;

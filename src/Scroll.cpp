@@ -13,10 +13,10 @@ Scroll::Scroll(glm::vec2 center, glm::vec2 rollerSize, glm::vec2 silkSize,
       currentSilkLenForNarrowing(0.f),
       targetSilkLenForClosing(0.f),
       targetSilkLenForOpening(0.f),
-      velocityForNarrowing(kBubbleRadius),
-      velocityForClosing(48 * kBubbleRadius),
-      velocityForOpening(96 * kBubbleRadius),
-      velocityForRetracting(24 * kBubbleRadius),
+      velocityForNarrowing(kBaseUnit),
+      velocityForClosing(48 * kBaseUnit),
+      velocityForOpening(96 * kBaseUnit),
+      velocityForRetracting(24 * kBaseUnit),
       targetPositionForRetracting(glm::vec2(0.f)),
       targetPositionForDeploying(glm::vec2(0.f)),
       targetPositionForAttacking(glm::vec2(0.f)) {
@@ -44,7 +44,7 @@ Scroll::Scroll(glm::vec2 center, glm::vec2 rollerSize, glm::vec2 silkSize,
   bottomRoller->SetRotationPivot(rotationPivotForBottomRoller);
 
   //// Update the postion of the whole scroll, It equal the position of the top
-  ///roller.
+  /// roller.
   // SetPosition(topRoller->GetPosition());
 }
 

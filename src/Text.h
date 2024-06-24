@@ -65,7 +65,7 @@ class Text {
        glm::vec4 boxBounds = glm::vec4(0.f, 0.f, kWindowSize),
        glm::vec3 color = glm::vec3(0.f), float scale = 1.0f,
        float lineSpacingFactor = 1.2f,
-       float additionalPadding = kBubbleRadius / 3.0f);
+       float additionalPadding = kBaseUnit / 3.0f);
   // Copy constructor
   Text(const Text& other);
   // Destructor

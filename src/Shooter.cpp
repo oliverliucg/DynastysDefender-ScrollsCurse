@@ -11,18 +11,17 @@ Shooter::Shooter(glm::vec2 pos, glm::vec2 size, glm::vec2 rotationPivot,
                          kBubbleRadius, glm::vec2(0.0f, 0.0f),
                          glm::vec4(0.0f, 1.0f, 0.0f, 0.8f),
                          ResourceManager::GetInstance().GetTexture("bubble"));
-  nextBubble =
-      Bubble(glm::vec2(tail.x - kBubbleRadius / 2, tail.y - kBubbleRadius / 2),
-             kBubbleRadius / 2, glm::vec2(0.0f, 0.0f),
-             glm::vec4(0.0f, 0.0f, 1.0f, 0.7f),
-             ResourceManager::GetInstance().GetTexture("bubble"));
+  nextBubble = Bubble(glm::vec2(tail.x - kBaseUnit / 2, tail.y - kBaseUnit / 2),
+                      kBaseUnit / 2, glm::vec2(0.0f, 0.0f),
+                      glm::vec4(0.0f, 0.0f, 1.0f, 0.7f),
+                      ResourceManager::GetInstance().GetTexture("bubble"));
   // Calculate the rotation pivot for the next bubble. This rotation pivot is
   // the point that the next bubble rotates around.
   glm::vec2 distance = rotationCenter - nextBubble.GetPosition();
   glm::vec2 rotationPivotForNextBubble(distance / nextBubble.GetSize());
   nextBubble.SetRotationPivot(rotationPivotForNextBubble);
   // Initialize the ray
-  //ray = Ray(rotationCenter, GetShootingDirection(),
+  // ray = Ray(rotationCenter, GetShootingDirection(),
   //          glm::vec4(0.24314, 0.08627, 0.00392, 1.0f));
   ray = Ray(rotationCenter, GetShootingDirection(),
             glm::vec4(1.f, 1.f, 1.f, 1.0f));
@@ -164,6 +163,11 @@ glm::vec4 Shooter::GetNewBubbleColor(
 }
 
 const Bubble& Shooter::GetCarriedBubble() const { return carriedBubble; }
+
+void Shooter::UpdateCarriedBubbleRadius(float radius) {
+  // Update the radius for the carried bubble
+  carriedBubble.SetRadius(kBubbleRadius);
+}
 
 void Shooter::Draw(std::shared_ptr<Renderer> renderer) {
   // Draw the shooter

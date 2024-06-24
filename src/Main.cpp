@@ -72,8 +72,9 @@ void switchToWindowedMode(GLFWwindow* window, int width, int height) {
 void SetWindowSize(int width, int height) {
   kWindowSize = glm::vec2(width, height);
   screenScale = width / kFullScreenSize.x;
-  kBubbleRadius = kWindowSize.y / 42.f;
-  kVelocityUnit = 2 * kBubbleRadius;
+  kBaseUnit = kWindowSize.y / 42.f;
+  kBubbleRadius = kBaseUnit;
+  kVelocityUnit = 2 * kBaseUnit;
   kBubbleSize = glm::vec2(kBubbleRadius * 2, kBubbleRadius * 2);
   kFontScale = 0.2f;
   kFontSize = kWindowSize.y * kFontScale;

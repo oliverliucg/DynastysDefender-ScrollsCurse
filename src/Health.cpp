@@ -130,7 +130,7 @@ void Health::SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color) {
   SetDamagePopOutDirection(this->damagePopOutToRight);
 
   // Set the scale of the damage text based on the size of the total health bar
-  damageTextScale = 0.06f * size.y / kBubbleRadius / kFontScale;
+  damageTextScale = 0.06f * size.y / kBaseUnit / kFontScale;
 }
 
 // void Health::SetCurrentHealthBar(glm::vec2 pos, glm::vec2 size,
@@ -148,12 +148,12 @@ Capsule& Health::GetTotalHealthBar() { return totalHealthBar; }
 void Health::IncreaseHealth(int mount) {
   if (mount == 0) return;
   // Create a new damage text
-  damageTexts.push_back(Text(/*pos=*/this->totalHealthBar.GetCenter() +
-                                 glm::vec2(0, 5 * kBubbleRadius),
-                             /*lineWidth=*/10 * kBubbleRadius));
+  damageTexts.push_back(Text(
+      /*pos=*/this->totalHealthBar.GetCenter() + glm::vec2(0, 5 * kBaseUnit),
+      /*lineWidth=*/10 * kBaseUnit));
   auto& damageText = damageTexts.back();
   damageText.SetPosition(this->totalHealthBar.GetCenter() +
-                         glm::vec2(0, 5 * kBubbleRadius));
+                         glm::vec2(0, 5 * kBaseUnit));
   std::u32string damageStr = intToU32String(mount * 300 / totalHealth);
   if (mount < 0) {
     damageText.SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -173,22 +173,22 @@ void Health::DecreaseHealth(int mount) { this->IncreaseHealth(-mount); }
 void Health::SetDamagePopOutDirection(bool popOutToRight) {
   damagePopOutToRight = popOutToRight;
   if (!damagePopOutToRight) {
-    damageTextInitialPosition = totalHealthBar.GetCenter() +
-                                glm::vec2(-kBubbleRadius, 5.5f * kBubbleRadius);
+    damageTextInitialPosition =
+        totalHealthBar.GetCenter() + glm::vec2(-kBaseUnit, 5.5f * kBaseUnit);
     damageTextTargetPosition =
         rotateVector(totalHealthBar.GetBottomSemiCircleCenter(),
                      totalHealthBar.GetRoll(), totalHealthBar.GetCenter()) +
-        glm::vec2(-kBubbleRadius, 2.7f * kBubbleRadius);
+        glm::vec2(-kBaseUnit, 2.7f * kBaseUnit);
   } else {
     damageTextInitialPosition =
-        totalHealthBar.GetCenter() + glm::vec2(0, 5.5f * kBubbleRadius);
+        totalHealthBar.GetCenter() + glm::vec2(0, 5.5f * kBaseUnit);
     damageTextTargetPosition =
         rotateVector(totalHealthBar.GetTopSemiCircleCenter(),
                      totalHealthBar.GetRoll(), totalHealthBar.GetCenter()) +
-        glm::vec2(0.f, 2.7f * kBubbleRadius);
+        glm::vec2(0.f, 2.7f * kBaseUnit);
   }
   damageTextFadedPosition =
-      damageTextTargetPosition - glm::vec2(0.0f, 5 * kBubbleRadius);
+      damageTextTargetPosition - glm::vec2(0.0f, 5 * kBaseUnit);
 }
 
 void Health::UpdateDamageTexts(float dt) {
@@ -212,7 +212,7 @@ void Health::UpdateDamageTexts(float dt) {
     glm::vec2 currentDirection =
         glm::normalize(targetPosition - damageText.GetPosition());
     // Get the new position of the damage text
-    float speed = isFadingOut ? 5.0f * kBubbleRadius : 30.0f * kBubbleRadius;
+    float speed = isFadingOut ? 5.0f * kBaseUnit : 30.0f * kBaseUnit;
     glm::vec2 newPosition = damageText.GetPosition() + speed * direction * dt;
     // Get distance from the initial position to the new position
     float newDistance = glm::distance(initialPosition, newPosition);

@@ -25,16 +25,16 @@ void ShadowTrailSystem::respawnParticles(GameObject& object, int numParticles,
   for (unsigned int i = 0; i < numParticles; ++i) {
     int unusedParticle = this->firstUnusedParticle();
     float randomMaxScale = 2.5f;
-    // Create a random X that is from -randomMaxScale * kBubbleRadius to
-    // randomMaxScale * kBubbleRadius
+    // Create a random X that is from -randomMaxScale * kBaseUnit to
+    // randomMaxScale * kBaseUnit
     float randomX = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) *
-                        randomMaxScale * 2 * kBubbleRadius -
-                    randomMaxScale * kBubbleRadius;
-    // Create a random Y that is from -randomMaxScale * kBubbleRadius to
-    // randomMaxScale * kBubbleRadius
+                        randomMaxScale * 2 * kBaseUnit -
+                    randomMaxScale * kBaseUnit;
+    // Create a random Y that is from -randomMaxScale * kBaseUnit to
+    // randomMaxScale * kBaseUnit
     float randomY = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) *
-                        randomMaxScale * 2 * kBubbleRadius -
-                    randomMaxScale * kBubbleRadius;
+                        randomMaxScale * 2 * kBaseUnit -
+                    randomMaxScale * kBaseUnit;
     float rColor = 0.5f + ((rand() % 100) / 100.0f);
     this->particles[unusedParticle].position =
         object.GetPosition() + glm::vec2(randomX, randomY) + offset;
@@ -47,7 +47,7 @@ void ShadowTrailSystem::respawnParticles(GameObject& object, int numParticles,
     this->particles[unusedParticle].velocity = velocity;
     this->particles[unusedParticle].scale = getRandomScale(scaleRange);
     this->particles[unusedParticle].fadeOutSpeed =
-        0.6f * glm::length(velocity) / kBubbleRadius + 0.4f;
+        0.6f * glm::length(velocity) / kBaseUnit + 0.4f;
     // if (this->particles[unusedParticle].position.y >= 0.f) {
     //     std::cout << "unused particle: " << unusedParticle << std::endl;
     //     std::cout << "position: " <<
