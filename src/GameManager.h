@@ -125,6 +125,7 @@ class GameManager {
   float mouseX, mouseY, mouseLastX, mouseLastY;
   float width, height;
   int level;
+  GameLevel gameLevel;
   int64_t score;
   bool hideDefaultMouseCursor;
 
@@ -183,7 +184,10 @@ class GameManager {
   std::unordered_map<int, std::unique_ptr<Bubble>> explodings;
 
   // Stores individual scores gained during game play
-  std::vector<int> scoreIncrements;
+  std::queue<int> scoreIncrements;
+
+  // number of score increments to be reflected on the screen
+  int numOfScoreIncrementsReady;
 
   // Arrows
   std::vector<std::shared_ptr<Arrow>> arrows;
@@ -432,7 +436,7 @@ class GameManager {
   // bubble type (exploding or falling), the game level, and the timed used in
   // the current round.
   int CalculateScore(int numBubbles, float bubbleRadius, BubbleState bubbleType,
-                     int gameLevel, float timeUsed);
+                     float timeUsed);
 
   // Increase the score by the given value.
   void IncreaseScore(int64_t value);

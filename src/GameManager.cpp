@@ -16,6 +16,7 @@ GameManager::GameManager(unsigned int width, unsigned int height)
       level(1),
       score(ConfigManager::GetInstance().GetScore()),
       hideDefaultMouseCursor(false),
+      numOfScoreIncrementsReady(0),
       activePage("") {
   // Initialize all key states to false
   memset(keys, false, sizeof(keys));
@@ -1056,8 +1057,8 @@ void GameManager::ProcessInput(float dt) {
       // Delete all the static bubbles.
       statics.clear();
 
-      // Reset score
-      this->ResetScore(ConfigManager::GetInstance().GetScore());
+      //// Reset score
+      // this->ResetScore(ConfigManager::GetInstance().GetScore());
 
       // Reset the game level to 1.
       this->level = 1;
@@ -1195,6 +1196,7 @@ void GameManager::ProcessInput(float dt) {
                     glm::vec2(0.0f, 10.0f * 9.8f * kBaseUnit));
                 // Reset the score to 0.
                 this->ResetScore(0);
+
               } else if (content == "exit") {
                 this->SetState(GameState::EXIT);
               } else if (content == "back") {
@@ -1778,19 +1780,19 @@ void GameManager::Update(float dt) {
           statics.erase(fallingId);
           shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
         }
+
         // Calculate the score based on the number of bubbles exploded or
         // falling
         if (!explodings.empty()) {
           this->CalculateScore(explodings.size(),
                                explodings.begin()->second->GetRadius(),
-                               BubbleState::Exploding, this->level,
+                               BubbleState::Exploding,
                                this->timer->GetEventUsedTime("playtime"));
         }
         if (!fallings.empty()) {
-          this->CalculateScore(fallings.size(),
-                               fallings.begin()->second->GetRadius(),
-                               BubbleState::Falling, this->level,
-                               this->timer->GetEventUsedTime("playtime"));
+          this->CalculateScore(
+              fallings.size(), fallings.begin()->second->GetRadius(),
+              BubbleState::Falling, this->timer->GetEventUsedTime("playtime"));
         }
 
         // clear all the exploding bubbles.
@@ -1840,6 +1842,7 @@ void GameManager::Update(float dt) {
         arrows.back()->Fire(targetPostion, 65.0f * kBaseUnit);
 
         this->GoToState(GameState::PREPARING);
+        numOfScoreIncrementsReady += scoreIncrements.size();
         this->timer->SetEventTimer("refreshscore", 0.05f);
         this->timer->StartEventTimer("refreshscore");
         this->scroll->SetState(ScrollState::CLOSING);
@@ -1871,6 +1874,7 @@ void GameManager::Update(float dt) {
         this->scroll->SetState(ScrollState::CLOSING);
       }
       if (!scoreIncrements.empty()) {
+        numOfScoreIncrementsReady += scoreIncrements.size();
         this->timer->SetEventTimer("refreshscore", 0.05f);
         this->timer->StartEventTimer("refreshscore");
       }
@@ -2349,12 +2353,13 @@ void GameManager::Update(float dt) {
   // Refreshing the score
   if (this->timer->HasEvent("refreshscore") &&
       this->timer->IsEventTimerExpired("refreshscore")) {
-    assert(!this->scoreIncrements.empty() &&
+    assert(!this->scoreIncrements.empty() && numOfScoreIncrementsReady > 0 &&
            "The score increments should not be empty.");
-    int increment = this->scoreIncrements.back();
-    this->scoreIncrements.pop_back();
+    int increment = this->scoreIncrements.front();
+    this->scoreIncrements.pop();
+    --numOfScoreIncrementsReady;
     this->IncreaseScore(increment);
-    if (!this->scoreIncrements.empty()) {
+    if (numOfScoreIncrementsReady > 0) {
       this->timer->SetEventTimer("refreshscore", 0.05f);
       this->timer->StartEventTimer("refreshscore");
       // Increase the opacity of the score text.
@@ -2886,7 +2891,17 @@ void GameManager::SetState(GameState newState) {
   if (this->state == GameState::WIN || this->state == GameState::LOSE) {
     // Store the final score to the global config.
     ConfigManager& configManager = ConfigManager::GetInstance();
-    configManager.SetScore(this->score);
+
+    // As there might be some score increments that are not added to the total
+    // score yet, we need to create a temporary variable to store the total
+    // score
+    int tempScore = this->score;
+    std::queue<int> tempScoreIncrements = this->scoreIncrements;
+    while (!tempScoreIncrements.empty()) {
+      tempScore += tempScoreIncrements.front();
+      tempScoreIncrements.pop();
+    }
+    configManager.SetScore(tempScore);
   }
 }
 
@@ -4080,8 +4095,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   // The radius of the bubble decreases as per 10 levels.
   kBubbleRadius = kBaseUnit * std::pow(0.9f, (level - 1) / 10);
 
-  // The game level
-  GameLevel gameLevel;
+  // Update the game level
   gameLevel.numColors = level <= colorMap.size() ? level : colorMap.size();
   gameLevel.numInitialBubbles = 10 + level * 5;
   gameLevel.minDistanceToBottom =
@@ -4089,11 +4103,11 @@ void GameManager::GenerateRandomStaticBubbles() {
   gameLevel.minDistanceToShooter =
       5 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
   gameLevel.probabilityNewBubbleIsNeighborOfLastAdded =
-      1.f - 1.f / GetNumGameLevels() * level;
+      1.f - 0.85f / GetNumGameLevels() * level;
   gameLevel.probabilityNewBubbleIsNeighborOfBubble =
-      1.f - 1.f / GetNumGameLevels() * level;
+      1.f - 0.85f / GetNumGameLevels() * level;
   gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor =
-      1.f - 1.f / GetNumGameLevels() * level;
+      1.f - 0.85f / GetNumGameLevels() * level;
   gameLevel.narrowingTimeInterval = 15.f - 0.3f * level;
 
   // Get the boundaries of the game board (left, upper, right, lower)
@@ -4380,12 +4394,20 @@ void GameManager::ResetGameCharacters() {
 }
 
 int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
-                                BubbleState bubbleType, int gameLevel,
-                                float timeUsed) {
+                                BubbleState bubbleType, float timeUsed) {
   if (numBubbles < 3) {
     return 0;
   }
-  float score = 80.f - bubbleRadius + gameLevel * 5 - 2.f * timeUsed;
+  float score = 40.f - 0.5f * bubbleRadius +
+                0.5f * this->level * std::sqrt(this->level) -
+                timeUsed / std::sqrt(this->gameLevel.numInitialBubbles);
+  if (score < 0.f) {
+    // Map (-inf, 0) to (0, 1).
+    score = std::exp(score);
+  } else {
+    // Map [0, inf) to [1, inf).
+    ++score;
+  }
   if (bubbleType == BubbleState::Falling) {
     score *= 1.5f;
   }
@@ -4394,7 +4416,7 @@ int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
     if (i > 2) {
       score *= 1.2f;
     }
-    scoreIncrements.push_back(static_cast<int>(std::ceil(score)));
+    scoreIncrements.push(static_cast<int>(std::ceil(score)));
     totalIncrement += scoreIncrements.back();
   }
   // score *= numBubbles + 0.1f * (numBubbles - 2) * (numBubbles - 3);
@@ -4414,4 +4436,13 @@ void GameManager::ResetScore(int64_t value) {
   this->score = value;
   // Set the score text
   texts.at("score")->SetParagraph(1, U"{" + intToU32String(this->score) + U"}");
+
+  // Empty the queue of score increments
+  scoreIncrements = std::queue<int>();
+  numOfScoreIncrementsReady = 0;
+
+  // Clean the score increment event
+  if (this->timer->HasEvent("refreshscore")) {
+    this->timer->CleanEvent("refreshscore");
+  }
 }
