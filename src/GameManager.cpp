@@ -701,6 +701,8 @@ void GameManager::Init() {
       "medium", resourceManager.GetText("difficulty", "medium"));
   auto hardMode = CreateClickableOptionUnit(
       "hard", resourceManager.GetText("difficulty", "hard"));
+  auto expertMode = CreateClickableOptionUnit(
+      "expert", resourceManager.GetText("difficulty", "expert"));
   switch (this->GetDifficulty()) {
     case Difficulty::EASY:
       easyMode->SetState(OptionState::kClicked);
@@ -711,6 +713,9 @@ void GameManager::Init() {
     case Difficulty::HARD:
       hardMode->SetState(OptionState::kClicked);
       break;
+    case Difficulty::EXPERT:
+      expertMode->SetState(OptionState::kClicked);
+      break;
     default:
       break;
   }
@@ -719,8 +724,10 @@ void GameManager::Init() {
   textSection->AddContent(easyMode);
   textSection->AddContent(mediumMode);
   textSection->AddContent(hardMode);
+  textSection->AddContent(expertMode);
   textSection->SetInterUnitSpacing("easy", "medium", 0.5f * kBaseUnit);
   textSection->SetInterUnitSpacing("medium", "hard", 0.5f * kBaseUnit);
+  textSection->SetInterUnitSpacing("hard", "expert", 0.5f * kBaseUnit);
   buttonSection->AddContent(backButtonUnit);
   pages["difficulty"] = std::make_unique<Page>("difficulty");
   pages["difficulty"]->AddSection(textSection);
@@ -1307,6 +1314,8 @@ void GameManager::ProcessInput(float dt) {
                       this->SetDifficulty(Difficulty::MEDIUM);
                     } else if (optionToBeClicked == "hard") {
                       this->SetDifficulty(Difficulty::HARD);
+                    } else if (optionToBeClicked == "expert") {
+                      this->SetDifficulty(Difficulty::EXPERT);
                     }
                   } else if (activePage == "displaysettings") {
                     optionAlreadyClicked =
@@ -2834,6 +2843,8 @@ int GameManager::GetNumGameLevels() {
       return 20;
     case Difficulty::HARD:
       return 30;
+    case Difficulty::EXPERT:
+      return 40;
     default:
       return 20;
   }
@@ -2975,6 +2986,11 @@ void GameManager::SetDifficulty(Difficulty newDifficulty) {
   assert(newDifficulty != Difficulty::UNDEFINED &&
          "The difficulty is not defined.");
   this->difficulty = newDifficulty;
+  // Set the total health based on the difficulty.
+  this->gameCharacters.at("guojie")->GetHealth().SetTotalHealth(
+      this->GetNumGameLevels());
+  this->gameCharacters.at("guojie")->GetHealth().SetCurrentHealth(
+      this->GetNumGameLevels());
   // Store the difficulty to the global config.
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetDifficulty(this->difficulty);
@@ -3491,6 +3507,7 @@ bool GameManager::FineTuneToCorrectPosition(int bubbleId) {
   auto& bubble = moves[bubbleId];
   std::vector<int> neighborIds = GetNeighborIds(bubble);
   glm::vec4 boundaries = gameBoard->GetValidBoundaries();
+  glm::vec2 newPosition = bubble->GetPosition();
   if (neighborIds.empty()) {
     assert(IsAtUpperBoundary(bubble->GetPosition()) &&
            "The bubble is not at the upper boundary.");
@@ -3559,12 +3576,24 @@ bool GameManager::FineTuneToCorrectPosition(int bubbleId) {
            "The offset to the left and the right should be greater than or "
            "equal to 0.");
     if (offSetToLeft < offSetToRight) {
-      bubble->SetPosition(bubble->GetPosition() - glm::vec2(offSetToLeft, 0.f));
+      newPosition = bubble->GetPosition() - glm::vec2(offSetToLeft, 0.f);
+      /*bubble->SetPosition(bubble->GetPosition() - glm::vec2(offSetToLeft,
+       * 0.f));*/
     } else {
-      bubble->SetPosition(bubble->GetPosition() +
-                          glm::vec2(offSetToRight, 0.f));
+      newPosition = bubble->GetPosition() + glm::vec2(offSetToRight, 0.f);
+      // bubble->SetPosition(bubble->GetPosition() +
+      //                     glm::vec2(offSetToRight, 0.f));
     }
-    return std::min(offSetToLeft, offSetToRight) == 0.f;
+    // float weight =
+    //     GetFreeSlotWeight(bubble->GetColorWithoutAlpha(), newPosition);
+    // if (weight > 0.f) {
+    // bubble->SetPosition(newPosition);
+    // return true;
+    // }
+    // else {
+    //   return false;
+    // }
+    /*  return std::min(offSetToLeft, offSetToRight) == 0.f;*/
   } else if (neighborIds.size() == 1) {
     // Fine-tune the bubble's position to ensure its angle with a single
     // neighbor is a multiple of 30 degrees, measured clockwise from the right
@@ -3594,10 +3623,18 @@ bool GameManager::FineTuneToCorrectPosition(int bubbleId) {
     glm::vec2 targetDirection = rotateVector(baseDirection, targetAngle);
     glm::vec2 targetCenter =
         neighborBubble->GetCenter() + 2 * kBubbleRadius * targetDirection;
-    bubble->SetPosition(targetCenter - glm::vec2(kBubbleRadius, kBubbleRadius));
-    return true;
+    newPosition = targetCenter - glm::vec2(kBubbleRadius, kBubbleRadius);
+    // bubble->SetPosition(targetCenter - glm::vec2(kBubbleRadius,
+    // kBubbleRadius)); return true;
   }
-  return false;
+  float weight = GetFreeSlotWeight(bubble->GetColorWithoutAlpha(), newPosition);
+  if (weight > 0.f) {
+    bubble->SetPosition(newPosition);
+    return true;
+  } else {
+    return false;
+  }
+  /* return false;*/
 }
 
 bool GameManager::FineTuneToNeighbor(int bubbleId, int staticBubbleId) {
@@ -4096,19 +4133,51 @@ void GameManager::GenerateRandomStaticBubbles() {
   kBubbleRadius = kBaseUnit * std::pow(0.9f, (level - 1) / 10);
 
   // Update the game level
-  gameLevel.numColors = level <= colorMap.size() ? level : colorMap.size();
+  gameLevel.numColors =
+      level < colorMap.size() ? std::sqrt(level * 4.f - 3.f) : colorMap.size();
   gameLevel.numInitialBubbles = 10 + level * 5;
   gameLevel.minDistanceToBottom =
       4 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
   gameLevel.minDistanceToShooter =
       5 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
+  float difficultyScalingFactor = 0.8f;
+  switch (this->difficulty) {
+    case Difficulty::MEDIUM:
+      difficultyScalingFactor += 0.02f;
+      break;
+    case Difficulty::HARD:
+      difficultyScalingFactor += 0.04f;
+      break;
+    case Difficulty::EXPERT:
+      difficultyScalingFactor += 0.06f;
+      break;
+    default:
+      break;
+  }
   gameLevel.probabilityNewBubbleIsNeighborOfLastAdded =
-      1.f - 0.85f / GetNumGameLevels() * level;
+      1.f - difficultyScalingFactor / GetNumGameLevels() * level;
   gameLevel.probabilityNewBubbleIsNeighborOfBubble =
-      1.f - 0.85f / GetNumGameLevels() * level;
+      1.f - difficultyScalingFactor / GetNumGameLevels() * level;
   gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor =
-      1.f - 0.85f / GetNumGameLevels() * level;
-  gameLevel.narrowingTimeInterval = 15.f - 0.3f * level;
+      1.f - difficultyScalingFactor / GetNumGameLevels() * level;
+
+  float baseTime = 9.f, initialTime = 18.f;
+  switch (this->difficulty) {
+    case Difficulty::MEDIUM:
+      baseTime -= 1.f;
+      initialTime -= 1.f;
+      break;
+    case Difficulty::HARD:
+      baseTime -= 2.f;
+      initialTime -= 2.f;
+      break;
+    case Difficulty::EXPERT:
+      baseTime -= 3.f;
+      initialTime -= 3.f;
+      break;
+  }
+  gameLevel.narrowingTimeInterval =
+      glm::mix(initialTime, baseTime, level * 1.f / GetNumGameLevels());
 
   // Get the boundaries of the game board (left, upper, right, lower)
   glm::vec4 boundaries =
@@ -4200,7 +4269,7 @@ float GameManager::GetNarrowingTimeInterval() {
   // }
   // return time;
 
-  return 15.f - 0.3f * level;
+  return this->gameLevel.narrowingTimeInterval;
 }
 
 std::vector<glm::vec2> GameManager::GetCommonFreeSlots(

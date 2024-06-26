@@ -30,6 +30,7 @@ enum class Color {
   Cyan,
   White,
   LightBlue,
+  Brown,
 };
 
 struct SizePadding {

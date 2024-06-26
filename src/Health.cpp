@@ -154,7 +154,7 @@ void Health::IncreaseHealth(int mount) {
   auto& damageText = damageTexts.back();
   damageText.SetPosition(this->totalHealthBar.GetCenter() +
                          glm::vec2(0, 5 * kBaseUnit));
-  std::u32string damageStr = intToU32String(mount * 300 / totalHealth);
+  std::u32string damageStr = intToU32String(mount * 1200 / totalHealth);
   if (mount < 0) {
     damageText.SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
   } else {

@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_map>
 
-enum class Difficulty { UNDEFINED, EASY, MEDIUM, HARD };
+enum class Difficulty { UNDEFINED, EASY, MEDIUM, HARD, EXPERT };
 
 enum class ScreenMode { UNDEFINED, WINDOWED, FULLSCREEN };
 
@@ -59,7 +59,8 @@ struct hash<CharStyle> {
 inline std::unordered_map<Difficulty, std::string> difficulty_map = {
     {Difficulty::EASY, "easy"},
     {Difficulty::MEDIUM, "medium"},
-    {Difficulty::HARD, "hard"}};
+    {Difficulty::HARD, "hard"},
+    {Difficulty::EXPERT, "expert"}};
 
 // Define the language map
 inline std::unordered_map<Language, std::string> language_map = {

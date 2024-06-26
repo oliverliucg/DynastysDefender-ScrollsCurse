@@ -116,6 +116,9 @@ void ConfigManager::SetDifficulty(Difficulty difficulty) {
     case Difficulty::HARD:
       config_["difficulty"] = "hard";
       break;
+    case Difficulty::EXPERT:
+      config_["difficulty"] = "expert";
+      break;
     default:
       std::cerr << "Invalid difficulty value: " << static_cast<int>(difficulty)
                 << std::endl;
@@ -139,6 +142,8 @@ Difficulty ConfigManager::GetDifficulty() const {
     return Difficulty::MEDIUM;
   } else if (difficulty == "hard") {
     return Difficulty::HARD;
+  } else if (difficulty == "expert") {
+    return Difficulty::EXPERT;
   } else {
     std::cerr << "Invalid difficulty value in configuration file: "
               << difficulty << std::endl;
