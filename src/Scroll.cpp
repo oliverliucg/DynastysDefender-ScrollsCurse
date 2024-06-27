@@ -369,11 +369,11 @@ void Scroll::Attack(float dt) {
   } else {
     this->SetCenter(newCenter);
     this->SetRoll(this->GetRoll() + 8 * glm::pi<float>() * dt);
-    float newScale = this->GetScale() - 0.9 * dt;
-    if (newScale > 0.06f) {
+    float newScale = this->GetScale() - 0.8 * dt;
+    if (newScale > 0.07f) {
       this->SetScale(newScale);
     } else {
-      this->SetScale(0.06f);
+      this->SetScale(0.07f);
     }
   }
 }

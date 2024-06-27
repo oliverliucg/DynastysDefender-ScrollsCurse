@@ -206,16 +206,17 @@ void GameManager::Init() {
                               true, "particle1");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/cracks.png",
                               true, "cracks");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/liuchesad.png",
-                              true, "liuchesad");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/liuchehappy.png", true, "liuchehappy");
+      "C:/Users/xiaod/resources/textures/liuchesad2.png", true, "liuchesad");
+  resourceManager.LoadTexture(
+      "C:/Users/xiaod/resources/textures/liuchehappy3.png", true,
+      "liuchehappy");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/liucheangry.png", true, "liucheangry");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weizifusad.png", true, "weizifusad");
+      "C:/Users/xiaod/resources/textures/weizifusad3.png", true, "weizifusad");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weizifuhappy.png", true,
+      "C:/Users/xiaod/resources/textures/weizifuhappy3.png", true,
       "weizifuhappy");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/guojiefight.png", true, "guojiefight");
@@ -227,7 +228,7 @@ void GameManager::Init() {
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/weiqingsad.png", true, "weiqingsad");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqinghappy.png", true,
+      "C:/Users/xiaod/resources/textures/weiqinghappy2.png", true,
       "weiqinghappy");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/weiqingwin.png", true, "weiqingwin");
@@ -350,14 +351,15 @@ void GameManager::Init() {
 
   // Wei Qing
   positions.clear();
-  positions = {{GameCharacterState::FIGHTING,
-                glm::vec2(this->width * 0.74, this->height * 0.665)},
+  glm::vec2 weiqingfightingPos =
+      glm::vec2(this->width * 0.8, this->height * 0.665);
+  positions = {{GameCharacterState::FIGHTING, weiqingfightingPos},
                {GameCharacterState::SAD,
-                glm::vec2(this->width * 0.775, this->height * 0.665)},
+                weiqingfightingPos + glm::vec2(this->width * 0.035, 0)},
                {GameCharacterState::HAPPY,
-                glm::vec2(this->width * 0.775, this->height * 0.665)},
+                weiqingfightingPos + glm::vec2(this->width * 0.035, 0)},
                {GameCharacterState::WINNING,
-                glm::vec2(this->width * 0.757, this->height * 0.665)}};
+                weiqingfightingPos + glm::vec2(this->width * 0.017, 0)}};
   sizes.clear();
   sizes = {{GameCharacterState::FIGHTING,
             glm::vec2(this->height / 1.222 / 4, this->height / 4)},
@@ -801,26 +803,6 @@ void GameManager::Init() {
                              pages["displaysettings"]->GetHeight() * 0.5f,
                          this->gameBoard->GetPosition().y)));
 
-  // Initialize the timer
-  timer = std::make_shared<Timer>();
-
-  // Set the target silk length for closing and opening the scroll
-  scroll->SetTargetSilkLenForClosing(0.f);
-  scroll->SetTargetSilkLenForOpening(gameBoard->GetSize().y);
-  scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForOpening());
-  scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
-  // Set the narrowing, closing, and opening velocity of the scroll
-  scroll->SetVelocityForNarrowing(kBaseUnit);
-  scroll->SetVelocityForClosing(48 * kBaseUnit);
-  scroll->SetVelocityForOpening(96 * kBaseUnit);
-  // Set the target position for scroll retracting, deploying, and attacking
-  scroll->SetTargetPositionForRetracting(
-      glm::vec2(this->width * 0.16f, this->height * 0.83f));
-  scroll->SetTargetPositionForDeploying(
-      glm::vec2(this->width / 2.0f, this->height / 2.0f));
-  scroll->SetTargetPositionForAttacking(
-      glm::vec2(this->width * 0.785f, this->height * 0.73f));
-
   // Create page "Language Preference"
   std::unordered_map<Language, std::shared_ptr<OptionUnit>> languagePreferences;
   languagePreferences[Language::GERMAN] =
@@ -931,7 +913,6 @@ void GameManager::Init() {
   scroll->SetTargetSilkLenForOpening(gameBoard->GetSize().y);
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForOpening());
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
-  scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
   // Set the narrowing, closing, and opening velocity of the scroll
   scroll->SetVelocityForNarrowing(kBaseUnit);
   scroll->SetVelocityForClosing(48 * kBaseUnit);
@@ -941,8 +922,9 @@ void GameManager::Init() {
       glm::vec2(this->width * 0.16f, this->height * 0.83f));
   scroll->SetTargetPositionForDeploying(
       glm::vec2(this->width / 2.0f, this->height / 2.0f));
-  scroll->SetTargetPositionForAttacking(
-      glm::vec2(this->width * 0.785f, this->height * 0.73f));
+  glm::vec2 targetPositionForAttacking =
+      weiqingfightingPos + glm::vec2(this->width * 0.045, this->height * 0.065);
+  scroll->SetTargetPositionForAttacking(targetPositionForAttacking);
 
   // Add sound resources
   SoundEngine& soundEngine = SoundEngine::GetInstance();
@@ -1367,12 +1349,15 @@ void GameManager::ProcessInput(float dt) {
 void GameManager::Update(float dt) {
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
-      postProcessor->SetChaos(true);
-      postProcessor->SetSampleOffsets(1.f / 20000.f);
+      // postProcessor->SetChaos(true);
+      // postProcessor->SetSampleOffsets(1.f / 20000.f);
       this->SetToTargetState();
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
+    this->SetState(GameState::INITIAL);
+    this->GoToState(GameState::STORY);
+    return;
     if (this->targetState == GameState::UNDEFINED) {
       // Make the whole screen become clear from the chaos effect gradually.
       float originalIntensity = 1.f;
@@ -1510,7 +1495,7 @@ void GameManager::Update(float dt) {
     }
     if (gameCharacters["weiqing"]->IsStunned()) {
       gameCharacters["weiqing"]->RotateTo(
-          gameCharacters["weiqing"]->GetTargetRoll(), 2.7f * glm::pi<float>(),
+          gameCharacters["weiqing"]->GetTargetRoll(), 2.3f * glm::pi<float>(),
           dt);
       if (!gameCharacters["weiqing"]->IsRotating()) {
         gameCharacters["weiqing"]->SetTargetRoll(0.f);
@@ -1518,7 +1503,7 @@ void GameManager::Update(float dt) {
       }
     } else if (gameCharacters["weiqing"]->IsRotating()) {
       gameCharacters["weiqing"]->RotateTo(
-          gameCharacters["weiqing"]->GetTargetRoll(), -3.0f * glm::pi<float>(),
+          gameCharacters["weiqing"]->GetTargetRoll(), -2.7f * glm::pi<float>(),
           dt);
     } else if (gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() == 0) {
       gameCharacters["weiqing"]->SetState(GameCharacterState::SAD);
