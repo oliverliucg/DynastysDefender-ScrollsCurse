@@ -31,6 +31,7 @@ enum class Color {
   White,
   LightBlue,
   Brown,
+  JadeGreen,
 };
 
 struct SizePadding {

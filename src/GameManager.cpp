@@ -219,19 +219,20 @@ void GameManager::Init() {
       "C:/Users/xiaod/resources/textures/weizifuhappy3.png", true,
       "weizifuhappy");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/guojiefight.png", true, "guojiefight");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/guojiesad.png",
-                              true, "guojiesad");
+      "C:/Users/xiaod/resources/textures/guojiefight2.png", true,
+      "guojiefight");
+  resourceManager.LoadTexture(
+      "C:/Users/xiaod/resources/textures/guojiesad2.png", true, "guojiesad");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/weiqingfight2.png", true,
       "weiqingfight");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqingsad.png", true, "weiqingsad");
+      "C:/Users/xiaod/resources/textures/weiqingsad2.png", true, "weiqingsad");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/weiqinghappy2.png", true,
       "weiqinghappy");
   resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqingwin.png", true, "weiqingwin");
+      "C:/Users/xiaod/resources/textures/weiqingwin2.png", true, "weiqingwin");
   resourceManager.LoadTexture(
       "C:/Users/xiaod/resources/textures/scroll_paper1.png", true,
       "scrollpaper");
@@ -1495,7 +1496,7 @@ void GameManager::Update(float dt) {
     }
     if (gameCharacters["weiqing"]->IsStunned()) {
       gameCharacters["weiqing"]->RotateTo(
-          gameCharacters["weiqing"]->GetTargetRoll(), 2.3f * glm::pi<float>(),
+          gameCharacters["weiqing"]->GetTargetRoll(), 1.9f * glm::pi<float>(),
           dt);
       if (!gameCharacters["weiqing"]->IsRotating()) {
         gameCharacters["weiqing"]->SetTargetRoll(0.f);
@@ -1503,7 +1504,7 @@ void GameManager::Update(float dt) {
       }
     } else if (gameCharacters["weiqing"]->IsRotating()) {
       gameCharacters["weiqing"]->RotateTo(
-          gameCharacters["weiqing"]->GetTargetRoll(), -2.7f * glm::pi<float>(),
+          gameCharacters["weiqing"]->GetTargetRoll(), -2.4f * glm::pi<float>(),
           dt);
     } else if (gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() == 0) {
       gameCharacters["weiqing"]->SetState(GameCharacterState::SAD);
@@ -1556,7 +1557,7 @@ void GameManager::Update(float dt) {
   if (!arrows.empty() && !hasNewArrowHit) {
     if (gameCharacters["guojie"]->IsStunned()) {
       gameCharacters["guojie"]->RotateTo(
-          gameCharacters["guojie"]->GetTargetRoll(), -2.7f * glm::pi<float>(),
+          gameCharacters["guojie"]->GetTargetRoll(), -1.9f * glm::pi<float>(),
           dt);
       if (!gameCharacters["guojie"]->IsRotating()) {
         gameCharacters["guojie"]->SetTargetRoll(0.f);
@@ -1564,7 +1565,7 @@ void GameManager::Update(float dt) {
       }
     } else if (gameCharacters["guojie"]->IsRotating()) {
       gameCharacters["guojie"]->RotateTo(
-          gameCharacters["guojie"]->GetTargetRoll(), 3.0f * glm::pi<float>(),
+          gameCharacters["guojie"]->GetTargetRoll(), 2.4f * glm::pi<float>(),
           dt);
     } else if (gameCharacters["guojie"]->GetHealth().GetCurrentHealth() == 0 &&
                gameCharacters["guojie"]->GetState() !=

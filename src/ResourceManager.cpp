@@ -18,7 +18,8 @@ std::unordered_map<Color, glm::vec3> colorMap = {
     {Color::Cyan, glm::vec3(0.0f, 1.0f, 1.0f)},
     {Color::White, glm::vec3(1.0f, 1.0f, 1.0f)},
     {Color::LightBlue, glm::vec3(0.678f, 0.847f, 0.902f)},
-    {Color::Brown, glm::vec3(0.494f, 0.278f, 0.f)},
+    {Color::Brown, glm::vec3(0.6471, 0.1647, 0.1647)},
+    {Color::JadeGreen, glm::vec3(0.0, 0.6588, 0.4196)},
 };
 
 // const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -160,7 +161,8 @@ Color colorToEnum(glm::vec3 rgb) {
 bool isDeepColor(glm::vec3 rgb) {
   Color color = colorToEnum(rgb);
   return color == Color::Pink || color == Color::Purple ||
-         color == Color::Blue || color == Color::Red || color == Color::Brown;
+         color == Color::Blue || color == Color::Red || color == Color::Brown ||
+         color == Color::JadeGreen;
 }
 
 glm::vec3 rgb2hsv(glm::vec3 rgb) {
