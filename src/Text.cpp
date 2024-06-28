@@ -4,16 +4,19 @@ bool TypingEffect::Update(float dt) {
   bool notCompleted = currentTextLength < fullText.size();
   timer += dt;
   cursorTimer += dt;
+  float actualSpeed = speed * speedAdjustmentFactor;
   if (notCompleted) {
-    size_t newAddedTextLength = static_cast<size_t>(timer * speed);
+    size_t newAddedTextLength = static_cast<size_t>(timer * actualSpeed);
     if (newAddedTextLength > 0) {
-      timer -= newAddedTextLength / speed;
+      timer -= newAddedTextLength / actualSpeed;
       currentTextLength += newAddedTextLength;
       if (currentTextLength > fullText.size()) {
         currentTextLength = fullText.size();
       }
       // When new text is added, reset the cursor timer.
       cursorTimer = 0.f;
+      // When new text is added, reset the speed adjustment factor.
+      speedAdjustmentFactor = generateGaussianRandom(0.5f, 2.f, 1.2f);
     }
   } else {
     timer = 0.f;

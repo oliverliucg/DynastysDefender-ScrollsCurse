@@ -102,36 +102,19 @@ int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b) {
   }
 }
 
-// glm::vec2 getRelativePositionRatio(glm::vec2 object1Pos, glm::vec2
-// object2Pos, glm::vec2 object1Size) {
-//     return (object2Pos - object1Pos) / object1Size;
-// }
-
-// float generateRandomFloat(float min, float max) {
-//     if (min == max) {
-//         return min;
-//     }
-//     else if (min > max) {
-//         std::swap(min, max);
-//     }
-//     std::random_device rd; // Obtain a random number from hardware
-//     std::mt19937 eng(rd()); // Seed the generator
-//     std::uniform_real_distribution<float> distr(min, max); // Define the
-//     range return distr(eng);
-// }
-//
-// int generateRandomInt(int min, int max) {
-//     if (min == max) {
-//		return min;
-//	}
-//     else if (min > max) {
-//		std::swap(min, max);
-//	}
-//	std::random_device rd; // Obtain a random number from hardware
-//	std::mt19937 eng(rd()); // Seed the generator
-//	std::uniform_int_distribution<int> distr(min, max); // Define the range
-//	return distr(eng);
-// }
+double generateGaussianRandom(double min, double max, double mean) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  if (mean == std::numeric_limits<double>::infinity()) {
+    mean = (min + max) / 2.0;
+  }
+  double stddev = (max - min) / 6.0;
+  std::normal_distribution<> distr(mean, stddev);
+  double value = distr(gen);  // Generate a Gaussian-distributed value
+  value = std::max(min, std::min(value, max));  // Clip the value to the range
+  std::cout << "Gaussian Random value: " << value << std::endl;
+  return value;
+}
 
 bool randomBool(float probability) {
   return generateRandom(0.0f, 1.0f) < probability;

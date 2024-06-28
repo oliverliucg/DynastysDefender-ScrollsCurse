@@ -155,16 +155,6 @@ glm::vec2 rotateVector(glm::vec2 point, float angle,
 // Get the sign of the cross product of two vectors
 int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b);
 
-//// Get the relative position ratio from object1 to object2
-// glm::vec2 getRelativePositionRatio(glm::vec2 object1Pos, glm::vec2
-// object2Pos, glm::vec2 object1Size);
-
-//// Generate a random float between min and max
-// float generateRandomFloat(float min, float max);
-//
-//// Generate a random integer between min and max
-// int generateRandomInt(int min, int max);
-
 // Generate a random number with data type T between min and max
 template <typename T>
 T generateRandom(T min, T max) {
@@ -178,6 +168,11 @@ T generateRandom(T min, T max) {
   std::uniform_real_distribution<T> distr(min, max);  // Define the range
   return distr(eng);
 }
+
+// Generate a Gaussian random number between min and max.
+double generateGaussianRandom(
+    double min, double max,
+    double mean = std::numeric_limits<double>::infinity());
 
 // Decide true or false with a given probability
 bool randomBool(float probability);

@@ -41,9 +41,10 @@ struct TypingEffect {
   std::u32string fullText;       // The full text to be displayed.
   size_t currentTextLength = 0;  // The length of the text to be displayed.
   float speed =
-      DEFAULT_ENGLISH_TYPING_SPEED;  // The speed at which the text is typed.
-  float timer = 0.f;                 // Timer to track the typing effect
-  float cursorTimer = 0.f;           // Timer for cursor flashing
+      DEFAULT_ENGLISH_TYPING_SPEED;   // The speed at which the text is typed.
+  float speedAdjustmentFactor = 1.f;  // The speed adjustment factor.
+  float timer = 0.f;                  // Timer to track the typing effect
+  float cursorTimer = 0.f;            // Timer for cursor flashing
   float cursorInterval =
       DEFAULT_CURSOR_INTERVAL;  // The interval between cursor blinks.
   bool cursorVisible =
