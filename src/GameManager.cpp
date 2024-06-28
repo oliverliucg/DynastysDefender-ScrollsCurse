@@ -1350,15 +1350,12 @@ void GameManager::ProcessInput(float dt) {
 void GameManager::Update(float dt) {
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
-      // postProcessor->SetChaos(true);
-      // postProcessor->SetSampleOffsets(1.f / 20000.f);
+      postProcessor->SetChaos(true);
+      postProcessor->SetSampleOffsets(1.f / 20000.f);
       this->SetToTargetState();
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
-    this->SetState(GameState::INITIAL);
-    this->GoToState(GameState::STORY);
-    return;
     if (this->targetState == GameState::UNDEFINED) {
       // Make the whole screen become clear from the chaos effect gradually.
       float originalIntensity = 1.f;
@@ -1416,8 +1413,6 @@ void GameManager::Update(float dt) {
     }
     return;
   } else if (this->state == GameState::INTRO) {
-    bool hasEvent = timer->HasEvent("intro");
-    (void)hasEvent;
     // typing the introduction text
     if (!timer->HasEvent("intro") &&
         !texts.at("introduction")->UpdateTypingEffect(dt)) {
@@ -2448,10 +2443,30 @@ void GameManager::Render() {
     }
     ResourceManager& resourceManager = ResourceManager::GetInstance();
     postProcessor->BeginRender();
-    spriteRenderer->DrawSprite(resourceManager.GetTexture("splash"),
-                               glm::vec2(0, 0),
-                               glm::vec2(this->width, this->height), 0.0f,
-                               glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    /*   float originalSampleOffsets = 1.f / 30000.f;*/
+    /*   float targetIntensity = 0.6f;*/
+    float targetSampleOffsets = 1.f / 1000.f;
+    float redChannelMin = 0.f, greenChannelMin = 0.f, blueChannelMin = 0.f;
+    if (!timer->HasEvent("splash") &&
+        this->postProcessor->GetSampleOffsets() <= targetSampleOffsets) {
+      const float interpolationFactor =
+          this->postProcessor->GetSampleOffsets() / targetSampleOffsets;
+      redChannelMin = glm::mix(1.f, 0.f, interpolationFactor);
+      greenChannelMin = glm::mix(1.f, 0.f, interpolationFactor);
+      blueChannelMin = glm::mix(1.f, 0.f, interpolationFactor);
+    }
+    glm::vec2 redChannelRange = glm::vec2(redChannelMin, 1.f);
+    glm::vec2 greenChannelRange = glm::vec2(greenChannelMin, 1.f);
+    glm::vec2 blueChannelRange = glm::vec2(blueChannelMin, 1.f);
+    glm::vec2 alphaChannelRange = glm::vec2(0.f, 1.f);
+    partialTextureRenderer->DrawPartialTexture(
+        resourceManager.GetTexture("splash"),
+        /*position=*/glm::vec2(0, 0),
+        /*size=*/glm::vec2(this->width, this->height),
+        /*redChannelRange=*/redChannelRange,
+        /*greenChannelRange=*/greenChannelRange,
+        /*blueChannelRange=*/blueChannelRange,
+        /*alphaChannelRange=*/alphaChannelRange);
     postProcessor->EndRender();
     postProcessor->Render(glfwGetTime());
     return;
@@ -3140,7 +3155,7 @@ void GameManager::LoadTexts() {
   if (texts.find("introduction") == texts.end()) {
     texts["introduction"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(this->width * 0.4f, this->height * 0.65f),
-        /*lineWidth=*/this->width * 0.75f);
+        /*lineWidth=*/this->width * 0.5f);
     texts["introduction"]->AddParagraph(
         resourceManager.GetText("introduction"));
     texts["introduction"]->SetColor(glm::vec3(1.f, 1.f, 1.f));
