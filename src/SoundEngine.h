@@ -25,6 +25,12 @@ class SoundEngine {
   void PlaySound(const std::string& name, bool loop = false);
   void StopSound(const std::string& name);
 
+  // Checks if a sound is playing
+  bool IsPlaying(const std::string& sourceName);
+
+  // Sets the volume of a sound
+  void SetVolume(const std::string& sourceName, float volume);
+
   void Clear();
 
   // Clean up sources that are no longer playing. If force is true, clean up
@@ -41,8 +47,14 @@ class SoundEngine {
   ALCdevice* device_;
   ALCcontext* context_;
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
-  std::unordered_set<ALuint> sources_;               // Set of sound sources
+  std::unordered_map<std::string, ALuint> sources_;  // Map of sound sources
 
-  // Check if a source is looping
+  // Checks if a source is looping
   bool IsLooping(ALuint source);
+
+  // Checks if a source is playing
+  bool IsPlaying(ALuint source);
+
+  // Sets the volume of a source
+  void SetVolume(ALuint source, float volume);
 };

@@ -34,21 +34,22 @@ SoundEngine::SoundEngine() {
 SoundEngine::~SoundEngine() { Clear(); }
 
 void SoundEngine::CleanUpSources(bool force) {
-  std::vector<ALuint> sourcesToDelete;
+  std::vector<std::string> sourcesToDelete;
   for (auto& source :
        sources_) {  // Assuming activeSources is a list of source IDs
     ALint state;
-    alGetSourcei(source, AL_SOURCE_STATE, &state);
+    auto sourceID = source.second;
+    alGetSourcei(sourceID, AL_SOURCE_STATE, &state);
 
     // Check if the source is not playing or if force cleanup is enabled
-    if (force || (state != AL_PLAYING && !IsLooping(source))) {
-      alDeleteSources(1, &source);
-      sourcesToDelete.emplace_back(source);
+    if (force || (state != AL_PLAYING && !IsLooping(sourceID))) {
+      alDeleteSources(1, &sourceID);
+      sourcesToDelete.emplace_back(source.first);
     }
   }
   // Remove the deleted sources from the active list
-  for (auto source : sourcesToDelete) {
-    sources_.erase(source);
+  for (auto sourceName : sourcesToDelete) {
+    sources_.erase(sourceName);
   }
 }
 
@@ -288,7 +289,7 @@ void SoundEngine::PlaySound(const std::string& name, bool loop) {
   if (loop) {
     alSourcei(source, AL_LOOPING, AL_TRUE);
   }
-  sources_.insert(source);
+  sources_[name] = source;
   //// Wait for the sound to finish
   // ALint source_state;
   // do {
@@ -298,16 +299,51 @@ void SoundEngine::PlaySound(const std::string& name, bool loop) {
 }
 
 void SoundEngine::StopSound(const std::string& name) {
-  auto buffer = buffers_.at(name);
-  ALuint source;
-  alGenSources(1, &source);
-  alSourcei(source, AL_BUFFER, buffer);
+  ALuint source =
+      sources_.at(name);  // Get the source associated with this sound name
+
+  // Stop the source
   alSourceStop(source);
+
+  // Delete the source
   alDeleteSources(1, &source);
+
+  // Remove the source from the map
+  sources_.erase(name);
+}
+
+bool SoundEngine::IsPlaying(const std::string& sourceName) {
+  if (sources_.find(sourceName) != sources_.end()) {
+    ALuint source = sources_[sourceName];
+    ALint state;
+    alGetSourcei(source, AL_SOURCE_STATE, &state);
+    return (state == AL_PLAYING);
+  }
+  return false;
+}
+
+void SoundEngine::SetVolume(const std::string& sourceName, float volume) {
+  SetVolume(sources_.at(sourceName), volume);
 }
 
 bool SoundEngine::IsLooping(ALuint source) {
   ALint loop;
   alGetSourcei(source, AL_LOOPING, &loop);
   return loop == AL_TRUE;
+}
+
+bool SoundEngine::IsPlaying(ALuint source) {
+  ALint state;
+  alGetSourcei(source, AL_SOURCE_STATE, &state);
+  return state == AL_PLAYING;
+}
+
+void SoundEngine::SetVolume(ALuint source, float volume) {
+  // Check if the volume is within the valid range
+  if (volume < 0.0f) {
+    volume = 0.0f;
+  } else if (volume > 1.0f) {
+    volume = 1.0f;
+  }
+  alSourcef(source, AL_GAIN, volume);
 }

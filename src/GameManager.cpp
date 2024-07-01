@@ -175,7 +175,7 @@ void GameManager::Init() {
       resourceManager.GetShader("postprocessing"), this->width, this->height);
 
   // load textures
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/brush.png",
+  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/brush2.png",
                               true, "mouse");
   resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/splash2.png",
                               false, "splash");
@@ -929,6 +929,20 @@ void GameManager::Init() {
 
   // Add sound resources
   SoundEngine& soundEngine = SoundEngine::GetInstance();
+  // background music
+  soundEngine.LoadSound(
+      "background_relax",
+      "C:/Users/xiaod/resources/audio/background_music_relaxing.wav");
+  soundEngine.LoadSound(
+      "background_fight1",
+      "C:/Users/xiaod/resources/audio/background_music_fighting1.wav");
+  soundEngine.LoadSound(
+      "background_fight2",
+      "C:/Users/xiaod/resources/audio/background_music_fighting2.wav");
+  soundEngine.LoadSound(
+      "background_fight3",
+      "C:/Users/xiaod/resources/audio/background_music_fighting3.wav");
+
   soundEngine.LoadSound("shoot", "C:/Users/xiaod/resources/audio/solid.wav");
   soundEngine.LoadSound("bubbleexplode",
                         "C:/Users/xiaod/resources/audio/bleep.wav");
@@ -2244,10 +2258,16 @@ void GameManager::Update(float dt) {
     // Set the state of the game characters after guojie arrives at the target
     // position.
     if (this->timer->HasEvent("guojieshaking") &&
-        this->timer->GetEventUsedTime("guojieshaking") > 0.085f) {
+        this->timer->GetEventUsedTime("guojieshaking") > 0.085f &&
+        gameCharacters["weiqing"]->GetState() != GameCharacterState::FIGHTING) {
       gameCharacters["liuche"]->SetState(GameCharacterState::SAD);
       gameCharacters["weizifu"]->SetState(GameCharacterState::SAD);
       gameCharacters["weiqing"]->SetState(GameCharacterState::FIGHTING);
+      if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
+        SoundEngine::GetInstance().StopSound("background_relax");
+      }
+      SoundEngine::GetInstance().PlaySound("background_fight1");
+      SoundEngine::GetInstance().SetVolume("background_fight1", 0.3f);
     }
   }
 
@@ -2823,7 +2843,7 @@ void GameManager::Render() {
 
   // Render the mouse cursor on the silk area.
   constexpr float kMouseCursorHeight = 287.f;
-  constexpr float kMouseCursorWidth = 287.f * 812.f / 861.f;
+  constexpr float kMouseCursorWidth = 287.f * 1209.f / 1148.f;
   // if (this->mouseX < 0.f || this->mouseY < 0.f) {
   //   std::cout << "Mouse Position is negative: " << this->mouseX << ", "
   //             << this->mouseY << std::endl;
@@ -2914,6 +2934,13 @@ void GameManager::SetState(GameState newState) {
       tempScoreIncrements.pop();
     }
     configManager.SetScore(tempScore);
+  } else if (this->state == GameState::INITIAL ||
+             this->state == GameState::STORY) {
+    // Reset the background music to the main theme.
+    SoundEngine& soundEngine = SoundEngine::GetInstance();
+    if (!soundEngine.IsPlaying("background_relax")) {
+      soundEngine.PlaySound("background_relax", true);
+    }
   }
 }
 

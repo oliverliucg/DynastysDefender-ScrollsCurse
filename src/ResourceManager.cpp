@@ -112,7 +112,6 @@ double generateGaussianRandom(double min, double max, double mean) {
   std::normal_distribution<> distr(mean, stddev);
   double value = distr(gen);  // Generate a Gaussian-distributed value
   value = std::max(min, std::min(value, max));  // Clip the value to the range
-  std::cout << "Gaussian Random value: " << value << std::endl;
   return value;
 }
 

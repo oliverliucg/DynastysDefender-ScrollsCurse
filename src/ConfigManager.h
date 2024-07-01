@@ -8,7 +8,7 @@
 
 enum class Difficulty { UNDEFINED, EASY, MEDIUM, HARD, EXPERT };
 
-enum class ScreenMode { UNDEFINED, WINDOWED, FULLSCREEN };
+enum class ScreenMode { UNDEFINED, FULLSCREEN, WINDOWED, WINDOWED_BORDERLESS };
 
 enum class CharStyle { UNDEFINED, REGULAR, BOLD, ITALIC, BOLD_ITALIC };
 
