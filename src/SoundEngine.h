@@ -22,8 +22,18 @@ class SoundEngine {
   // Get the singleton instance
   static SoundEngine& GetInstance();
   ALuint LoadSound(const std::string& name, const std::string& filename);
-  void PlaySound(const std::string& name, bool loop = false);
+  void PlaySound(const std::string& name, bool loop = false,
+                 float volume = 1.0f);
   void StopSound(const std::string& name);
+
+  // Get count of times a sound has been played
+  int GetPlayCount(const std::string& sourceName);
+
+  // Gets the current playback position of a sound in seconds
+  float GetPlaybackPosition(const std::string& sourceName);
+
+  // Gets the remaining time of a sound in seconds
+  float GetRemainingTime(const std::string& sourceName, float totalDuration);
 
   // Checks if a sound is playing
   bool IsPlaying(const std::string& sourceName);
@@ -46,8 +56,10 @@ class SoundEngine {
 
   ALCdevice* device_;
   ALCcontext* context_;
-  std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
-  std::unordered_map<std::string, ALuint> sources_;  // Map of sound sources
+  std::unordered_map<std::string, ALuint> buffers_;   // Map of sound buffers
+  std::unordered_map<std::string, ALuint> sources_;   // Map of sound sources
+  std::unordered_map<std::string, float> volumes_;    // Map of sound volumes
+  std::unordered_map<std::string, int> play_counts_;  // Map of play counts
 
   // Checks if a source is looping
   bool IsLooping(ALuint source);
@@ -57,4 +69,10 @@ class SoundEngine {
 
   // Sets the volume of a source
   void SetVolume(ALuint source, float volume);
+
+  // Gets the current playback position of a sound in seconds
+  float GetPlaybackPosition(ALuint source);
+
+  // Gets the remaining time of a sound in seconds
+  float GetRemainingTime(ALuint source, float totalDuration);
 };

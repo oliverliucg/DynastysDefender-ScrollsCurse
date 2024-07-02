@@ -280,7 +280,12 @@ ALuint SoundEngine::LoadSound(const std::string& name,
   return buffer;
 }
 
-void SoundEngine::PlaySound(const std::string& name, bool loop) {
+int SoundEngine::GetPlayCount(const std::string& sourceName) {
+  assert(buffers_.count(sourceName) > 0 && "Sound not found");
+  return play_counts_.count(sourceName) > 0 ? play_counts_.at(sourceName) : 0;
+}
+
+void SoundEngine::PlaySound(const std::string& name, bool loop, float volume) {
   auto buffer = buffers_.at(name);
   ALuint source;
   alGenSources(1, &source);
@@ -290,6 +295,8 @@ void SoundEngine::PlaySound(const std::string& name, bool loop) {
     alSourcei(source, AL_LOOPING, AL_TRUE);
   }
   sources_[name] = source;
+  SetVolume(source, volume);
+  ++play_counts_[name];
   //// Wait for the sound to finish
   // ALint source_state;
   // do {
@@ -326,6 +333,15 @@ void SoundEngine::SetVolume(const std::string& sourceName, float volume) {
   SetVolume(sources_.at(sourceName), volume);
 }
 
+float SoundEngine::GetPlaybackPosition(const std::string& sourceName) {
+  return GetPlaybackPosition(sources_.at(sourceName));
+}
+
+float SoundEngine::GetRemainingTime(const std::string& sourceName,
+                                    float totalDuration) {
+  return GetRemainingTime(sources_.at(sourceName), totalDuration);
+}
+
 bool SoundEngine::IsLooping(ALuint source) {
   ALint loop;
   alGetSourcei(source, AL_LOOPING, &loop);
@@ -346,4 +362,16 @@ void SoundEngine::SetVolume(ALuint source, float volume) {
     volume = 1.0f;
   }
   alSourcef(source, AL_GAIN, volume);
+}
+
+float SoundEngine::GetPlaybackPosition(ALuint source) {
+  float currentTime = 0.0f;
+  alGetSourcef(source, AL_SEC_OFFSET, &currentTime);
+  return currentTime;
+}
+
+float SoundEngine::GetRemainingTime(ALuint source, float totalDuration) {
+  float currentTime = 0.0f;
+  alGetSourcef(source, AL_SEC_OFFSET, &currentTime);
+  return totalDuration - currentTime;
 }

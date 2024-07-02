@@ -929,10 +929,20 @@ void GameManager::Init() {
 
   // Add sound resources
   SoundEngine& soundEngine = SoundEngine::GetInstance();
+  // Load splash screen sound
+  soundEngine.LoadSound(
+      "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise.wav");
+  soundEngine.LoadSound("splash",
+                        "C:/Users/xiaod/resources/audio/splash/splash.wav");
+  soundEngine.LoadSound("kick",
+                        "C:/Users/xiaod/resources/audio/splash/kick.wav");
   // background music
   soundEngine.LoadSound(
       "background_relax",
       "C:/Users/xiaod/resources/audio/background_music_relaxing.wav");
+  soundEngine.LoadSound(
+      "background_fight0",
+      "C:/Users/xiaod/resources/audio/background_music_fighting0.wav");
   soundEngine.LoadSound(
       "background_fight1",
       "C:/Users/xiaod/resources/audio/background_music_fighting1.wav");
@@ -1370,6 +1380,10 @@ void GameManager::Update(float dt) {
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
+    SoundEngine& soundEngine = SoundEngine::GetInstance();
+    if (!soundEngine.IsPlaying("splash")) {
+      soundEngine.PlaySound("splash", false, 0.05f);
+    }
     if (this->targetState == GameState::UNDEFINED) {
       // Make the whole screen become clear from the chaos effect gradually.
       float originalIntensity = 1.f;
@@ -1379,13 +1393,24 @@ void GameManager::Update(float dt) {
       if (postProcessor->GetIntensity() > targetIntensity &&
           !timer->HasEvent("splash")) {
         float newIntensity = postProcessor->GetIntensity() - 0.08f * dt;
+        float intensifyDiffProportion = (originalIntensity - newIntensity) /
+                                        (originalIntensity - targetIntensity);
         /*float newIntensity = originalIntensity;*/
         float newSampleOffsets =
             originalSampleOffsets -
-            (originalIntensity - newIntensity) /
-                (originalIntensity - targetIntensity) *
+            intensifyDiffProportion *
                 (originalSampleOffsets - targetSampleOffsets);
         targetSampleOffsets;
+        SoundEngine& soundEngine = SoundEngine::GetInstance();
+        if (newSampleOffsets >= 1 / 1000.f &&
+            soundEngine.GetPlayCount("kick") == 0) {
+          soundEngine.PlaySound("kick", false, 0.2f);
+        }
+        if (soundEngine.IsPlaying("splash")) {
+          float splashSoundVolume =
+              glm::mix(0.02f, 0.5f, intensifyDiffProportion);
+          soundEngine.SetVolume("splash", splashSoundVolume);
+        }
         if (newIntensity < targetIntensity) {
           newIntensity = targetIntensity;
           newSampleOffsets = targetSampleOffsets;
@@ -1408,9 +1433,17 @@ void GameManager::Update(float dt) {
         targetSampleOffsets = 1.f / 10000.f;
         originalIntensity = targetIntensity;
         targetIntensity = 1.f;
+
         if (postProcessor->GetSampleOffsets() > targetSampleOffsets) {
           float newSampleOffsets =
               postProcessor->GetSampleOffsets() - 0.002 * dt;
+          float sampleOffsetsDiffProportion =
+              (originalSampleOffsets - newSampleOffsets) /
+              (originalSampleOffsets - targetSampleOffsets);
+          float splashSoundVolume =
+              glm::mix(0.5f, 0.02f, sampleOffsetsDiffProportion);
+          soundEngine.SetVolume("splash", splashSoundVolume);
+
           float newIntensity =
               originalIntensity -
               (originalSampleOffsets - newSampleOffsets) /
@@ -2266,8 +2299,7 @@ void GameManager::Update(float dt) {
       if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
         SoundEngine::GetInstance().StopSound("background_relax");
       }
-      SoundEngine::GetInstance().PlaySound("background_fight1");
-      SoundEngine::GetInstance().SetVolume("background_fight1", 0.3f);
+      SoundEngine::GetInstance().PlaySound("background_fight0", true, 0.1f);
     }
   }
 
@@ -2938,8 +2970,17 @@ void GameManager::SetState(GameState newState) {
              this->state == GameState::STORY) {
     // Reset the background music to the main theme.
     SoundEngine& soundEngine = SoundEngine::GetInstance();
+    if (soundEngine.IsPlaying("background_fight0")) {
+      soundEngine.StopSound("background_fight0");
+    }
     if (!soundEngine.IsPlaying("background_relax")) {
-      soundEngine.PlaySound("background_relax", true);
+      soundEngine.PlaySound("background_relax", true, 0.3f);
+    }
+  } else if (this->state == GameState::SPLASH_SCREEN) {
+    // Play the white noise sound effect.
+    SoundEngine& soundEngine = SoundEngine::GetInstance();
+    if (!soundEngine.IsPlaying("white_noise")) {
+      soundEngine.PlaySound("white_noise");
     }
   }
 }
