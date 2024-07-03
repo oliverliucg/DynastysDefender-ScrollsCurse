@@ -41,6 +41,9 @@ class SoundEngine {
   // Sets the volume of a sound
   void SetVolume(const std::string& sourceName, float volume);
 
+  // Gets the volume of a sound
+  float GetVolume(const std::string& sourceName);
+
   void Clear();
 
   // Clean up sources that are no longer playing. If force is true, clean up
@@ -69,6 +72,9 @@ class SoundEngine {
 
   // Sets the volume of a source
   void SetVolume(ALuint source, float volume);
+
+  // Gets the volume of a source
+  float GetVolume(ALuint source);
 
   // Gets the current playback position of a sound in seconds
   float GetPlaybackPosition(ALuint source);

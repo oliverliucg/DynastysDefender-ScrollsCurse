@@ -333,6 +333,10 @@ void SoundEngine::SetVolume(const std::string& sourceName, float volume) {
   SetVolume(sources_.at(sourceName), volume);
 }
 
+float SoundEngine::GetVolume(const std::string& sourceName) {
+  return GetVolume(sources_.at(sourceName));
+}
+
 float SoundEngine::GetPlaybackPosition(const std::string& sourceName) {
   return GetPlaybackPosition(sources_.at(sourceName));
 }
@@ -362,6 +366,12 @@ void SoundEngine::SetVolume(ALuint source, float volume) {
     volume = 1.0f;
   }
   alSourcef(source, AL_GAIN, volume);
+}
+
+float SoundEngine::GetVolume(ALuint source) {
+  float volume = 0.0f;
+  alGetSourcef(source, AL_GAIN, &volume);
+  return volume;
 }
 
 float SoundEngine::GetPlaybackPosition(ALuint source) {

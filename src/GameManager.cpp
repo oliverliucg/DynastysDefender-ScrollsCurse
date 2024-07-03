@@ -931,11 +931,13 @@ void GameManager::Init() {
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   // Load splash screen sound
   soundEngine.LoadSound(
-      "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise.wav");
+      "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise2.wav");
   soundEngine.LoadSound("splash",
                         "C:/Users/xiaod/resources/audio/splash/splash.wav");
-  soundEngine.LoadSound("kick",
-                        "C:/Users/xiaod/resources/audio/splash/kick.wav");
+  soundEngine.LoadSound("shock_wave",
+                        "C:/Users/xiaod/resources/audio/splash/shock_wave.wav");
+  soundEngine.LoadSound("splash_end",
+                        "C:/Users/xiaod/resources/audio/splash/splash_end.wav");
   // background music
   soundEngine.LoadSound(
       "background_relax",
@@ -1381,8 +1383,16 @@ void GameManager::Update(float dt) {
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
     SoundEngine& soundEngine = SoundEngine::GetInstance();
-    if (!soundEngine.IsPlaying("splash")) {
-      soundEngine.PlaySound("splash", false, 0.05f);
+    if (soundEngine.IsPlaying("white_noise") &&
+        soundEngine.GetPlaybackPosition("white_noise") > 0.45f) {
+      float curVolume = soundEngine.GetVolume("white_noise");
+      float newVolume = curVolume - 0.35f * dt;
+      if (newVolume < 0.05f) {
+        newVolume = 0.05f;
+        soundEngine.SetVolume("white_noise", newVolume);
+      } else {
+        soundEngine.SetVolume("white_noise", newVolume);
+      }
     }
     if (this->targetState == GameState::UNDEFINED) {
       // Make the whole screen become clear from the chaos effect gradually.
@@ -1395,21 +1405,25 @@ void GameManager::Update(float dt) {
         float newIntensity = postProcessor->GetIntensity() - 0.08f * dt;
         float intensifyDiffProportion = (originalIntensity - newIntensity) /
                                         (originalIntensity - targetIntensity);
-        /*float newIntensity = originalIntensity;*/
         float newSampleOffsets =
             originalSampleOffsets -
             intensifyDiffProportion *
                 (originalSampleOffsets - targetSampleOffsets);
         targetSampleOffsets;
         SoundEngine& soundEngine = SoundEngine::GetInstance();
-        if (newSampleOffsets >= 1 / 1000.f &&
-            soundEngine.GetPlayCount("kick") == 0) {
-          soundEngine.PlaySound("kick", false, 0.2f);
+        if (newSampleOffsets >= 1 / 1050.f &&
+            soundEngine.GetPlayCount("shock_wave") == 0) {
+          soundEngine.PlaySound("shock_wave");
+          soundEngine.PlaySound("splash_end", false, 0.02f);
         }
-        if (soundEngine.IsPlaying("splash")) {
+        if (soundEngine.IsPlaying("splash_end")) {
+          float thresholdSampleOffsets = 1.f / 1050.f;
+          float sampleOffsetsDiffProportion =
+              (thresholdSampleOffsets - newSampleOffsets) /
+              (thresholdSampleOffsets - targetSampleOffsets);
           float splashSoundVolume =
-              glm::mix(0.02f, 0.5f, intensifyDiffProportion);
-          soundEngine.SetVolume("splash", splashSoundVolume);
+              glm::mix(0.02f, 0.3f, sampleOffsetsDiffProportion);
+          soundEngine.SetVolume("splash_end", splashSoundVolume);
         }
         if (newIntensity < targetIntensity) {
           newIntensity = targetIntensity;
@@ -1427,6 +1441,8 @@ void GameManager::Update(float dt) {
         postProcessor->SetSampleOffsets(0.f);
         postProcessor->SetIntensity(1.f);
         this->SetState(GameState::INTRO);
+        SoundEngine& soundEngine = SoundEngine::GetInstance();
+        soundEngine.StopSound("splash_end");
       } else if (timer->HasEvent("splash") &&
                  !timer->IsEventTimerExpired("splash")) {
         originalSampleOffsets = targetSampleOffsets;
@@ -1441,9 +1457,8 @@ void GameManager::Update(float dt) {
               (originalSampleOffsets - newSampleOffsets) /
               (originalSampleOffsets - targetSampleOffsets);
           float splashSoundVolume =
-              glm::mix(0.5f, 0.02f, sampleOffsetsDiffProportion);
-          soundEngine.SetVolume("splash", splashSoundVolume);
-
+              glm::mix(0.3f, 0.02f, sampleOffsetsDiffProportion);
+          soundEngine.SetVolume("splash_end", splashSoundVolume);
           float newIntensity =
               originalIntensity -
               (originalSampleOffsets - newSampleOffsets) /
@@ -2980,7 +2995,7 @@ void GameManager::SetState(GameState newState) {
     // Play the white noise sound effect.
     SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (!soundEngine.IsPlaying("white_noise")) {
-      soundEngine.PlaySound("white_noise");
+      soundEngine.PlaySound("white_noise", false, 0.7f);
     }
   }
 }
