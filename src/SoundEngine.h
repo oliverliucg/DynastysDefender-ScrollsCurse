@@ -59,8 +59,9 @@ class SoundEngine {
 
   ALCdevice* device_;
   ALCcontext* context_;
-  std::unordered_map<std::string, ALuint> buffers_;   // Map of sound buffers
-  std::unordered_map<std::string, ALuint> sources_;   // Map of sound sources
+  std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
+  std::unordered_map<std::string, std::vector<ALuint> >
+      sources_;                                       // Map of sound sources
   std::unordered_map<std::string, float> volumes_;    // Map of sound volumes
   std::unordered_map<std::string, int> play_counts_;  // Map of play counts
 

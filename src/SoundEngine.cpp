@@ -34,21 +34,38 @@ SoundEngine::SoundEngine() {
 SoundEngine::~SoundEngine() { Clear(); }
 
 void SoundEngine::CleanUpSources(bool force) {
-  std::vector<std::string> sourcesToDelete;
+  std::vector<std::string> sourceNamesToDelete;
+  std::unordered_set<ALuint> sourcesVisited;
   for (auto& source :
        sources_) {  // Assuming activeSources is a list of source IDs
     ALint state;
-    auto sourceID = source.second;
-    alGetSourcei(sourceID, AL_SOURCE_STATE, &state);
-
-    // Check if the source is not playing or if force cleanup is enabled
-    if (force || (state != AL_PLAYING && !IsLooping(sourceID))) {
-      alDeleteSources(1, &sourceID);
-      sourcesToDelete.emplace_back(source.first);
+    std::unordered_set<ALint> sourcesToDelete;
+    for (const auto& sourceID : source.second) {
+      assert(sourcesVisited.count(sourceID) == 0 &&
+             "Source visited more than once");
+      sourcesVisited.insert(sourceID);
+      alGetSourcei(sourceID, AL_SOURCE_STATE, &state);
+      // Check if the source is not playing or if force cleanup is enabled
+      if (force || (state != AL_PLAYING && !IsLooping(sourceID))) {
+        alDeleteSources(1, &sourceID);
+        sourcesToDelete.insert(sourceID);
+      }
+    }
+    if (sourcesToDelete.size() == source.second.size()) {
+      sourceNamesToDelete.emplace_back(source.first);
+    } else {
+      // only keep the sources that are still playing
+      std::vector<ALuint> remainingSources;
+      for (const auto& sourceID : source.second) {
+        if (sourcesToDelete.count(sourceID) == 0) {
+          remainingSources.emplace_back(sourceID);
+        }
+      }
+      source.second = remainingSources;
     }
   }
   // Remove the deleted sources from the active list
-  for (auto sourceName : sourcesToDelete) {
+  for (auto sourceName : sourceNamesToDelete) {
     sources_.erase(sourceName);
   }
 }
@@ -294,7 +311,7 @@ void SoundEngine::PlaySound(const std::string& name, bool loop, float volume) {
   if (loop) {
     alSourcei(source, AL_LOOPING, AL_TRUE);
   }
-  sources_[name] = source;
+  sources_[name].emplace_back(source);
   SetVolume(source, volume);
   ++play_counts_[name];
   //// Wait for the sound to finish
@@ -306,14 +323,16 @@ void SoundEngine::PlaySound(const std::string& name, bool loop, float volume) {
 }
 
 void SoundEngine::StopSound(const std::string& name) {
-  ALuint source =
+  auto sources =
       sources_.at(name);  // Get the source associated with this sound name
 
-  // Stop the source
-  alSourceStop(source);
+  for (const auto& source : sources) {
+    // Stop the source
+    alSourceStop(source);
 
-  // Delete the source
-  alDeleteSources(1, &source);
+    // Delete the source
+    alDeleteSources(1, &source);
+  }
 
   // Remove the source from the map
   sources_.erase(name);
@@ -321,7 +340,7 @@ void SoundEngine::StopSound(const std::string& name) {
 
 bool SoundEngine::IsPlaying(const std::string& sourceName) {
   if (sources_.find(sourceName) != sources_.end()) {
-    ALuint source = sources_[sourceName];
+    ALuint source = sources_[sourceName].back();
     ALint state;
     alGetSourcei(source, AL_SOURCE_STATE, &state);
     return (state == AL_PLAYING);
@@ -330,20 +349,20 @@ bool SoundEngine::IsPlaying(const std::string& sourceName) {
 }
 
 void SoundEngine::SetVolume(const std::string& sourceName, float volume) {
-  SetVolume(sources_.at(sourceName), volume);
+  SetVolume(sources_.at(sourceName).back(), volume);
 }
 
 float SoundEngine::GetVolume(const std::string& sourceName) {
-  return GetVolume(sources_.at(sourceName));
+  return GetVolume(sources_.at(sourceName).back());
 }
 
 float SoundEngine::GetPlaybackPosition(const std::string& sourceName) {
-  return GetPlaybackPosition(sources_.at(sourceName));
+  return GetPlaybackPosition(sources_.at(sourceName).back());
 }
 
 float SoundEngine::GetRemainingTime(const std::string& sourceName,
                                     float totalDuration) {
-  return GetRemainingTime(sources_.at(sourceName), totalDuration);
+  return GetRemainingTime(sources_.at(sourceName).back(), totalDuration);
 }
 
 bool SoundEngine::IsLooping(ALuint source) {
