@@ -990,14 +990,14 @@ void GameManager::ProcessInput(float dt) {
   }
 
   if (this->state == GameState::ACTIVE) {
-    // move shooter
+    // move shooter when not failed
     if (this->keys[GLFW_KEY_LEFT]) {
       // if the key 'ctrl' is hold, then we rotate the shooter in a smaller
       // angle.
       if (this->keys[GLFW_KEY_LEFT_CONTROL]) {
         shooter->SetRoll(shooter->GetRoll() - 0.001f);
       } else {
-        shooter->SetRoll(shooter->GetRoll() - 0.01f);
+        shooter->SetRoll(shooter->GetRoll() - 0.008f);
       }
       shooter->GetRay().UpdatePath(this->gameBoard->GetValidBoundaries(),
                                    this->statics);
@@ -1007,7 +1007,7 @@ void GameManager::ProcessInput(float dt) {
       if (this->keys[GLFW_KEY_LEFT_CONTROL]) {
         shooter->SetRoll(shooter->GetRoll() + 0.001f);
       } else {
-        shooter->SetRoll(shooter->GetRoll() + 0.01f);
+        shooter->SetRoll(shooter->GetRoll() + 0.008f);
       }
       shooter->GetRay().UpdatePath(this->gameBoard->GetValidBoundaries(),
                                    this->statics);
@@ -1042,18 +1042,14 @@ void GameManager::ProcessInput(float dt) {
     if (this->keys[GLFW_KEY_SPACE] &&
         this->keysLocked[GLFW_KEY_SPACE] == false) {
       this->keysLocked[GLFW_KEY_SPACE] = true;
-      std::unique_ptr<Bubble> bubble =
-          shooter->ShootBubble(GetNextBubbleColor());
-      moves.emplace(bubble->GetID(), std::move(bubble));
+      if (this->targetState == GameState::UNDEFINED) {
+        std::unique_ptr<Bubble> bubble =
+            shooter->ShootBubble(GetNextBubbleColor());
+        moves.emplace(bubble->GetID(), std::move(bubble));
+      }
       //// update the gameboard color based on the color of the ray.
       // gameBoard->UpdateColor(shooter->GetRay().GetColorWithoutAlpha());
     }
-  } else if (this->state == GameState::MENU) {
-    // if (this->keys[GLFW_KEY_ENTER] && !this->keysLocked[GLFW_KEY_ENTER])
-    //{
-    //     this->SetState(GameState::PREPARING);
-    //     this->keysLocked[GLFW_KEY_ENTER] = true;
-    // }
   } else if (this->state == GameState::STORY) {
   } else if (this->state == GameState::CONTROL) {
   } else if (this->state == GameState::WIN || this->state == GameState::LOSE) {
@@ -2780,8 +2776,7 @@ void GameManager::Render() {
       // Particles
       explosionSystem->Draw();
     }
-  } else if (this->state == GameState::MENU ||
-             this->state == GameState::INITIAL ||
+  } else if (this->state == GameState::INITIAL ||
              this->state == GameState::STORY ||
              this->state == GameState::CONTROL ||
              this->state == GameState::DIFFICULTY_SETTINGS ||

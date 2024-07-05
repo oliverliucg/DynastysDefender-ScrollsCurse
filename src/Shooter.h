@@ -65,7 +65,7 @@ class Shooter : public GameObject {
   Bubble nextBubble;
   // The ray start from the center carriedBubble.
   Ray ray;
-  // Get the shooting direction.
+  //  Get the shooting direction.
   glm::vec2 GetShootingDirection();
   // Get a new color for the next bubble.
   glm::vec4 GetNewBubbleColor();
