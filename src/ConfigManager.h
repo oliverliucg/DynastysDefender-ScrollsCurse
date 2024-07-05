@@ -64,7 +64,6 @@ inline std::unordered_map<Difficulty, std::string> difficulty_map = {
 
 // Define the language map
 inline std::unordered_map<Language, std::string> language_map = {
-
     {Language::GERMAN, "de"},
     {Language::ENGLISH, "en"},
     {Language::SPANISH, "es"},

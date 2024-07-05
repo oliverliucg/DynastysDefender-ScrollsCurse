@@ -311,7 +311,7 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
   // char style
   CharStyle charStyle = CharStyle::REGULAR;
 
-  std::u32string lastWord;
+  size_t numOfSpacesAtLineEnd = 0;
 
   std::vector<Character> characters;
   std::vector<float> xpositions, ypositions, widths, heights;
@@ -350,8 +350,14 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
       }
     }
 
-    lastWord = word;
     if (lenOfLine + endX - x > lineWidth) {
+      // Caculate the width of spaces at the end of the line.
+      if (numOfSpacesAtLineEnd > 0) {
+        float spacesWidthAtLineEnd =
+            characterMap.at(U'0').at(CharStyle::REGULAR).Size.x * 0.5f * scale *
+            numOfSpacesAtLineEnd;
+        lenOfLine -= spacesWidthAtLineEnd;
+      }
       offset.x = center.x - (initialX + lenOfLine * 0.5f);
       RenderLine(characters, xpositions, ypositions, widths, heights, offset);
       y += lineSpacing;
@@ -363,12 +369,14 @@ std::pair<float, float> WesternTextRenderer::RenderCenteredText(
     } else {
       firstWord = false;
     }
+    numOfSpacesAtLineEnd = 0;
 
     // Move the end index of the word to the start of the next word.
     while (wordIndex.second < text.size() && text[wordIndex.second] == U' ') {
       ++wordIndex.second;
       word.append(U" ");
       styles.emplace_back(styles.back());
+      ++numOfSpacesAtLineEnd;
     }
 
     for (c = word.begin(); c != word.end(); ++c) {

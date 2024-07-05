@@ -1438,7 +1438,9 @@ void GameManager::Update(float dt) {
         postProcessor->SetIntensity(1.f);
         this->SetState(GameState::INTRO);
         SoundEngine& soundEngine = SoundEngine::GetInstance();
+        // Stop splash screen sound.
         soundEngine.StopSound("splash_end");
+        soundEngine.StopSound("white_noise");
       } else if (timer->HasEvent("splash") &&
                  !timer->IsEventTimerExpired("splash")) {
         originalSampleOffsets = targetSampleOffsets;
