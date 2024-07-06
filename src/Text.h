@@ -6,6 +6,7 @@
 
 #include "Capsule.h"
 #include "ResourceManager.h"
+#include "SoundEngine.h"
 #include "TextRenderer.h"
 
 constexpr float DEFAULT_CURSOR_INTERVAL = 0.5f;
@@ -44,6 +45,7 @@ struct TypingEffect {
       DEFAULT_ENGLISH_TYPING_SPEED;   // The speed at which the text is typed.
   float speedAdjustmentFactor = 1.f;  // The speed adjustment factor.
   float timer = 0.f;                  // Timer to track the typing effect
+  float typingTimer = 0.f;            // Timer to track the typing sound
   float cursorTimer = 0.f;            // Timer for cursor flashing
   float cursorInterval =
       DEFAULT_CURSOR_INTERVAL;  // The interval between cursor blinks.

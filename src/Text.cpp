@@ -3,8 +3,11 @@
 bool TypingEffect::Update(float dt) {
   bool notCompleted = currentTextLength < fullText.size();
   timer += dt;
+  typingTimer += dt;
   cursorTimer += dt;
   float actualSpeed = speed * speedAdjustmentFactor;
+  size_t numOfKeysTyped = 0;
+  bool lastCharIsSpace = false;
   if (notCompleted) {
     size_t newAddedTextLength = static_cast<size_t>(timer * actualSpeed);
     if (newAddedTextLength > 0) {
@@ -17,7 +20,37 @@ bool TypingEffect::Update(float dt) {
       cursorTimer = 0.f;
       // When new text is added, reset the speed adjustment factor.
       speedAdjustmentFactor = generateGaussianRandom(0.5f, 2.f, 1.2f);
+      // Check if the last character is a space.
+      if (fullText[currentTextLength - 1] == U' ') {
+        lastCharIsSpace = true;
+      }
+      numOfKeysTyped = newAddedTextLength;
+      typingTimer = 0.f;
+    } else {
+      // Still have typing sound when no new text is added if the language
+      // typing speed is slower than English.
+      if (speed < DEFAULT_ENGLISH_TYPING_SPEED) {
+        float typingSpeed =
+            DEFAULT_ENGLISH_TYPING_SPEED * speedAdjustmentFactor;
+        numOfKeysTyped = static_cast<size_t>(typingTimer * typingSpeed);
+        typingTimer -= numOfKeysTyped / typingSpeed;
+      }
     }
+    // Play typing sound.
+    if (numOfKeysTyped > 0) {
+      SoundEngine& soundEngine = SoundEngine::GetInstance();
+      if (lastCharIsSpace) {
+        soundEngine.PlaySound("key_space", false, 0.15f);
+      } else {
+        // Randomly choose between key_s and keys_s_j.
+        if (randomBool(0.75f)) {
+          soundEngine.PlaySound("key_s", false, 1.f);
+        } else {
+          soundEngine.PlaySound("keys_s_j", false, 0.5f);
+        }
+      }
+    }
+
   } else {
     timer = 0.f;
   }
@@ -255,6 +288,7 @@ void Text::EnableTypingEffect(float speed) {
 }
 
 void Text::DisableTypingEffect() {
+  paragraphs.clear();
   for (auto& typingEffect : typingEffects) {
     paragraphs.emplace_back(typingEffect.fullText);
   }

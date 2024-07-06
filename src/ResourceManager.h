@@ -169,6 +169,20 @@ T generateRandom(T min, T max) {
   return distr(eng);
 }
 
+// Generate a random integer between min and max
+template <typename T>
+T generateRandomInt(T min, T max) {
+  if (min == max) {
+    return min;
+  } else if (min > max) {
+    std::swap(min, max);
+  }
+  std::random_device rd;   // Obtain a random number from hardware
+  std::mt19937 eng(rd());  // Seed the generator
+  std::uniform_int_distribution<T> distr(min, max);  // Define the range
+  return distr(eng);
+}
+
 // Generate a Gaussian random number between min and max.
 double generateGaussianRandom(
     double min, double max,

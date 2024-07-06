@@ -938,6 +938,16 @@ void GameManager::Init() {
                         "C:/Users/xiaod/resources/audio/splash/shock_wave.wav");
   soundEngine.LoadSound("splash_end",
                         "C:/Users/xiaod/resources/audio/splash/splash_end.wav");
+  // Loas key typing sound
+  soundEngine.LoadSound("key_s",
+                        "C:/Users/xiaod/resources/audio/keypressed/key_s.wav");
+  soundEngine.LoadSound(
+      "keys_s_j", "C:/Users/xiaod/resources/audio/keypressed/keys_s_j.wav");
+  soundEngine.LoadSound(
+      "key_enter", "C:/Users/xiaod/resources/audio/keypressed/key_enter.wav");
+  soundEngine.LoadSound(
+      "key_space", "C:/Users/xiaod/resources/audio/keypressed/key_space.wav");
+
   // background music
   soundEngine.LoadSound(
       "background_relax",
@@ -1474,21 +1484,30 @@ void GameManager::Update(float dt) {
     return;
   } else if (this->state == GameState::INTRO) {
     // typing the introduction text
-    if (!timer->HasEvent("intro") &&
+    if (!timer->HasEvent("intro") && !timer->HasEvent("introFadeOut") &&
         !texts.at("introduction")->UpdateTypingEffect(dt)) {
       // stay for 1 second
-      timer->SetEventTimer("intro", 3.f);
+      timer->SetEventTimer("intro", 4.f);
       timer->StartEventTimer("intro");
-    } else {
-      if (timer->HasEvent("intro")) {
-        assert(!texts.at("introduction")->UpdateTypingEffect(dt) &&
-               "The introduction text should be fully typed.");
-        // jump to the next state when the timer is expired
-        if (timer->IsEventTimerExpired("intro")) {
-          this->SetState(GameState::INITIAL);
-          this->GoToState(GameState::STORY);
-        }
+    } else if (timer->HasEvent("intro")) {
+      assert(!texts.at("introduction")->UpdateTypingEffect(dt) &&
+             "The introduction text should be fully typed.");
+      // jump to the next state when the timer is expired
+      if (timer->IsEventTimerExpired("intro")) {
+        // Play sound of pressing key 'Enter'
+        SoundEngine& soundEngine = SoundEngine::GetInstance();
+        soundEngine.PlaySound("key_enter");
+        // Disable the typing effect of the introduction text
+        texts.at("introduction")->DisableTypingEffect();
+        // Set up timer for the introduction text to fade out
+        timer->SetEventTimer("introFadeOut", 1.5f);
+        timer->StartEventTimer("introFadeOut");
+        timer->CleanEvent("intro");
       }
+    } else if (timer->HasEvent("introFadeOut") &&
+               timer->IsEventTimerExpired("introFadeOut")) {
+      this->SetState(GameState::INITIAL);
+      this->GoToState(GameState::STORY);
     }
     return;
   }
@@ -2539,6 +2558,15 @@ void GameManager::Render() {
     // type the introduction text
     texts.at("introduction")
         ->Draw(textRenderers.at(language), /*centered=*/true);
+    // Draw a Black Overlay used for text fading
+    if (timer->HasEvent("introFadeOut")) {
+      float totalTime = timer->GetEventTimer("introFadeOut");
+      float remainingTime = timer->GetEventRemainingTime("introFadeOut");
+      float newAlpha = 1.0f - remainingTime / totalTime;
+      colorRenderer->DrawColor(
+          glm::vec2(0, 0), glm::vec2(this->width, this->height), 0.0f,
+          glm::vec2(0.5f, 0.5f), glm::vec4(0.0f, 0.0f, 0.0f, newAlpha));
+    }
     return;
   }
 
