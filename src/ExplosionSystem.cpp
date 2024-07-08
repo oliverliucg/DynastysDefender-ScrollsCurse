@@ -71,9 +71,6 @@ void ExplosionSystem::CreateExplosions(
     CreateExplosion(center, color, isDeepColor, numParticles,
                     explosionPointRadiusX, explosionPointRadiusY, scaleRange);
   }
-
-  // Play explosion sound
-  SoundEngine::GetInstance().PlaySound("bubbleexplode");
 }
 
 void ExplosionSystem::Update(float dt) {

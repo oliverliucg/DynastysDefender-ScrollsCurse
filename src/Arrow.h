@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameObject.h"
+#include "SoundEngine.h"
 
 class Arrow : public GameObject {
  public:

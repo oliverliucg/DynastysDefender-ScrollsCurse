@@ -75,6 +75,9 @@ void Arrow::Fire(glm::vec2 target, float speed) {
   this->targetPosition = this->penetrationPosition + GetArrowHeadDirection() *
                                                          this->size.x *
                                                          this->penetrationRatio;
+  // Play the sound effect
+  SoundEngine& soundEngine = SoundEngine::GetInstance();
+  soundEngine.PlaySound("arrow_shoot");
   /*this->penetrationPosition = this->targetPosition - GetArrowHeadDirection() *
    * this->size.x * this->penetrationRatio;*/
 }
@@ -106,6 +109,8 @@ void Arrow::Update(float dt) {
     if (innerProduct <= 0) {
       this->position = this->targetPosition;
       this->isStopped = true;
+      SoundEngine& soundEngine = SoundEngine::GetInstance();
+      soundEngine.PlaySound("arrow_hit");
       this->isPenetrating = false;
       return;
     }
@@ -156,19 +161,20 @@ glm::vec4 Arrow::GetTextureCoords() {
 //
 //		// Get direction from the penetration position to the target
 //		glm::vec2 direction = glm::normalize(this->targetPosition -
-//this->penetrationPosition);
+// this->penetrationPosition);
 //
 //
 //		// Calculate the scissor box
 //		glm::vec4 newScissorBox = glm::vec4(0.0f, 0.0f, (this->size.x +
-//this->size.y) * this->scale, (this->size.x + this->size.y) * this->scale); 		if
-//(direction.x < 0.f) { 			newScissorBox.x = this->penetrationPosition.x;
+// this->size.y) * this->scale, (this->size.x + this->size.y) * this->scale);
+// if (direction.x < 0.f) { 			newScissorBox.x =
+//this->penetrationPosition.x;
 //		}
 //		else if (direction.x > 0.f) {
 //			newScissorBox.x = this->penetrationPosition.x -
-//GetArrowHeadDirection().x * this->size.x * (1 - this->penetrationPosition.x);
+// GetArrowHeadDirection().x * this->size.x * (1 - this->penetrationPosition.x);
 //			newScissorBox.z = GetArrowHeadDirection().x *
-//this->size.x * (1 - this->penetrationPosition.x);
+// this->size.x * (1 - this->penetrationPosition.x);
 //		}
 //		else {
 //			newScissorBox.x = 0.f;
@@ -184,12 +190,12 @@ glm::vec4 Arrow::GetTextureCoords() {
 //		else if (direction.y < 0.f) {
 //			newScissorBox.y = kWindowSize.y -
 //(this->penetrationPosition.y - GetArrowHeadDirection().y * this->size.y * (1 -
-//this->penetrationPosition.y)); 			newScissorBox.w = GetArrowHeadDirection().y *
-//this->size.y * (1 - this->penetrationPosition.y);
+// this->penetrationPosition.y)); 			newScissorBox.w =
+// GetArrowHeadDirection().y * this->size.y * (1 - this->penetrationPosition.y);
 //		}
 //
 //		glScissor(newScissorBox.x, newScissorBox.y, newScissorBox.z,
-//newScissorBox.w);
+// newScissorBox.w);
 //	}
 //
 //	GameObject::Draw(renderer);

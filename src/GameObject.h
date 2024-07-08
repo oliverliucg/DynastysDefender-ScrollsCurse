@@ -8,6 +8,7 @@
 #include "ColorRenderer.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
+#include "SoundEngine.h"
 #include "SpriteDynamicRenderer.h"
 #include "SpriteRenderer.h"
 #include "Texture.h"

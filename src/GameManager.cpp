@@ -965,9 +965,19 @@ void GameManager::Init() {
       "background_fight3",
       "C:/Users/xiaod/resources/audio/background_music_fighting3.wav");
 
-  soundEngine.LoadSound("shoot", "C:/Users/xiaod/resources/audio/solid.wav");
+  // Game Play sound
+  soundEngine.LoadSound(
+      "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav");
+  soundEngine.LoadSound(
+      "bubble_explode",
+      "C:/Users/xiaod/resources/audio/gameplay/bubble_explode4.wav");
   soundEngine.LoadSound("bubbleexplode",
                         "C:/Users/xiaod/resources/audio/bleep.wav");
+  soundEngine.LoadSound(
+      "arrow_shoot",
+      "C:/Users/xiaod/resources/audio/gameplay/bubble_shoot.wav");
+  soundEngine.LoadSound(
+      "arrow_hit", "C:/Users/xiaod/resources/audio/gameplay/arrow_hit1.wav");
 
   // Go to the splash screen state
   this->GoToState(GameState::SPLASH_SCREEN);
@@ -1872,6 +1882,7 @@ void GameManager::Update(float dt) {
                                      bubble->GetRadius() * 0.6f);
         }
         explosionSystem->CreateExplosions(explosionInfo);
+        SoundEngine::GetInstance().PlaySound("bubble_explode", false, 0.8f);
         explodings.clear();
       }
 
@@ -3406,7 +3417,7 @@ std::vector<int> GameManager::GetNeighborIds(
   return std::vector<int>(neighborIds.begin(), neighborIds.end());
 }
 bool GameManager::IsAtUpperBoundary(glm::vec2 pos) {
-  return areFloatsEqual(pos.y, gameBoard->GetValidPosition().y, 1e-2);
+  return areFloatsEqual(pos.y, gameBoard->GetValidPosition().y, 1.f);
 }
 
 bool GameManager::IsConnectedToTopHelper(std::unique_ptr<Bubble>& bubble,
