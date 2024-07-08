@@ -967,6 +967,11 @@ void GameManager::Init() {
 
   // Game Play sound
   soundEngine.LoadSound(
+      "wood_collide",
+      "C:/Users/xiaod/resources/audio/gameplay/wood_collide.wav");
+  soundEngine.LoadSound(
+      "earthquake", "C:/Users/xiaod/resources/audio/gameplay/earthquake.wav");
+  soundEngine.LoadSound(
       "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav");
   soundEngine.LoadSound(
       "bubble_explode",
@@ -2329,26 +2334,48 @@ void GameManager::Update(float dt) {
         // Set the time for cracks on the ground.
         this->timer->SetEventTimer("cracks", 1.5f);
         this->timer->StartEventTimer("cracks");
+        // Play the sound of guojie landing on the ground.
+        SoundEngine::GetInstance().PlaySound("wood_collide", false, 0.8f);
+        SoundEngine::GetInstance().PlaySound("earthquake", false, 1.f);
       }
-    }
-    // Set the state of the game characters after guojie arrives at the target
-    // position.
-    if (this->timer->HasEvent("guojieshaking") &&
-        this->timer->GetEventUsedTime("guojieshaking") > 0.085f &&
-        gameCharacters["weiqing"]->GetState() != GameCharacterState::FIGHTING) {
-      gameCharacters["liuche"]->SetState(GameCharacterState::SAD);
-      gameCharacters["weizifu"]->SetState(GameCharacterState::SAD);
-      gameCharacters["weiqing"]->SetState(GameCharacterState::FIGHTING);
-      if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
-        SoundEngine::GetInstance().StopSound("background_relax");
-      }
-      SoundEngine::GetInstance().PlaySound("background_fight0", true, 0.1f);
     }
   }
 
+  // Set the state of the game characters after guojie arrives at the target
+  // position.
+  if (this->timer->HasEvent("guojieshaking") &&
+      this->timer->GetEventUsedTime("guojieshaking") > 0.085f &&
+      gameCharacters["weiqing"]->GetState() != GameCharacterState::FIGHTING) {
+    gameCharacters["liuche"]->SetState(GameCharacterState::SAD);
+    gameCharacters["weizifu"]->SetState(GameCharacterState::SAD);
+    gameCharacters["weiqing"]->SetState(GameCharacterState::FIGHTING);
+    if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
+      SoundEngine::GetInstance().StopSound("background_relax");
+    }
+    SoundEngine::GetInstance().PlaySound("background_fight0", true, 0.1f);
+  }
+
+  // Check if the event timer for shaking the screen has expired.
+  if (this->timer->HasEvent("guojieshaking") &&
+      this->timer->IsEventTimerExpired("guojieshaking")) {
+    postProcessor->SetShake(false);
+    postProcessor->SetBlur(false);
+    SoundEngine& soundEngine = SoundEngine::GetInstance();
+    if (this->timer->IsEventTimerExpired("guojieshaking") &&
+        soundEngine.GetVolume("earthquake") == 1.f) {
+      /*this->timer->CleanEvent("guojieshaking");*/
+      SoundEngine& soundEngine = SoundEngine::GetInstance();
+      if (soundEngine.IsPlaying("wood_collide")) {
+        soundEngine.StopSound("wood_collide");
+      }
+      if (soundEngine.IsPlaying("earthquake")) {
+        soundEngine.GraduallyChangeVolume("earthquake", 0.f, 0.8f);
+      }
+    }
+    this->timer->CleanEvent("guojieshaking");
+  }
+
   // Update all the particles
-  /*std::cout << "frame count while updating: " << this->frameCount <<
-   * std::endl;*/
   shadowTrailSystem->Update(dt);
   explosionSystem->Update(dt);
 
@@ -2514,7 +2541,9 @@ void GameManager::Update(float dt) {
     this->texts.at("score")->SetAlpha(alpha);
   }
 
-  // CLean up the sound sources that are not playing.
+  // Update sound sources' volume.
+  SoundEngine::GetInstance().UpdateSourcesVolume(dt);
+  // Clean up the sound sources that are not playing.
   SoundEngine::GetInstance().CleanUpSources();
 }
 
@@ -2651,14 +2680,6 @@ void GameManager::Render() {
                                                   circleRenderer, textRenderer);
       gameCharacters["weiqing"]->DrawGameCharacter(
           spriteRenderer, colorRenderer, circleRenderer, textRenderer);
-    }
-
-    // Check if the event timer for shaking the screen has expired.
-    if (this->timer->HasEvent("guojieshaking") &&
-        this->timer->IsEventTimerExpired("guojieshaking")) {
-      postProcessor->SetShake(false);
-      postProcessor->SetBlur(false);
-      this->timer->CleanEvent("guojieshaking");
     }
 
     for (auto& arrow : arrows) {

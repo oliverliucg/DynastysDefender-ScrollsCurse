@@ -361,6 +361,26 @@ float getXOfLine(float y, glm::vec3 lineParams) {
   return (-B * y - C) / A;
 }
 
+glm::vec3 solveQuadratic(float y_intercept, glm::vec2 lowest_point) {
+  float A = (y_intercept - lowest_point.y) / (lowest_point.x * lowest_point.x);
+  float B = -2 * A * lowest_point.x;
+  float C = y_intercept;
+  return glm::vec3(A, B, C);
+}
+
+float getYOfQuadratic(float x, glm::vec3 quadraticParams) {
+  float A = quadraticParams.x;
+  float B = quadraticParams.y;
+  float C = quadraticParams.z;
+  return A * x * x + B * x + C;
+}
+
+std::optional<std::pair<float, float>> getXOfQuadratic(
+    float y, glm::vec3 quadraticParams) {
+  return solveQuadratic(quadraticParams.x, quadraticParams.y,
+                        quadraticParams.z - y);
+}
+
 glm::vec2 calculateTravelDistanceVector(glm::vec2 velocity,
                                         glm::vec2 acceleration, float time) {
   return velocity * time + 0.5f * acceleration * time * time;

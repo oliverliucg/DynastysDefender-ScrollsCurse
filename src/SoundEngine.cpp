@@ -348,6 +348,72 @@ bool SoundEngine::IsPlaying(const std::string& sourceName) {
   return false;
 }
 
+void SoundEngine::GraduallyChangeVolume(const std::string& sourceName,
+                                        float targetVolume, float duration) {
+  if (targetVolume < 0.0f) {
+    targetVolume = 0.0f;
+  } else if (targetVolume > 1.0f) {
+    targetVolume = 1.0f;
+  }
+  ALuint source = sources_.at(sourceName).back();
+  float curVolume = GetVolume(source);
+  auto equationParams =
+      solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
+  std::cout << "params: " << equationParams.x << " " << equationParams.y << " "
+            << equationParams.z << std::endl;
+  gradually_changing_volumes_[sourceName][source] =
+      solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
+}
+
+void SoundEngine::UpdateSourcesVolume(float dt) {
+  std::vector<std::string> sourceNamesToDelete;
+  for (auto& sourceName : gradually_changing_volumes_) {
+    // If the source is not in the sources map, remove it from the gradually
+    // changing volumes map.
+    if (sources_.find(sourceName.first) == sources_.end()) {
+      sourceNamesToDelete.emplace_back(sourceName.first);
+      continue;
+    }
+    std::unordered_set<ALuint> sourcesToDelete;
+    for (auto& source : sourceName.second) {
+      // If the source is not in the sources map, remove it from the gradually
+      // changing volumes map.
+      if (std::find(sources_[sourceName.first].begin(),
+                    sources_[sourceName.first].end(),
+                    source.first) == sources_[sourceName.first].end()) {
+        gradually_changing_volumes_[sourceName.first].erase(source.first);
+        continue;
+      }
+      const auto& quadraticParams = source.second;
+      float currentVolume = GetVolume(source.first);
+      auto potentialCurrentTimePoint =
+          getXOfQuadratic(currentVolume, quadraticParams).value();
+      float currentTimePoint = std::min(potentialCurrentTimePoint.first,
+                                        potentialCurrentTimePoint.second);
+      float duration = -quadraticParams.y / (2 * quadraticParams.x);
+      assert(currentTimePoint >= 0.f &&
+             !areFloatsGreater(currentTimePoint, duration) &&
+             "Invalid time point for gradually changing volume");
+      float newTimePoint = currentTimePoint + dt;
+      if (newTimePoint > duration) {
+        newTimePoint = duration;
+        sourcesToDelete.insert(source.first);
+      }
+      float newVolume = getYOfQuadratic(newTimePoint, quadraticParams);
+      SetVolume(source.first, newVolume);
+    }
+    for (auto source : sourcesToDelete) {
+      gradually_changing_volumes_[sourceName.first].erase(source);
+    }
+    if (gradually_changing_volumes_[sourceName.first].empty()) {
+      sourceNamesToDelete.emplace_back(sourceName.first);
+    }
+  }
+  for (auto sourceName : sourceNamesToDelete) {
+    gradually_changing_volumes_.erase(sourceName);
+  }
+}
+
 void SoundEngine::SetVolume(const std::string& sourceName, float volume) {
   SetVolume(sources_.at(sourceName).back(), volume);
 }

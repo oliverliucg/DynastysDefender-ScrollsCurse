@@ -238,7 +238,7 @@ std::optional<std::pair<float, float>> solveQuadratic(float a, float b,
 std::optional<std::pair<float, float>> solveTwoVariableLinear(
     float a1, float b1, float c1, float a2, float b2, float c2);
 
-// Solve a line equation given two points
+// Solve a line function given two points
 glm::vec3 solveLine(glm::vec2 point1, glm::vec2 point2);
 
 // Get the y value of a line given x
@@ -246,6 +246,17 @@ float getYOfLine(float x, glm::vec3 lineParams);
 
 // Get the x value of a line given y
 float getXOfLine(float y, glm::vec3 lineParams);
+
+// Solve a quadratic function given the y-intercept (0, b) and the lowest
+// point (x_0, y_0)
+glm::vec3 solveQuadratic(float y_intercept, glm::vec2 lowest_point);
+
+// Get the y value of a quadratic function given x
+float getYOfQuadratic(float x, glm::vec3 quadraticParams);
+
+// Get the x value of a quadratic function given y
+std::optional<std::pair<float, float>> getXOfQuadratic(
+    float y, glm::vec3 quadraticParams);
 
 // Calculate the traval distance vector of a gameobject with a given velocity
 // and acceleration in a given time

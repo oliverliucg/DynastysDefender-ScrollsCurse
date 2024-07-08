@@ -15,6 +15,8 @@
 #include <unordered_set>
 // #include "alhelpers.h"
 
+#include "ResourceManager.h"
+
 enum FormatType { Int16, Float, IMA4, MSADPCM };
 
 class SoundEngine {
@@ -38,6 +40,13 @@ class SoundEngine {
   // Checks if a sound is playing
   bool IsPlaying(const std::string& sourceName);
 
+  // Gradually change the volume of a sound
+  void GraduallyChangeVolume(const std::string& sourceName, float targetVolume,
+                             float duration);
+
+  // Update the volume of a sound that is gradually changing
+  void UpdateSourcesVolume(float dt);
+
   // Sets the volume of a sound
   void SetVolume(const std::string& sourceName, float volume);
 
@@ -60,10 +69,14 @@ class SoundEngine {
   ALCdevice* device_;
   ALCcontext* context_;
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
-  std::unordered_map<std::string, std::vector<ALuint> >
+  std::unordered_map<std::string, std::vector<ALuint>>
       sources_;                                       // Map of sound sources
   std::unordered_map<std::string, float> volumes_;    // Map of sound volumes
   std::unordered_map<std::string, int> play_counts_;  // Map of play counts
+  std::unordered_map<std::string,
+                     std::unordered_map<ALuint, glm::vec3>>  // Map of gradually
+                                                             // changing volumes
+      gradually_changing_volumes_;
 
   // Checks if a source is looping
   bool IsLooping(ALuint source);
