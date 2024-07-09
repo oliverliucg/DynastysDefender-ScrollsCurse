@@ -366,6 +366,7 @@ void Scroll::Attack(float dt) {
     this->SetCenter(targetPositionForAttacking);
     this->SetRoll(-glm::pi<float>() / 3.f);
     this->SetState(ScrollState::ATTACKED);
+    SoundEngine::GetInstance().PlaySound("scroll_hit", false, 0.8f);
   } else {
     this->SetCenter(newCenter);
     this->SetRoll(this->GetRoll() + 8 * glm::pi<float>() * dt);

@@ -44,6 +44,9 @@ class SoundEngine {
   void GraduallyChangeVolume(const std::string& sourceName, float targetVolume,
                              float duration);
 
+  // Checks if a sound is gradually changing volume
+  bool IsGraduallyChangingVolume(const std::string& sourceName);
+
   // Update the volume of a sound that is gradually changing
   void UpdateSourcesVolume(float dt);
 
@@ -72,7 +75,7 @@ class SoundEngine {
   std::unordered_map<std::string, std::vector<ALuint>>
       sources_;                                       // Map of sound sources
   std::unordered_map<std::string, float> volumes_;    // Map of sound volumes
-  std::unordered_map<std::string, int> play_counts_;  // Map of play counts
+  std::unordered_map<std::string, int> play_counts_;  // Map of play counts 
   std::unordered_map<std::string,
                      std::unordered_map<ALuint, glm::vec3>>  // Map of gradually
                                                              // changing volumes

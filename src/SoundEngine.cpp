@@ -365,6 +365,11 @@ void SoundEngine::GraduallyChangeVolume(const std::string& sourceName,
       solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
 }
 
+bool SoundEngine::IsGraduallyChangingVolume(const std::string& sourceName) {
+  return gradually_changing_volumes_.find(sourceName) !=
+         gradually_changing_volumes_.end();
+}
+
 void SoundEngine::UpdateSourcesVolume(float dt) {
   std::vector<std::string> sourceNamesToDelete;
   for (auto& sourceName : gradually_changing_volumes_) {
@@ -402,14 +407,14 @@ void SoundEngine::UpdateSourcesVolume(float dt) {
       float newVolume = getYOfQuadratic(newTimePoint, quadraticParams);
       SetVolume(source.first, newVolume);
     }
-    for (auto source : sourcesToDelete) {
+    for (const auto& source : sourcesToDelete) {
       gradually_changing_volumes_[sourceName.first].erase(source);
     }
     if (gradually_changing_volumes_[sourceName.first].empty()) {
       sourceNamesToDelete.emplace_back(sourceName.first);
     }
   }
-  for (auto sourceName : sourceNamesToDelete) {
+  for (const auto& sourceName : sourceNamesToDelete) {
     gradually_changing_volumes_.erase(sourceName);
   }
 }

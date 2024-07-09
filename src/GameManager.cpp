@@ -983,6 +983,11 @@ void GameManager::Init() {
       "C:/Users/xiaod/resources/audio/gameplay/bubble_shoot.wav");
   soundEngine.LoadSound(
       "arrow_hit", "C:/Users/xiaod/resources/audio/gameplay/arrow_hit1.wav");
+  soundEngine.LoadSound(
+      "scroll_hit", "C:/Users/xiaod/resources/audio/gameplay/scroll_hit2.wav");
+  soundEngine.LoadSound(
+      "scroll_vibrate",
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate.wav");
 
   // Go to the splash screen state
   this->GoToState(GameState::SPLASH_SCREEN);
@@ -1604,6 +1609,14 @@ void GameManager::Update(float dt) {
 
   // Scroll should only shake when the scroll is OPENED.
   this->gameArenaShaking &= this->scroll->GetState() == ScrollState::OPENED;
+  if (!this->gameArenaShaking &&
+      SoundEngine::GetInstance().IsPlaying("scroll_vibrate")) {
+    float volume = SoundEngine::GetInstance().GetVolume("scroll_vibrate");
+    if (volume == 1.f) {
+      SoundEngine::GetInstance().GraduallyChangeVolume("scroll_vibrate", 0.f,
+                                                       0.5f);
+    }
+  }
 
   // Update arrows
   bool hasNewArrowHit = false;
@@ -1976,6 +1989,8 @@ void GameManager::Update(float dt) {
       if (this->timer->IsEventTimerExpired("beforenarrowing")) {
         // Stop the shake effect
         this->gameArenaShaking = false;
+        SoundEngine::GetInstance().GraduallyChangeVolume("scroll_vibrate", 0.f,
+                                                         0.5f);
         // Narrow the scroll
         this->scroll->SetState(ScrollState::NARROWING);
         this->scroll->SetTargetSilkLenForNarrowing(gameBoardSize.y -
@@ -1990,8 +2005,10 @@ void GameManager::Update(float dt) {
             0, intToU32String(static_cast<int64_t>(std::ceil(
                    this->timer->GetEventRemainingTime("beforenarrowing")))));
         // Shaking the whole scroll if the time is less than 1.5s.
-        if (this->timer->GetEventRemainingTime("beforenarrowing") < 1.5f) {
+        if (!this->gameArenaShaking &&
+            this->timer->GetEventRemainingTime("beforenarrowing") < 1.5f) {
           this->gameArenaShaking = true;
+          SoundEngine::GetInstance().PlaySound("scroll_vibrate");
         }
       }
     }
@@ -2361,8 +2378,7 @@ void GameManager::Update(float dt) {
     postProcessor->SetShake(false);
     postProcessor->SetBlur(false);
     SoundEngine& soundEngine = SoundEngine::GetInstance();
-    if (this->timer->IsEventTimerExpired("guojieshaking") &&
-        soundEngine.GetVolume("earthquake") == 1.f) {
+    if (soundEngine.GetVolume("earthquake") == 1.f) {
       /*this->timer->CleanEvent("guojieshaking");*/
       SoundEngine& soundEngine = SoundEngine::GetInstance();
       if (soundEngine.IsPlaying("wood_collide")) {
