@@ -1000,6 +1000,8 @@ void GameManager::Init() {
   soundEngine.LoadSound(
       "scroll_vibrate",
       "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate5.wav");
+  soundEngine.LoadSound(
+      "flip_paper", "C:/Users/xiaod/resources/audio/gameplay/flip_paper2.wav");
 
   // Go to the splash screen state
   this->GoToState(GameState::SPLASH_SCREEN);
@@ -2533,9 +2535,30 @@ void GameManager::Update(float dt) {
           color.b = std::max(kScoreColorPink.b, color.b - 0.1f);
         }
         this->texts.at("score")->SetColor(color);
+      } else {
+        if (!this->timer->HasEvent("reduceflipvolume")) {
+          this->timer->SetEventTimer("reduceflipvolume",
+                                     1.5f + 0.01f * numOfScoreIncrementsReady);
+          this->timer->StartEventTimer("reduceflipvolume");
+        }
+      }
+      float volume = 1.f;
+      if (this->timer->HasEvent("reduceflipvolume")) {
+        if (!this->timer->IsEventTimerExpired("reduceflipvolume")) {
+          volume =
+              glm::mix(0.f, 1.f,
+                       this->timer->GetEventRemainingTime("reduceflipvolume") /
+                           this->timer->GetEventTimer("reduceflipvolume"));
+        } else {
+          volume = 0.f;
+        }
+      }
+      if (volume > 0.f) {
+        SoundEngine::GetInstance().PlaySound("flip_paper", false, volume);
       }
     } else {
       this->timer->CleanEvent("refreshscore");
+      this->timer->CleanEvent("reduceflipvolume");
       this->timer->SetEventTimer("displayscore", 1.5f);
       this->timer->StartEventTimer("displayscore");
     }
