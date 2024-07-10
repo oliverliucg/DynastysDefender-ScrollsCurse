@@ -57,7 +57,7 @@ std::unique_ptr<Bubble> Shooter::ShootBubble() {
 
 std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
   // Play the sound effect for shooting a bubble
-  SoundEngine::GetInstance().PlaySound("bubble_pop", false, 0.5f);
+  SoundEngine::GetInstance().PlaySound("bubble_pop", false);
   std::unique_ptr<Bubble> copiedBubble =
       std::make_unique<Bubble>(carriedBubble);
   copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *

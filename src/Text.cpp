@@ -40,13 +40,13 @@ bool TypingEffect::Update(float dt) {
     if (numOfKeysTyped > 0) {
       SoundEngine& soundEngine = SoundEngine::GetInstance();
       if (lastCharIsSpace) {
-        soundEngine.PlaySound("key_space", false, 0.15f);
+        soundEngine.PlaySound("key_space", false);
       } else {
         // Randomly choose between key_s and keys_s_j.
         if (randomBool(0.75f)) {
-          soundEngine.PlaySound("key_s", false, 1.f);
+          soundEngine.PlaySound("key_s", false);
         } else {
-          soundEngine.PlaySound("keys_s_j", false, 0.5f);
+          soundEngine.PlaySound("keys_s_j", false);
         }
       }
     }

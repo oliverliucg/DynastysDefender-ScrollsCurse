@@ -23,9 +23,10 @@ class SoundEngine {
  public:
   // Get the singleton instance
   static SoundEngine& GetInstance();
-  ALuint LoadSound(const std::string& name, const std::string& filename);
+  ALuint LoadSound(const std::string& name, const std::string& filename,
+                   float defaultVolume = 1.0f);
   void PlaySound(const std::string& name, bool loop = false,
-                 float volume = 1.0f);
+                 float volume = -1.f);
   void StopSound(const std::string& name);
 
   // Get count of times a sound has been played
@@ -72,10 +73,12 @@ class SoundEngine {
   ALCdevice* device_;
   ALCcontext* context_;
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
+  std::unordered_map<std::string, float> default_volumes_;  // Map of default
+                                                            // sound volumes
   std::unordered_map<std::string, std::vector<ALuint>>
       sources_;                                       // Map of sound sources
   std::unordered_map<std::string, float> volumes_;    // Map of sound volumes
-  std::unordered_map<std::string, int> play_counts_;  // Map of play counts 
+  std::unordered_map<std::string, int> play_counts_;  // Map of play counts
   std::unordered_map<std::string,
                      std::unordered_map<ALuint, glm::vec3>>  // Map of gradually
                                                              // changing volumes

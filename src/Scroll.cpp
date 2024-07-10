@@ -280,7 +280,7 @@ void Scroll::Narrow(float dt, float targetSilkLen) {
   }
   if (!SoundEngine::GetInstance().IsPlaying("scroll_close") &&
       this->state == ScrollState::NARROWING) {
-    SoundEngine::GetInstance().PlaySound("scroll_close", false, 1.f);
+    SoundEngine::GetInstance().PlaySound("scroll_close", false);
   }
 }
 
@@ -294,14 +294,14 @@ void Scroll::Close(float dt, float targetSilkLen) {
     if (diff <= distance) {
       this->AddSilkLen(-diff);
       this->SetState(ScrollState::CLOSED);
-      SoundEngine::GetInstance().PlaySound("scroll_closed", false, 0.7f);
+      SoundEngine::GetInstance().PlaySound("scroll_closed", false);
     } else {
       this->AddSilkLen(-distance);
     }
   }
   if (!SoundEngine::GetInstance().IsPlaying("scroll_close") &&
       this->state == ScrollState::CLOSING) {
-    SoundEngine::GetInstance().PlaySound("scroll_close", false, 1.f);
+    SoundEngine::GetInstance().PlaySound("scroll_close", false);
   }
 }
 
@@ -392,7 +392,7 @@ void Scroll::Attack(float dt) {
     this->SetCenter(targetPositionForAttacking);
     this->SetRoll(-glm::pi<float>() / 3.f);
     this->SetState(ScrollState::ATTACKED);
-    SoundEngine::GetInstance().PlaySound("scroll_hit", false, 0.8f);
+    SoundEngine::GetInstance().PlaySound("scroll_hit", false);
   } else {
     this->SetCenter(newCenter);
     this->SetRoll(this->GetRoll() + 8 * glm::pi<float>() * dt);

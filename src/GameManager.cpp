@@ -931,30 +931,34 @@ void GameManager::Init() {
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   // Load splash screen sound
   soundEngine.LoadSound(
-      "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise2.wav");
+      "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise2.wav",
+      0.7f);
   soundEngine.LoadSound("splash",
                         "C:/Users/xiaod/resources/audio/splash/splash.wav");
   soundEngine.LoadSound("shock_wave",
                         "C:/Users/xiaod/resources/audio/splash/shock_wave.wav");
   soundEngine.LoadSound("splash_end",
-                        "C:/Users/xiaod/resources/audio/splash/splash_end.wav");
+                        "C:/Users/xiaod/resources/audio/splash/splash_end.wav",
+                        0.02f);
   // Loas key typing sound
   soundEngine.LoadSound("key_s",
                         "C:/Users/xiaod/resources/audio/keypressed/key_s.wav");
   soundEngine.LoadSound(
-      "keys_s_j", "C:/Users/xiaod/resources/audio/keypressed/keys_s_j.wav");
+      "keys_s_j", "C:/Users/xiaod/resources/audio/keypressed/keys_s_j.wav",
+      0.5f);
   soundEngine.LoadSound(
       "key_enter", "C:/Users/xiaod/resources/audio/keypressed/key_enter.wav");
   soundEngine.LoadSound(
-      "key_space", "C:/Users/xiaod/resources/audio/keypressed/key_space.wav");
+      "key_space", "C:/Users/xiaod/resources/audio/keypressed/key_space.wav",
+      0.15f);
 
   // background music
   soundEngine.LoadSound(
       "background_relax",
-      "C:/Users/xiaod/resources/audio/background_music_relaxing.wav");
+      "C:/Users/xiaod/resources/audio/background_music_relaxing.wav", 0.3f);
   soundEngine.LoadSound(
       "background_fight0",
-      "C:/Users/xiaod/resources/audio/background_music_fighting0.wav");
+      "C:/Users/xiaod/resources/audio/background_music_fighting0.wav", 0.1f);
   soundEngine.LoadSound(
       "background_fight1",
       "C:/Users/xiaod/resources/audio/background_music_fighting1.wav");
@@ -968,19 +972,22 @@ void GameManager::Init() {
   // Game Play sound
   soundEngine.LoadSound(
       "wood_collide",
-      "C:/Users/xiaod/resources/audio/gameplay/wood_collide.wav");
+      "C:/Users/xiaod/resources/audio/gameplay/wood_collide.wav", 0.8f);
   soundEngine.LoadSound(
       "earthquake", "C:/Users/xiaod/resources/audio/gameplay/earthquake.wav");
   soundEngine.LoadSound(
-      "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav");
+      "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav",
+      0.5f);
   soundEngine.LoadSound(
       "bubble_explode",
-      "C:/Users/xiaod/resources/audio/gameplay/bubble_explode5.wav");
+      "C:/Users/xiaod/resources/audio/gameplay/bubble_explode5.wav", 0.8f);
   soundEngine.LoadSound("bubbleexplode",
                         "C:/Users/xiaod/resources/audio/bleep.wav");
   soundEngine.LoadSound(
       "arrow_shoot",
       "C:/Users/xiaod/resources/audio/gameplay/bubble_shoot.wav");
+  soundEngine.LoadSound(
+      "arrow_hit", "C:/Users/xiaod/resources/audio/gameplay/arrow_hit1.wav");
   soundEngine.LoadSound(
       "scroll_open",
       "C:/Users/xiaod/resources/audio/gameplay/scroll_open3.wav");
@@ -992,11 +999,10 @@ void GameManager::Init() {
       "C:/Users/xiaod/resources/audio/gameplay/scroll_ready_to_open.wav");
   soundEngine.LoadSound(
       "scroll_closed",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_closed1.wav");
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_closed1.wav", 0.7f);
   soundEngine.LoadSound(
-      "arrow_hit", "C:/Users/xiaod/resources/audio/gameplay/arrow_hit1.wav");
-  soundEngine.LoadSound(
-      "scroll_hit", "C:/Users/xiaod/resources/audio/gameplay/scroll_hit2.wav");
+      "scroll_hit", "C:/Users/xiaod/resources/audio/gameplay/scroll_hit2.wav",
+      0.8f);
   soundEngine.LoadSound(
       "scroll_vibrate",
       "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate5.wav");
@@ -1380,6 +1386,9 @@ void GameManager::ProcessInput(float dt) {
                     optionAlreadyClicked = language_map.at(this->GetLanguage());
                     this->SetLanguage(language_enum_map.at(optionToBeClicked));
                   }
+                  // Play the sound of clicking the option, similar to the sound
+                  // of bubble popping.
+                  SoundEngine::GetInstance().PlaySound("bubble_pop");
                   break;
                 }
               } else {
@@ -1454,7 +1463,7 @@ void GameManager::Update(float dt) {
         if (newSampleOffsets >= 1 / 1050.f &&
             soundEngine.GetPlayCount("shock_wave") == 0) {
           soundEngine.PlaySound("shock_wave");
-          soundEngine.PlaySound("splash_end", false, 0.02f);
+          soundEngine.PlaySound("splash_end", false);
         }
         if (soundEngine.IsPlaying("splash_end")) {
           float thresholdSampleOffsets = 1.f / 1050.f;
@@ -1920,7 +1929,7 @@ void GameManager::Update(float dt) {
                                      bubble->GetRadius() * 0.6f);
         }
         explosionSystem->CreateExplosions(explosionInfo);
-        SoundEngine::GetInstance().PlaySound("bubble_explode", false, 0.8f);
+        SoundEngine::GetInstance().PlaySound("bubble_explode", false);
         explodings.clear();
       }
 
@@ -2372,8 +2381,8 @@ void GameManager::Update(float dt) {
         this->timer->SetEventTimer("cracks", 1.5f);
         this->timer->StartEventTimer("cracks");
         // Play the sound of guojie landing on the ground.
-        SoundEngine::GetInstance().PlaySound("wood_collide", false, 0.8f);
-        SoundEngine::GetInstance().PlaySound("earthquake", false, 1.f);
+        SoundEngine::GetInstance().PlaySound("wood_collide", false);
+        SoundEngine::GetInstance().PlaySound("earthquake", false);
       }
     }
   }
@@ -2389,7 +2398,7 @@ void GameManager::Update(float dt) {
     if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
       SoundEngine::GetInstance().StopSound("background_relax");
     }
-    SoundEngine::GetInstance().PlaySound("background_fight0", true, 0.1f);
+    SoundEngine::GetInstance().PlaySound("background_fight0", true);
   }
 
   // Check if the event timer for shaking the screen has expired.
@@ -3103,13 +3112,13 @@ void GameManager::SetState(GameState newState) {
       soundEngine.StopSound("background_fight0");
     }
     if (!soundEngine.IsPlaying("background_relax")) {
-      soundEngine.PlaySound("background_relax", true, 0.3f);
+      soundEngine.PlaySound("background_relax", true);
     }
   } else if (this->state == GameState::SPLASH_SCREEN) {
     // Play the white noise sound effect.
     SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (!soundEngine.IsPlaying("white_noise")) {
-      soundEngine.PlaySound("white_noise", false, 0.7f);
+      soundEngine.PlaySound("white_noise", false);
     }
   }
 }

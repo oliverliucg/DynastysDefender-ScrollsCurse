@@ -81,7 +81,8 @@ void SoundEngine::Clear() {
 }
 
 ALuint SoundEngine::LoadSound(const std::string& name,
-                              const std::string& filename) {
+                              const std::string& filename,
+                              float defaultVolume) {
   enum FormatType sample_format = Int16;
   ALint byteblockalign = 0;
   ALint splblockalign = 0;
@@ -293,6 +294,7 @@ ALuint SoundEngine::LoadSound(const std::string& name,
   }
 
   buffers_[name] = buffer;
+  default_volumes_[name] = defaultVolume;
 
   return buffer;
 }
@@ -304,6 +306,9 @@ int SoundEngine::GetPlayCount(const std::string& sourceName) {
 
 void SoundEngine::PlaySound(const std::string& name, bool loop, float volume) {
   auto buffer = buffers_.at(name);
+  if (volume < 0.f) {
+    volume = default_volumes_.at(name);
+  }
   ALuint source;
   alGenSources(1, &source);
   alSourcei(source, AL_BUFFER, buffer);
