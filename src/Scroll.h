@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 
 #include "GameObject.h"
+#include "Timer.h"
 
 // Scroll state
 enum ScrollState {

@@ -142,7 +142,20 @@ glm::vec2 Scroll::GetTargetCenter(std::string target) const {
   return this->targetCenters.at(target);
 }
 
-void Scroll::SetState(ScrollState state) { this->state = state; }
+void Scroll::SetState(ScrollState state) {
+  this->state = state;
+  bool hasFrictionSound = this->state == ScrollState::OPENING ||
+                          this->state == ScrollState::CLOSING ||
+                          this->state == ScrollState::NARROWING;
+  if (!hasFrictionSound) {
+    if (SoundEngine::GetInstance().IsPlaying("scroll_open")) {
+      SoundEngine::GetInstance().StopSound("scroll_open");
+    }
+    if (SoundEngine::GetInstance().IsPlaying("scroll_close")) {
+      SoundEngine::GetInstance().StopSound("scroll_close");
+    }
+  }
+}
 
 ScrollState Scroll::GetState() const { return state; }
 
@@ -265,6 +278,10 @@ void Scroll::Narrow(float dt, float targetSilkLen) {
       this->currentSilkLenForNarrowing = this->GetSilkLen();
     }
   }
+  if (!SoundEngine::GetInstance().IsPlaying("scroll_close") &&
+      this->state == ScrollState::NARROWING) {
+    SoundEngine::GetInstance().PlaySound("scroll_close", false, 1.f);
+  }
 }
 
 void Scroll::Close(float dt, float targetSilkLen) {
@@ -277,9 +294,14 @@ void Scroll::Close(float dt, float targetSilkLen) {
     if (diff <= distance) {
       this->AddSilkLen(-diff);
       this->SetState(ScrollState::CLOSED);
+      SoundEngine::GetInstance().PlaySound("scroll_closed", false, 0.7f);
     } else {
       this->AddSilkLen(-distance);
     }
+  }
+  if (!SoundEngine::GetInstance().IsPlaying("scroll_close") &&
+      this->state == ScrollState::CLOSING) {
+    SoundEngine::GetInstance().PlaySound("scroll_close", false, 1.f);
   }
 }
 
@@ -298,6 +320,10 @@ void Scroll::Open(float dt, float targetSilkLen) {
     }
   } else {
     this->SetState(ScrollState::OPENED);
+  }
+  if (!SoundEngine::GetInstance().IsPlaying("scroll_open") &&
+      this->state == ScrollState::OPENING) {
+    SoundEngine::GetInstance().PlaySound("scroll_open", false, 1.f);
   }
 }
 

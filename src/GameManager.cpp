@@ -916,8 +916,8 @@ void GameManager::Init() {
   scroll->SetTargetSilkLenForNarrowing(scroll->GetTargetSilkLenForNarrowing());
   // Set the narrowing, closing, and opening velocity of the scroll
   scroll->SetVelocityForNarrowing(kBaseUnit);
-  scroll->SetVelocityForClosing(48 * kBaseUnit);
-  scroll->SetVelocityForOpening(96 * kBaseUnit);
+  scroll->SetVelocityForClosing(40 * kBaseUnit);
+  scroll->SetVelocityForOpening(54 * kBaseUnit);
   // Set the target position for scroll retracting, deploying, and attacking
   scroll->SetTargetPositionForRetracting(
       glm::vec2(this->width * 0.16f, this->height * 0.83f));
@@ -975,19 +975,31 @@ void GameManager::Init() {
       "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav");
   soundEngine.LoadSound(
       "bubble_explode",
-      "C:/Users/xiaod/resources/audio/gameplay/bubble_explode4.wav");
+      "C:/Users/xiaod/resources/audio/gameplay/bubble_explode5.wav");
   soundEngine.LoadSound("bubbleexplode",
                         "C:/Users/xiaod/resources/audio/bleep.wav");
   soundEngine.LoadSound(
       "arrow_shoot",
       "C:/Users/xiaod/resources/audio/gameplay/bubble_shoot.wav");
   soundEngine.LoadSound(
+      "scroll_open",
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_open3.wav");
+  soundEngine.LoadSound(
+      "scroll_close",
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_close3.wav");
+  soundEngine.LoadSound(
+      "scroll_ready_to_open",
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_ready_to_open.wav");
+  soundEngine.LoadSound(
+      "scroll_closed",
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_closed1.wav");
+  soundEngine.LoadSound(
       "arrow_hit", "C:/Users/xiaod/resources/audio/gameplay/arrow_hit1.wav");
   soundEngine.LoadSound(
       "scroll_hit", "C:/Users/xiaod/resources/audio/gameplay/scroll_hit2.wav");
   soundEngine.LoadSound(
       "scroll_vibrate",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate.wav");
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate5.wav");
 
   // Go to the splash screen state
   this->GoToState(GameState::SPLASH_SCREEN);
@@ -1536,7 +1548,13 @@ void GameManager::Update(float dt) {
 
   if (this->scroll->GetState() == ScrollState::CLOSING) {
     this->scroll->Close(dt, this->scroll->GetTargetSilkLenForClosing());
-  } else if (this->scroll->GetState() == ScrollState::OPENING) {
+    if (this->scroll->GetState() == ScrollState::CLOSED) {
+      this->timer->SetEventTimer("scrollReadyToOpen", 0.15f);
+      this->timer->StartEventTimer("scrollReadyToOpen");
+    }
+  } else if (this->scroll->GetState() == ScrollState::OPENING &&
+             (!this->timer->HasEvent("scrollReadyToOpen") ||
+              this->timer->IsEventTimerExpired("scrollReadyToOpen"))) {
     if (this->lastState != GameState::PREPARING &&
         this->state == GameState::ACTIVE) {
       this->scroll->Open(dt, this->scroll->GetCurrentSilkLenForNarrowing());

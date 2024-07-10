@@ -357,10 +357,9 @@ void SoundEngine::GraduallyChangeVolume(const std::string& sourceName,
   }
   ALuint source = sources_.at(sourceName).back();
   float curVolume = GetVolume(source);
+  assert(targetVolume != curVolume && "Target volume is the same as current");
   auto equationParams =
       solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
-  std::cout << "params: " << equationParams.x << " " << equationParams.y << " "
-            << equationParams.z << std::endl;
   gradually_changing_volumes_[sourceName][source] =
       solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
 }
@@ -391,6 +390,9 @@ void SoundEngine::UpdateSourcesVolume(float dt) {
       }
       const auto& quadraticParams = source.second;
       float currentVolume = GetVolume(source.first);
+      if (currentVolume == 0.f) {
+        std::cout << "Volume is 0, removing source" << std::endl;
+      }
       auto potentialCurrentTimePoint =
           getXOfQuadratic(currentVolume, quadraticParams).value();
       float currentTimePoint = std::min(potentialCurrentTimePoint.first,
