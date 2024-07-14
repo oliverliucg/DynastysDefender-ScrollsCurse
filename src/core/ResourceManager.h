@@ -16,8 +16,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "shader.h"
-#include "texture.h"
+#include "Shader.h"
+#include "Texture.h"
 
 enum class Color {
   Red,

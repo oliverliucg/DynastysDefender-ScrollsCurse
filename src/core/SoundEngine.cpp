@@ -299,6 +299,17 @@ ALuint SoundEngine::LoadSound(const std::string& name,
   return buffer;
 }
 
+void SoundEngine::UnloadSound(const std::string& name) {
+  alDeleteBuffers(1, &buffers_.at(name));
+  ALenum error = alGetError();
+  if (error != AL_NO_ERROR) {
+    fprintf(stderr, "Failed to delete buffer: %s\n", alGetString(error));
+  }
+  buffers_.erase(name);
+  default_volumes_.erase(name);
+  play_counts_.erase(name);
+}
+
 int SoundEngine::GetPlayCount(const std::string& sourceName) {
   assert(buffers_.count(sourceName) > 0 && "Sound not found");
   return play_counts_.count(sourceName) > 0 ? play_counts_.at(sourceName) : 0;

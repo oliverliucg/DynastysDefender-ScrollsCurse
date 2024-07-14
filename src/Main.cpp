@@ -44,7 +44,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void focus_callback(GLFWwindow* window, int focused);
 
-void RecreateWindow(GLFWwindow* window, int width, int height,
+void RecreateWindow(GLFWwindow** window, int width, int height,
                     GameManager& gameManager);
 
 int main() {
@@ -236,7 +236,7 @@ int main() {
           // Have decorations for windowed mode.
           glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
           glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-          RecreateWindow(window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
+          RecreateWindow(&window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
           isFromWindowedBorderlessMode = false;
         } else {
           int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
@@ -263,7 +263,7 @@ int main() {
         // No decorations for windowed borderless mode.
         glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        RecreateWindow(window, mode->width - 1, mode->height, gameManager);
+        RecreateWindow(&window, mode->width - 1, mode->height, gameManager);
         isFromWindowedBorderlessMode = true;
       }
 
@@ -450,15 +450,15 @@ void focus_callback(GLFWwindow* window, int focused) {
   }
 }
 
-void RecreateWindow(GLFWwindow* window, int width, int height,
+void RecreateWindow(GLFWwindow** window, int width, int height,
                     GameManager& gameManager) {
   // Destroy the current window
-  glfwDestroyWindow(window);
+  glfwDestroyWindow(*window);  // Destroy the old window
   // Recreate the window
-  window = glfwCreateWindow(width, height, "DynastysDefender-ScrollsCurse",
-                            NULL, NULL);
+  *window = glfwCreateWindow(width, height, "DynastysDefender-ScrollsCurse",
+                             NULL, NULL);
 
-  if (window == NULL) {
+  if (*window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return;
@@ -468,9 +468,9 @@ void RecreateWindow(GLFWwindow* window, int width, int height,
   const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
   int windowPosX = (mode->width - width) / 2;
   int windowPosY = (mode->height - height) / 2;
-  glfwSetWindowPos(window, windowPosX, windowPosY);
+  glfwSetWindowPos(*window, windowPosX, windowPosY);
   // Make the new window's context current
-  glfwMakeContextCurrent(window);
+  glfwMakeContextCurrent(*window);
 
   // OpenGL configuration
   glEnable(GL_BLEND);
@@ -483,17 +483,17 @@ void RecreateWindow(GLFWwindow* window, int width, int height,
     hideTaskbar();
   }
 
-  glfwSetWindowUserPointer(window, &gameManager);
+  glfwSetWindowUserPointer(*window, &gameManager);
 
   int framebufferWidth, framebufferHeight;
-  glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
-  reconfigureWindowSize(window, framebufferWidth, framebufferHeight);
-  glfwSetKeyCallback(window, key_callback);
-  glfwSetScrollCallback(window, scroll_callback);
-  glfwSetMouseButtonCallback(window, mouse_button_callback);
-  glfwSetCursorPosCallback(window, cursor_position_callback);
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwGetFramebufferSize(*window, &framebufferWidth, &framebufferHeight);
+  reconfigureWindowSize(*window, framebufferWidth, framebufferHeight);
+  glfwSetKeyCallback(*window, key_callback);
+  glfwSetScrollCallback(*window, scroll_callback);
+  glfwSetMouseButtonCallback(*window, mouse_button_callback);
+  glfwSetCursorPosCallback(*window, cursor_position_callback);
+  glfwSetFramebufferSizeCallback(*window, framebuffer_size_callback);
   if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    glfwSetWindowFocusCallback(window, focus_callback);
+    glfwSetWindowFocusCallback(*window, focus_callback);
   }
 }

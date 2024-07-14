@@ -24,6 +24,7 @@ class SoundEngine {
   static SoundEngine& GetInstance();
   ALuint LoadSound(const std::string& name, const std::string& filename,
                    float defaultVolume = 1.0f);
+  void UnloadSound(const std::string& name);
   void PlaySound(const std::string& name, bool loop = false,
                  float volume = -1.f);
   void StopSound(const std::string& name);

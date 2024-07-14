@@ -1510,6 +1510,9 @@ void GameManager::Update(float dt) {
         // Stop splash screen sound.
         soundEngine.StopSound("splash_end");
         soundEngine.StopSound("white_noise");
+        // Remove the splash screen sound
+        soundEngine.UnloadSound("splash_end");
+        soundEngine.UnloadSound("white_noise");
       } else if (timer->HasEvent("splash") &&
                  !timer->IsEventTimerExpired("splash")) {
         originalSampleOffsets = targetSampleOffsets;
@@ -4936,9 +4939,7 @@ void GameManager::ClearResources() {
   buttons.clear();
   this->postProcessor = nullptr;
   this->timer = nullptr;
-  for (auto& [characterName, gameCharacter] : gameCharacters) {
-    gameCharacter = nullptr;
-  }
+  gameCharacters.clear();
 
   // Detach all unique pointers
   this->gameBoard = nullptr;
