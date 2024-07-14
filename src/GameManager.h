@@ -110,6 +110,7 @@ class GameManager {
   Language language;
   bool keys[1024];
   bool keysLocked[1024];
+  bool focused;
   bool leftMousePressed;
   bool isReadyToDrag;
   bool isDragging;
@@ -132,9 +133,12 @@ class GameManager {
 
   void PreLoad();
   void Init();
+  void LoadSound();
   void ProcessInput(float dt);
   void Update(float dt);
   void Render();
+
+  void Reload();
 
  private:
   std::shared_ptr<SpriteRenderer> spriteRenderer;
@@ -259,6 +263,9 @@ class GameManager {
   // Load the font based on the language.
   void LoadTextRenderer();
 
+  // Re-load the font based on the language.
+  void ReloadTextRenderer();
+
   // Load the control characters that are used in the game. For example,
   // descenders like 'g', 'j', 'p', 'q', and 'y', that could be used to
   // determine the height of the text. Also load the space character that could
@@ -268,8 +275,14 @@ class GameManager {
   // Load text based from resource file.
   void LoadTexts();
 
+  // Reload text based from resource file.
+  void ReloadTexts();
+
   // Load buttons based from resource file.
   void LoadButtons();
+
+  // Reload buttons based from resource file.
+  void ReloadButtons();
 
   // Get the text renderer of the game.
   std::shared_ptr<TextRenderer> GetTextRenderer();
@@ -440,4 +453,6 @@ class GameManager {
 
   // Reset the score to zero or the given value.
   void ResetScore(int64_t value = 0);
+
+  void ClearResources();
 };

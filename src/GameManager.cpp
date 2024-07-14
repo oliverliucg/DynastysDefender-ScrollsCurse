@@ -26,6 +26,8 @@ GameManager::GameManager(unsigned int width, unsigned int height)
   scrollYOffset = 0.f;
   scrollSensitivity = 25.0f;
 
+  // Initailze the focus state
+  focused = true;
   // Initialize the mouse states
   leftMousePressed = false;
   isReadyToDrag = true;
@@ -33,7 +35,10 @@ GameManager::GameManager(unsigned int width, unsigned int height)
   gameArenaShaking = false;
 }
 
-GameManager::~GameManager() {}
+GameManager::~GameManager() {
+  // Clear all resources
+  this->ClearResources();
+}
 
 void GameManager::PreLoad() {
   this->SetState(GameState::PRELOAD);
@@ -55,60 +60,6 @@ void GameManager::PreLoad() {
 }
 
 void GameManager::Init() {
-  // if (this->state == GameState::OPTION) {
-  //     ResourceManager& resourceManager = ResourceManager::GetInstance();
-  //     /*resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt",
-  //     "C:/Users/xiaod/resources/shaders/sprite.fs.txt", nullptr, "sprite");*/
-  //     resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/pure_color.vs.txt",
-  //     "C:/Users/xiaod/resources/shaders/pure_color.fs.txt", nullptr,
-  //     "purecolor");
-  //     resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/text_2d.vs.txt",
-  //     "C:/Users/xiaod/resources/shaders/text_2d.fs.txt", nullptr, "text");
-  //     // configure shaders
-  //     glm::mat4 projection = glm::ortho(0.0f,
-  //     static_cast<float>(this->width),
-  //         static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
-  //     resourceManager.GetShader("purecolor").Use().SetMatrix4("projection",
-  //     projection); colorRenderer =
-  //     std::make_shared<ColorRenderer>(resourceManager.GetShader("purecolor"));
-  //     circleRenderer =
-  //     std::make_shared<CircleRenderer>(resourceManager.GetShader("purecolor"),
-  //     0.5f); TextRenderer =
-  //     std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
-  //     this->width, this->height);
-  //     // Initialize text renderer
-  //     TextRenderer =
-  //     std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
-  //     this->width, this->height);
-  //     textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-MediumItalic.TTF",
-  //     this->height * 0.03f); TextRenderer =
-  //     std::make_shared<TextRenderer>(resourceManager.GetShader("text"),
-  //     this->width, this->height);
-  //     textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Regular.TTF",
-  //     kFontSize, CharStyle::REGULAR);
-  //     //textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Bold.TTF",
-  //     kFontSize, CharStyle::BOLD);
-  //     //textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-Italic.TTF",
-  //     kFontSize, CharStyle::ITALIC);
-  //     //textRenderer->Load("C:/Users/xiaod/resources/fonts/Prompt-BoldItalic.TTF",
-  //     kFontSize, CharStyle::BOLD_ITALIC);
-
-  //    buttons["fullscreen"] = std::make_shared<Button>(glm::vec2(this->width *
-  //    0.15f, this->height * 0.18f), glm::vec2(this->width * 0.7f, this->height
-  //    * 0.25f), "Full-Screen"); buttons["windowed"] =
-  //    std::make_shared<Button>(glm::vec2(this->width * 0.15f, this->height *
-  //    0.48f), glm::vec2(this->width * 0.7f, this->height * 0.25f),
-  //    "Windowed"); buttons["exit"] =
-  //    std::make_shared<Button>(glm::vec2(this->width * 0.82f + this->height *
-  //    0.075f - this->height * 0.01f, this->height * 0.85f - this->height *
-  //    0.01f), glm::vec2(this->width * 0.18f, this->height * 0.15f), "Exit");
-  //    buttons["fullscreen"]->SetState(ButtonState::kNormal);
-  //    buttons["windowed"]->SetState(ButtonState::kNormal);
-  //    buttons["exit"]->SetState(ButtonState::kNormal);
-
-  //    return;
-  //}
-
   // load shaders
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   resourceManager.LoadShader(
@@ -421,6 +372,7 @@ void GameManager::Init() {
   this->LoadCommonCharacters();
   this->LoadTexts();
   this->LoadButtons();
+
   // Create page "story" / "Main Menu"
   auto textRenderer = textRenderers.at(language);
   auto textUnit =
@@ -517,7 +469,6 @@ void GameManager::Init() {
 
   const std::string textSectionBaseName = "textsection";
   const std::string buttonSectionBaseName = "buttonsection";
-
   auto textSection = std::make_shared<PageSection>("storytextsection");
   textSection->AddContent(textUnit);
   textSection->AddContent(liucheIconTextUnit);
@@ -554,7 +505,6 @@ void GameManager::Init() {
   const float kCommonInterSectionSpacing = 1.f * kBaseUnit;
   pages["story"]->SetInterSectionSpacing(
       "storytextsection", "storybuttonsection", kCommonInterSectionSpacing);
-
   glm::vec2 commonButtionPosition = glm::vec2(
       pages["story"]->GetPosition().x + pages["story"]->GetLeftSpacing(),
       this->height * 0.84f);
@@ -764,16 +714,32 @@ void GameManager::Init() {
   auto displaysetting1 = CreateClickableOptionUnit(
       "fullscreen", resourceManager.GetText("screenmode", "fullscreen"));
   auto displaysetting2 = CreateClickableOptionUnit(
+      "windowedborderless",
+      resourceManager.GetText("screenmode", "windowedborderless"));
+  auto displaysetting3 = CreateClickableOptionUnit(
       "windowed", resourceManager.GetText("screenmode", "windowed"));
-  if (this->GetScreenMode() == ScreenMode::FULLSCREEN)
-    displaysetting1->SetState(OptionState::kClicked);
-  else
-    displaysetting2->SetState(OptionState::kClicked);
+  switch (this->GetScreenMode()) {
+    case ScreenMode::FULLSCREEN:
+      displaysetting1->SetState(OptionState::kClicked);
+      break;
+    case ScreenMode::WINDOWED_BORDERLESS:
+      displaysetting2->SetState(OptionState::kClicked);
+      break;
+    case ScreenMode::WINDOWED:
+      displaysetting3->SetState(OptionState::kClicked);
+      break;
+    default:
+      break;
+  }
   textSection = std::make_shared<PageSection>("displaysettingtextsection");
   buttonSection = std::make_shared<PageSection>("displaysettingbuttonsection");
   textSection->AddContent(displaysetting1);
   textSection->AddContent(displaysetting2);
-  textSection->SetInterUnitSpacing("fullscreen", "windowed", 0.5f * kBaseUnit);
+  textSection->AddContent(displaysetting3);
+  textSection->SetInterUnitSpacing("fullscreen", "windowedborderless",
+                                   0.5f * kBaseUnit);
+  textSection->SetInterUnitSpacing("windowedborderless", "windowed",
+                                   0.5f * kBaseUnit);
   buttonSection->AddContent(backButtonUnit);
   pages["displaysettings"] = std::make_unique<Page>("displaysettings");
   pages["displaysettings"]->AddSection(textSection);
@@ -927,6 +893,11 @@ void GameManager::Init() {
       weiqingfightingPos + glm::vec2(this->width * 0.045, this->height * 0.065);
   scroll->SetTargetPositionForAttacking(targetPositionForAttacking);
 
+  // Go to the splash screen state
+  this->GoToState(GameState::SPLASH_SCREEN);
+}
+
+void GameManager::LoadSound() {
   // Add sound resources
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   // Load splash screen sound
@@ -1009,10 +980,44 @@ void GameManager::Init() {
   soundEngine.LoadSound(
       "flip_paper", "C:/Users/xiaod/resources/audio/gameplay/flip_paper2.wav");
 
-  // Go to the splash screen state
-  this->GoToState(GameState::SPLASH_SCREEN);
-  // this->SetState(GameState::INITIAL);
-  // this->GoToState(GameState::STORY);
+  // Interaction
+  soundEngine.LoadSound(
+      "button_click",
+      "C:/Users/xiaod/resources/audio/interaction/button_click1.wav");
+}
+
+void GameManager::Reload() {
+  // Memorize the current state
+  glm::vec2 scrollCenter = this->scroll->GetCenter();
+  auto gameBoardState = this->gameBoard->GetState();
+  auto screenMode = this->GetScreenMode();
+  bool isScollIconAllowed =
+      pages.at("story")->GetSection("storytextsection")->IsScrollIconAllowed();
+  float storyPageTextOffset =
+      pages.at("story")->GetSection("storytextsection")->GetOffset();
+  // First clear all resources
+  this->ClearResources();
+  // Re-load all resources
+  this->Init();
+  // Set gameobjects to the correct state
+  scroll->SetCenter(scrollCenter);
+  gameBoard->SetState(gameBoardState);
+  this->SetScreenMode(screenMode);
+  pages.at("story")
+      ->GetSection("storytextsection")
+      ->SetOffset(storyPageTextOffset);
+  pages.at("story")
+      ->GetSection("storytextsection")
+      ->SetScrollIconAllowed(isScollIconAllowed);
+  pages.at("story")->GetSection("storytextsection")->ResetSrcollIconPosition();
+
+  // Set to display mode setting page.
+  this->SetState(GameState::DISPLAY_SETTINGS);
+  this->lastState = GameState::STORY;
+  this->targetState = GameState::UNDEFINED;
+  this->scroll->SetSilkLen(std::min(pages.at(this->activePage)->GetHeight(),
+                                    gameBoard->GetSize().y));
+  this->scroll->SetState(ScrollState::OPENED);
 }
 
 void GameManager::ProcessInput(float dt) {
@@ -1217,6 +1222,8 @@ void GameManager::ProcessInput(float dt) {
           if (this->leftMousePressed) {
             if (button->GetState() == ButtonState::kHovered) {
               button->SetState(ButtonState::kPressed);
+              // Play the sound of clicking the button
+              SoundEngine::GetInstance().PlaySound("button_click");
               if (content == "control") {
                 this->GoToState(GameState::CONTROL);
                 // Get the buttion section of the page "control"
@@ -1373,12 +1380,21 @@ void GameManager::ProcessInput(float dt) {
                       this->SetDifficulty(Difficulty::EXPERT);
                     }
                   } else if (activePage == "displaysettings") {
-                    optionAlreadyClicked =
-                        this->screenMode == ScreenMode::FULLSCREEN
-                            ? "fullscreen"
-                            : "windowed";
+                    switch (this->screenMode) {
+                      case ScreenMode::FULLSCREEN:
+                        optionAlreadyClicked = "fullscreen";
+                        break;
+                      case ScreenMode::WINDOWED_BORDERLESS:
+                        optionAlreadyClicked = "windowedborderless";
+                        break;
+                      default:
+                        optionAlreadyClicked = "windowed";
+                        break;
+                    }
                     if (optionToBeClicked == "fullscreen") {
                       this->GoToScreenMode(ScreenMode::FULLSCREEN);
+                    } else if (optionToBeClicked == "windowedborderless") {
+                      this->GoToScreenMode(ScreenMode::WINDOWED_BORDERLESS);
                     } else if (optionToBeClicked == "windowed") {
                       this->GoToScreenMode(ScreenMode::WINDOWED);
                     }
@@ -3012,17 +3028,16 @@ void GameManager::Render() {
                           /*rightAligned=*/true);
 
   // Render the mouse cursor on the silk area.
-  constexpr float kMouseCursorHeight = 287.f;
-  constexpr float kMouseCursorWidth = 287.f * 1209.f / 1148.f;
-  // if (this->mouseX < 0.f || this->mouseY < 0.f) {
-  //   std::cout << "Mouse Position is negative: " << this->mouseX << ", "
-  //             << this->mouseY << std::endl;
-  // }
   if (hideDefaultMouseCursor) {
-    spriteRenderer->DrawSprite(resourceManager.GetTexture("mouse"),
-                               glm::vec2(this->mouseX, this->mouseY),
-                               glm::vec2(kMouseCursorWidth, kMouseCursorHeight),
-                               0.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    spriteRenderer->DrawSprite(
+        resourceManager.GetTexture("mouse"),
+        glm::vec2(this->mouseX, this->mouseY),
+        glm::vec2(
+            kMouseCursorWidth *
+                (this->width / Renderer::GetActualWindowSizePadding().width),
+            kMouseCursorHeight *
+                (this->height / Renderer::GetActualWindowSizePadding().height)),
+        0.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
   }
 }
 
@@ -3234,6 +3249,33 @@ void GameManager::LoadTextRenderer() {
   }
 }
 
+void GameManager::ReloadTextRenderer() {
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+  // Load renderers for all languages
+  for (const auto& [language, benchmark] : benchmark_char_map) {
+    switch (language) {
+      case Language::GERMAN:
+      case Language::ENGLISH:
+      case Language::SPANISH:
+      case Language::ITALIAN:
+      case Language::FRENCH:
+      case Language::KOREAN:
+      case Language::PORTUGUESE_BR:
+      case Language::PORTUGUESE_PT:
+      case Language::RUSSIAN:
+
+        textRenderers[language] = std::make_shared<WesternTextRenderer>(
+            resourceManager.GetShader("text"), this->width, this->height,
+            benchmark);
+        break;
+      default:
+        textRenderers[language] = std::make_shared<CJKTextRenderer>(
+            resourceManager.GetShader("text"), this->width, this->height,
+            benchmark);
+    }
+  }
+}
+
 void GameManager::LoadCommonCharacters() {
   std::unordered_set<char32_t> benchmarkChars;
   for (const auto& [language, benchmark] : benchmark_char_map) {
@@ -3247,8 +3289,10 @@ void GameManager::LoadCommonCharacters() {
 }
 
 void GameManager::LoadTexts() {
+  static int count = 0;
+  ++count;
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-
+  bool hashex5A = false;
   // Load the texts for the game
   resourceManager.LoadText(
       ConfigManager::GetInstance().GetTextFilePath().c_str());
@@ -3290,7 +3334,6 @@ void GameManager::LoadTexts() {
       texts["control"]->SetParagraph(i, textsToLoad[i]);
     }
   }
-
   textsToLoad.clear();
 
   if (texts.find("victory") == texts.end()) {
@@ -3388,14 +3431,24 @@ void GameManager::LoadTexts() {
     texts["time"]->SetCenter(centerTime);
   }
 
-  std::vector<std::string> clickableOptionNames = {"fullscreen", "windowed"};
+  std::vector<std::string> clickableOptionNames = {
+      "fullscreen", "windowedborderless", "windowed"};
   for (const auto& clickableOptionName : clickableOptionNames) {
     if (texts.find(clickableOptionName) != texts.end()) {
       if (clickableOptionName == "fullscreen" ||
+          clickableOptionName == "windowedborderless" ||
           clickableOptionName == "windowed") {
         texts[clickableOptionName]->SetParagraph(
             0, resourceManager.GetText("screenmode", clickableOptionName));
       }
+    }
+  }
+
+  clickableOptionNames = {"easy", "medium", "hard", "expert"};
+  for (const auto& clickableOptionName : clickableOptionNames) {
+    if (texts.find(clickableOptionName) != texts.end()) {
+      texts[clickableOptionName]->SetParagraph(
+          0, resourceManager.GetText("difficulty", clickableOptionName));
     }
   }
 
@@ -3414,6 +3467,125 @@ void GameManager::LoadTexts() {
       texts[gameCharacterName + "intro"]->SetParagraph(
           0, resourceManager.GetText("characterintro", gameCharacterName));
     }
+  }
+}
+
+void GameManager::ReloadTexts() {
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+
+  // Initialize text box
+  std::vector<std::u32string> textsToLoad;
+  textsToLoad.push_back(resourceManager.GetText("story", "1"));
+  textsToLoad.push_back(resourceManager.GetText("story", "2"));
+  texts["story"]->RemoveAllParagraphs(false);
+  for (size_t i = 0; i < textsToLoad.size(); ++i) {
+    texts["story"]->AddParagraph(textsToLoad[i]);
+  }
+
+  textsToLoad.clear();
+  textsToLoad.push_back(resourceManager.GetText("control", "1"));
+  textsToLoad.push_back(resourceManager.GetText("control", "2"));
+  textsToLoad.push_back(resourceManager.GetText("control", "3"));
+  textsToLoad.push_back(resourceManager.GetText("control", "4"));
+  texts["control"]->RemoveAllParagraphs(false);
+  for (size_t i = 0; i < textsToLoad.size(); ++i) {
+    texts["control"]->AddParagraph(textsToLoad[i]);
+  }
+
+  textsToLoad.clear();
+
+  texts["victory"]->RemoveAllParagraphs(false);
+  texts["victory"]->AddParagraph(resourceManager.GetText("victory"));
+
+  texts["defeated"]->RemoveAllParagraphs(false);
+  texts["defeated"]->AddParagraph(resourceManager.GetText("defeated"));
+
+  // score.
+  texts["score"]->RemoveAllParagraphs(false);
+  texts["score"]->AddParagraph(resourceManager.GetText("score"));
+  texts["score"]->AddParagraph(U"{" + intToU32String(this->score) + U"}");
+
+  texts["prompttomainmenu"]->RemoveAllParagraphs(false);
+  texts["prompttomainmenu"]->AddParagraph(
+      resourceManager.GetText("prompttomainmenu"));
+
+  texts["time"]->RemoveAllParagraphs(false);
+  texts["time"]->AddParagraph(U"30");
+
+  std::vector<std::string> clickableOptionNames = {
+      "fullscreen", "windowedborderless", "windowed"};
+  for (const auto& clickableOptionName : clickableOptionNames) {
+    if (texts.find(clickableOptionName) != texts.end()) {
+      if (clickableOptionName == "fullscreen" ||
+          clickableOptionName == "windowedborderless" ||
+          clickableOptionName == "windowed") {
+        texts[clickableOptionName]->RemoveAllParagraphs(false);
+        texts[clickableOptionName]->AddParagraph(
+            resourceManager.GetText("screenmode", clickableOptionName));
+      }
+    }
+  }
+
+  clickableOptionNames = {"easy", "medium", "hard", "expert"};
+  for (const auto& clickableOptionName : clickableOptionNames) {
+    if (texts.find(clickableOptionName) != texts.end()) {
+      texts[clickableOptionName]->RemoveAllParagraphs(false);
+      texts[clickableOptionName]->AddParagraph(
+          resourceManager.GetText("difficulty", clickableOptionName));
+    }
+  }
+
+  for (const auto& [languageEnum, clickableOptionName] : language_map) {
+    texts[clickableOptionName]->RemoveAllParagraphs(false);
+    std::u32string languageName;
+    switch (languageEnum) {
+      case Language::GERMAN:
+        languageName = U"Deutsch";
+        break;
+      case Language::ENGLISH:
+        languageName = U"English";
+        break;
+      case Language::SPANISH:
+        languageName = U"Español";
+        break;
+      case Language::ITALIAN:
+        languageName = U"Italiano";
+        break;
+      case Language::FRENCH:
+        languageName = U"Français";
+        break;
+      case Language::JAPANESE:
+        languageName = U"日本語";
+        break;
+      case Language::KOREAN:
+        languageName = U"한국어";
+        break;
+      case Language::RUSSIAN:
+        languageName = U"Русский";
+        break;
+      case Language::PORTUGUESE_BR:
+        languageName = U"Português (Brasil)";
+        break;
+      case Language::PORTUGUESE_PT:
+        languageName = U"Português (Portugal)";
+        break;
+      case Language::CHINESE_SIMPLIFIED:
+        languageName = U"中文（简体）";
+        break;
+      case Language::CHINESE_TRADITIONAL:
+        languageName = U"中文（繁體）";
+        break;
+    }
+    texts[clickableOptionName]->AddParagraph(languageName);
+  }
+
+  // Create character introduction units
+  std::vector<std::string> gameCharacterNames = {"liuche", "weizifu", "weiqing",
+                                                 "guojie"};
+  for (const auto& gameCharacterName : gameCharacterNames) {
+    texts[gameCharacterName + "intro"]->RemoveAllParagraphs(false);
+    texts[gameCharacterName + "intro"]->AddParagraph(
+        resourceManager.GetText("characterintro", gameCharacterName));
   }
 }
 
@@ -3436,6 +3608,21 @@ void GameManager::LoadButtons() {
       buttons[buttonName]->GetText().SetParagraph(
           0, resourceManager.GetText("button", buttonName));
     }
+  }
+}
+
+void GameManager::ReloadButtons() {
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+  //  Create buttons
+  std::vector<std::string> buttonNames = {"back",       "control",
+                                          "start",      "exit",
+                                          "restart",    "resume",
+                                          "stop",       "displaysettings",
+                                          "difficulty", "languagepreference"};
+  for (const auto& buttonName : buttonNames) {
+    buttons[buttonName]->GetText().RemoveAllParagraphs();
+    buttons[buttonName]->GetText().AddParagraph(
+        resourceManager.GetText("button", buttonName));
   }
 }
 
@@ -4721,4 +4908,46 @@ void GameManager::ResetScore(int64_t value) {
   if (this->timer->HasEvent("refreshscore")) {
     this->timer->CleanEvent("refreshscore");
   }
+}
+
+void GameManager::ClearResources() {
+  // Clear text characters textures
+  for (auto textureID : TextRenderer::characterMap) {
+    glDeleteTextures(1, &textureID.second[CharStyle::REGULAR].TextureID);
+    glDeleteTextures(1, &textureID.second[CharStyle::BOLD].TextureID);
+    glDeleteTextures(1, &textureID.second[CharStyle::ITALIC].TextureID);
+    glDeleteTextures(1, &textureID.second[CharStyle::BOLD_ITALIC].TextureID);
+  }
+  TextRenderer::characterMap.clear();
+  TextRenderer::characterCount.clear();
+  // Clear texts
+  texts.clear();
+  // Clear other resources
+  ResourceManager::GetInstance().Clear();
+  // Detach all shared pointers
+  this->spriteRenderer = nullptr;
+  this->spriteDynamicRenderer = nullptr;
+  this->partialTextureRenderer = nullptr;
+  this->colorRenderer = nullptr;
+  this->circleRenderer = nullptr;
+  this->rayRenderer = nullptr;
+  this->lineRenderer = nullptr;
+  textRenderers.clear();
+  buttons.clear();
+  this->postProcessor = nullptr;
+  this->timer = nullptr;
+  for (auto& [characterName, gameCharacter] : gameCharacters) {
+    gameCharacter = nullptr;
+  }
+
+  // Detach all unique pointers
+  this->gameBoard = nullptr;
+  this->scroll = nullptr;
+  this->shooter = nullptr;
+  this->shadowTrailSystem = nullptr;
+  this->explosionSystem = nullptr;
+  pages.clear();
+
+  //// Reset scissors parameters
+  // ScissorBoxHandler::GetInstance().Reset();
 }
