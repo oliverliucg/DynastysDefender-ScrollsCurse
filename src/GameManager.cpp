@@ -926,19 +926,21 @@ void GameManager::LoadSound() {
   // background music
   soundEngine.LoadSound(
       "background_relax",
-      "C:/Users/xiaod/resources/audio/background_music_relaxing.wav", 0.3f);
-  soundEngine.LoadSound(
-      "background_fight0",
-      "C:/Users/xiaod/resources/audio/background_music_fighting0.wav", 0.1f);
-  soundEngine.LoadSound(
-      "background_fight1",
-      "C:/Users/xiaod/resources/audio/background_music_fighting1.wav");
-  soundEngine.LoadSound(
-      "background_fight2",
-      "C:/Users/xiaod/resources/audio/background_music_fighting2.wav");
-  soundEngine.LoadSound(
-      "background_fight3",
-      "C:/Users/xiaod/resources/audio/background_music_fighting3.wav");
+      "C:/Users/xiaod/resources/audio/background/background_music_relaxing.wav",
+      0.3f);
+  soundEngine.LoadSound("background_fight0",
+                        "C:/Users/xiaod/resources/audio/background/"
+                        "background_music_fighting0.wav",
+                        0.1f);
+  soundEngine.LoadSound("background_fight1",
+                        "C:/Users/xiaod/resources/audio/background/"
+                        "background_music_fighting1.wav");
+  soundEngine.LoadSound("background_fight2",
+                        "C:/Users/xiaod/resources/audio/background/"
+                        "background_music_fighting2.wav");
+  soundEngine.LoadSound("background_fight3",
+                        "C:/Users/xiaod/resources/audio/background/"
+                        "background_music_fighting3.wav");
 
   // Game Play sound
   soundEngine.LoadSound(
@@ -982,6 +984,20 @@ void GameManager::LoadSound() {
       "C:/Users/xiaod/resources/audio/gameplay/wood_swing.wav", 0.7f);
   soundEngine.LoadSound(
       "flip_paper", "C:/Users/xiaod/resources/audio/gameplay/flip_paper2.wav");
+  soundEngine.LoadSound("drop",
+                        "C:/Users/xiaod/resources/audio/gameplay/drop5.wav");
+  soundEngine.LoadSound(
+      "scroll_explode",
+      "C:/Users/xiaod/resources/audio/gameplay/scroll_explode4.wav");
+
+  // Victory sound
+  soundEngine.LoadSound(
+      "victory", "C:/Users/xiaod/resources/audio/background/victory2.wav",
+      0.7f);
+  // Defeated sound
+  soundEngine.LoadSound(
+      "defeated", "C:/Users/xiaod/resources/audio/background/defeated.wav",
+      1.f);
 
   // Interaction
   soundEngine.LoadSound(
@@ -1024,21 +1040,6 @@ void GameManager::Reload() {
 }
 
 void GameManager::ProcessInput(float dt) {
-  // std::lock_guard<std::mutex> lock(inputMutex);
-  //  If 'F' is pressed, then we toggle the full screen mode.
-  // if (this->keys[GLFW_KEY_F] && this->keysLocked[GLFW_KEY_F] == false) {
-  //  this->keysLocked[GLFW_KEY_F] = true;
-  //  //if (this->GetScreenMode() != ScreenMode::FULLSCREEN) {
-  //  //  this->GoToScreenMode(ScreenMode::FULLSCREEN);
-  //  //}
-  //  if (ConfigManager::GetInstance().GetLanguage() == Language::ENGLISH) {
-  //    this->SetLanguage(Language::FRENCH);
-  //  }
-  //  else {
-  //    this->SetLanguage(Language::ENGLISH);
-  //  }
-  //  //this->SetLanguage(Language::FRENCH);
-  //}
   // If 'W' is pressed, then we toggle the windowed mode.
   if (this->keys[GLFW_KEY_W] && this->keysLocked[GLFW_KEY_W] == false) {
     this->keysLocked[GLFW_KEY_W] = true;
@@ -1444,15 +1445,12 @@ void GameManager::ProcessInput(float dt) {
 void GameManager::Update(float dt) {
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
-      // postProcessor->SetChaos(true);
-      // postProcessor->SetSampleOffsets(1.f / 20000.f);
+      postProcessor->SetChaos(true);
+      postProcessor->SetSampleOffsets(1.f / 20000.f);
       this->SetToTargetState();
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
-    this->SetState(GameState::INITIAL);
-    this->GoToState(GameState::STORY);
-    return;
     SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (soundEngine.IsPlaying("white_noise") &&
         soundEngine.GetPlaybackPosition("white_noise") > 0.45f) {
@@ -1620,6 +1618,8 @@ void GameManager::Update(float dt) {
         this->SetToTargetState();
         // Disable the scroll
         this->scroll->SetState(ScrollState::DISABLED);
+        // Play defeated sound
+        SoundEngine::GetInstance().PlaySound("defeated");
       }
     }
   } else if (this->scroll->GetState() == ScrollState::DEPLOYING) {
@@ -1663,6 +1663,9 @@ void GameManager::Update(float dt) {
       gameCharacters["weiqing"]->SetState(GameCharacterState::SAD);
       // Go to the state of LOSE
       this->GoToState(GameState::LOSE);
+      // Gradually lower the volume of the background music
+      SoundEngine::GetInstance().GraduallyChangeVolume("background_fight0", 0.f,
+                                                       3.f);
     }
   }
 
@@ -1751,11 +1754,16 @@ void GameManager::Update(float dt) {
           glm::vec2(2 * kBaseUnit / 15.f, 4 * kBaseUnit / 15.f));
       explosionSystem->CreateExplosions(explosionInfo);
 
+      /*SoundEngine::GetInstance().PlaySound("scroll_explode");*/
+
       // Set the scroll to DISABLED state.
       this->scroll->SetState(ScrollState::DISABLED);
 
       // Set the state to be WINNING
       this->SetState(GameState::WIN);
+
+      // Play victory music
+      SoundEngine::GetInstance().PlaySound("victory");
     }
   }
 
@@ -2004,32 +2012,20 @@ void GameManager::Update(float dt) {
         this->timer->StartEventTimer("refreshscore");
         this->scroll->SetState(ScrollState::CLOSING);
         ++(this->level);
-        /*if (this->level < GetNumGameLevels()) {
-                ++(this->level);
-        }*/
-        /*               if (this->level < GetNumGameLevels()) {
-                                           this->GoToState(GameState::PREPARING);
-                                           this->scroll->SetState(ScrollState::CLOSING);
-                                           ++(this->level);
-                                   }
-                                   else {
-                                           this->GoToState(GameState::WIN);
-                                           this->scroll->SetState(ScrollState::CLOSING);
-                                   }*/
+        if (this->level > this->GetNumGameLevels()) {
+          // Gradually lower the fighting music volume as we are ready to win
+          SoundEngine::GetInstance().GraduallyChangeVolume("background_fight0",
+                                                           0.f, 3.f);
+        }
         break;
       }
     }
 
     // Check if the current level is failed.
     if (this->IsLevelFailed()) {
-      // If weiqing's health is 0, then lose the game.
-      if (gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() == 0) {
-        this->GoToState(GameState::LOSE);
-      } else {
-        // If the current level is failed, then we restart the current level.
-        this->GoToState(GameState::PREPARING);
-        this->scroll->SetState(ScrollState::CLOSING);
-      }
+      // If the current level is failed, then we restart the current level.
+      this->GoToState(GameState::PREPARING);
+      this->scroll->SetState(ScrollState::CLOSING);
       if (!scoreIncrements.empty()) {
         numOfScoreIncrementsReady += scoreIncrements.size();
         this->timer->SetEventTimer("refreshscore", 0.05f);
@@ -2159,6 +2155,8 @@ void GameManager::Update(float dt) {
         // Make the whole screen blur gradually.
         postProcessor->SetBlur(true);
         postProcessor->SetSampleOffsets(0.0005f);
+
+        SoundEngine::GetInstance().PlaySound("drop");
       }
       texts[topic]->SetScale(newScale);
       /*          texts["victory"]->SetPosition(texts["victory"]->GetPosition()
