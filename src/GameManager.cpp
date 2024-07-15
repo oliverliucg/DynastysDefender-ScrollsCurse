@@ -978,6 +978,9 @@ void GameManager::LoadSound() {
       "scroll_vibrate",
       "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate5.wav");
   soundEngine.LoadSound(
+      "scroll_out_sleeve",
+      "C:/Users/xiaod/resources/audio/gameplay/wood_swing.wav", 0.7f);
+  soundEngine.LoadSound(
       "flip_paper", "C:/Users/xiaod/resources/audio/gameplay/flip_paper2.wav");
 
   // Interaction
@@ -1441,12 +1444,15 @@ void GameManager::ProcessInput(float dt) {
 void GameManager::Update(float dt) {
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
-      postProcessor->SetChaos(true);
-      postProcessor->SetSampleOffsets(1.f / 20000.f);
+      // postProcessor->SetChaos(true);
+      // postProcessor->SetSampleOffsets(1.f / 20000.f);
       this->SetToTargetState();
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
+    this->SetState(GameState::INITIAL);
+    this->GoToState(GameState::STORY);
+    return;
     SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (soundEngine.IsPlaying("white_noise") &&
         soundEngine.GetPlaybackPosition("white_noise") > 0.45f) {
@@ -1617,8 +1623,13 @@ void GameManager::Update(float dt) {
       }
     }
   } else if (this->scroll->GetState() == ScrollState::DEPLOYING) {
-    if (this->timer->IsEventTimerExpired("scrollInSleeve")) {
-      this->scroll->SetAlpha(1.f);
+    if (this->timer->HasEvent("scrollInSleeve")) {
+      if (this->timer->IsEventTimerExpired("scrollInSleeve")) {
+        this->scroll->SetAlpha(1.f);
+        this->timer->CleanEvent("scrollInSleeve");
+        SoundEngine::GetInstance().PlaySound("scroll_out_sleeve");
+      }
+    } else {
       this->scroll->Deploy(dt);
     }
   } else if (this->scroll->GetState() == ScrollState::ATTACKING) {
