@@ -968,9 +968,6 @@ void GameManager::LoadSound() {
       "scroll_close",
       "C:/Users/xiaod/resources/audio/gameplay/scroll_close3.wav");
   soundEngine.LoadSound(
-      "scroll_ready_to_open",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_ready_to_open.wav");
-  soundEngine.LoadSound(
       "scroll_closed",
       "C:/Users/xiaod/resources/audio/gameplay/scroll_closed1.wav", 0.7f);
   soundEngine.LoadSound(
@@ -2159,25 +2156,29 @@ void GameManager::Update(float dt) {
         SoundEngine::GetInstance().PlaySound("drop");
       }
       texts[topic]->SetScale(newScale);
-      /*          texts["victory"]->SetPosition(texts["victory"]->GetPosition()
-       * + newScale);*/
     } else {
       // If the game is lost, then grayscale the screen.
       if (this->state == GameState::LOSE) {
         postProcessor->SetGrayscale(true);
       }
-      // Make the whole screen blur gradually.
-      float targetSampleOffsets = 1.f / 300;
-      if (postProcessor->GetSampleOffsets() < targetSampleOffsets) {
+      if (!this->timer->HasEvent("prompttomainmenu")) {
+        // Make the whole screen blur immediately.
+        this->timer->SetEventTimer("prompttomainmenu", 1.5f);
+        this->timer->SetEventTimer("hideprompttomainmenu", 0.5f);
+        this->timer->SetEventTimer("beforegraduallyclear", 3.5f);
+        this->timer->StartEventTimer("prompttomainmenu");
+        this->timer->StartEventTimer("hideprompttomainmenu");
+        this->timer->PauseEventTimer("hideprompttomainmenu");
+        this->timer->StartEventTimer("beforegraduallyclear");
+        postProcessor->SetSampleOffsets(1.f / 240);
+      } else if (this->timer->HasEvent("beforegraduallyclear") &&
+                 this->timer->IsEventTimerExpired("beforegraduallyclear")) {
+        // Make the whole screen clear gradually.
         float newSampleOffsets =
-            postProcessor->GetSampleOffsets() + 0.0015f * dt;
-        if (newSampleOffsets > targetSampleOffsets) {
-          newSampleOffsets = targetSampleOffsets;
-          this->timer->SetEventTimer("prompttomainmenu", 1.5f);
-          this->timer->SetEventTimer("hideprompttomainmenu", 0.5f);
-          this->timer->StartEventTimer("prompttomainmenu");
-          this->timer->StartEventTimer("hideprompttomainmenu");
-          this->timer->PauseEventTimer("hideprompttomainmenu");
+            postProcessor->GetSampleOffsets() - 0.00085f * dt;
+        if (newSampleOffsets <= 0.f) {
+          newSampleOffsets = 0.f;
+          this->timer->CleanEvent("beforegraduallyclear");
         }
         postProcessor->SetSampleOffsets(newSampleOffsets);
       }

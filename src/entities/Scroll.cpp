@@ -136,11 +136,12 @@ glm::vec2 Scroll::GetTargetCenter(std::string target) const {
 }
 
 void Scroll::SetState(ScrollState state) {
+  auto oldState = this->state;
+  bool hadFrictionSound = oldState == ScrollState::OPENING ||
+                          oldState == ScrollState::CLOSING ||
+                          oldState == ScrollState::NARROWING;
   this->state = state;
-  bool hasFrictionSound = this->state == ScrollState::OPENING ||
-                          this->state == ScrollState::CLOSING ||
-                          this->state == ScrollState::NARROWING;
-  if (!hasFrictionSound) {
+  if (hadFrictionSound) {
     if (SoundEngine::GetInstance().IsPlaying("scroll_open")) {
       SoundEngine::GetInstance().StopSound("scroll_open");
     }
