@@ -18,6 +18,51 @@
 
 enum FormatType { Int16, Float, IMA4, MSADPCM };
 
+// Background music state
+enum class BackgroundMusicState { Relaxing, Fighting, None };
+
+struct BackgroundMusicInfo {
+  BackgroundMusicState state;
+  std::string currentMusic;
+  float timerInterval;
+  const float expectedInterval = 5.f;
+  // background music (fighting)
+  std::vector<std::string> fightingMusic;
+  // background music (relaxing)
+  std::vector<std::string> relaxingMusic;
+
+  BackgroundMusicInfo()
+      : state(BackgroundMusicState::None),
+        currentMusic(""),
+        timerInterval(0.0f) {}
+  void Refresh() {
+    if (state == BackgroundMusicState::Fighting) {
+      assert(!fightingMusic.empty() && "No fighting music available");
+      size_t nextMusicIdx =
+          generateRandomInt<size_t>(0, fightingMusic.size() - 1);
+      if (fightingMusic[nextMusicIdx] == currentMusic) {
+        nextMusicIdx = (nextMusicIdx + 1) % fightingMusic.size();
+      }
+      currentMusic = fightingMusic[nextMusicIdx];
+    } else if (state == BackgroundMusicState::Relaxing) {
+      assert(!relaxingMusic.empty() && "No relaxing music available");
+      size_t nextMusicIdx =
+          generateRandomInt<size_t>(0, relaxingMusic.size() - 1);
+      if (relaxingMusic[nextMusicIdx] == currentMusic) {
+        nextMusicIdx = (nextMusicIdx + 1) % relaxingMusic.size();
+      }
+      currentMusic = relaxingMusic[nextMusicIdx];
+    }
+    timerInterval = 0.0f;
+  }
+
+  void Reset() {
+    state = BackgroundMusicState::None;
+    currentMusic = "";
+    timerInterval = 0.0f;
+  }
+};
+
 class SoundEngine {
  public:
   // Get the singleton instance
@@ -57,6 +102,17 @@ class SoundEngine {
   // Gets the volume of a sound
   float GetVolume(const std::string& sourceName);
 
+  void SetBackgroundMusicNames(const std::vector<std::string>& music,
+                               bool isFighting = false);
+
+  void StartBackgroundMusic(bool isFighting = false);
+
+  void RefreshBackgroundMusic(float dt);
+
+  std::string GetPlayingBackgroundMusic() {
+    return background_music_info_.currentMusic;
+  }
+
   void Clear();
 
   // Clean up sources that are no longer playing. If force is true, clean up
@@ -84,6 +140,8 @@ class SoundEngine {
                                                              // changing volumes
       gradually_changing_volumes_;
 
+  BackgroundMusicInfo background_music_info_;
+
   // Checks if a source is looping
   bool IsLooping(ALuint source);
 
@@ -101,4 +159,8 @@ class SoundEngine {
 
   // Gets the remaining time of a sound in seconds
   float GetRemainingTime(ALuint source, float totalDuration);
+
+  void SetBackgroundMusicState(BackgroundMusicState state) {
+    background_music_info_.state = state;
+  }
 };

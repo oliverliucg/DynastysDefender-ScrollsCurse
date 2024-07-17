@@ -482,6 +482,59 @@ float SoundEngine::GetVolume(ALuint source) {
   return volume;
 }
 
+void SoundEngine::SetBackgroundMusicNames(const std::vector<std::string>& music,
+                                          bool isFighting) {
+  if (isFighting) {
+    background_music_info_.fightingMusic = music;
+  } else {
+    background_music_info_.relaxingMusic = music;
+  }
+}
+
+void SoundEngine::StartBackgroundMusic(bool isFighting) {
+  BackgroundMusicState state = isFighting ? BackgroundMusicState::Fighting
+                                          : BackgroundMusicState::Relaxing;
+  if (state == background_music_info_.state) {
+    return;
+  }
+  SetBackgroundMusicState(state);
+  std::string currentMusic = background_music_info_.currentMusic;
+  if (!currentMusic.empty() && IsPlaying(currentMusic)) {
+    StopSound(currentMusic);
+  }
+  switch (state) {
+    case BackgroundMusicState::Fighting:
+      background_music_info_.currentMusic =
+          background_music_info_.fightingMusic[0];
+      break;
+    case BackgroundMusicState::Relaxing:
+      background_music_info_.currentMusic =
+          background_music_info_.relaxingMusic[0];
+      break;
+    default:
+      break;
+  }
+  PlaySound(background_music_info_.currentMusic, false);
+}
+
+void SoundEngine::RefreshBackgroundMusic(float dt) {
+  if (background_music_info_.state == BackgroundMusicState::None) {
+    return;
+  } else {
+    assert(!background_music_info_.currentMusic.empty() &&
+           "No background music was playing");
+    if (IsPlaying(background_music_info_.currentMusic)) {
+      return;
+    }
+    background_music_info_.timerInterval += dt;
+    if (background_music_info_.timerInterval >=
+        background_music_info_.expectedInterval) {
+      background_music_info_.Refresh();
+      PlaySound(background_music_info_.currentMusic, false);
+    }
+  }
+}
+
 float SoundEngine::GetPlaybackPosition(ALuint source) {
   float currentTime = 0.0f;
   alGetSourcef(source, AL_SEC_OFFSET, &currentTime);

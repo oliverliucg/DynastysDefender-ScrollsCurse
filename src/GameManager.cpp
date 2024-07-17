@@ -928,19 +928,23 @@ void GameManager::LoadSound() {
       "background_relax",
       "C:/Users/xiaod/resources/audio/background/background_music_relaxing.wav",
       0.3f);
+  soundEngine.SetBackgroundMusicNames({"background_relax"},
+                                      /*isFighting=*/false);
   soundEngine.LoadSound("background_fight0",
                         "C:/Users/xiaod/resources/audio/background/"
                         "background_music_fighting0.wav",
-                        0.1f);
+                        0.2f);
   soundEngine.LoadSound("background_fight1",
                         "C:/Users/xiaod/resources/audio/background/"
-                        "background_music_fighting1.wav");
+                        "background_music_fighting1.wav",
+                        0.2f);
   soundEngine.LoadSound("background_fight2",
                         "C:/Users/xiaod/resources/audio/background/"
-                        "background_music_fighting2.wav");
-  soundEngine.LoadSound("background_fight3",
-                        "C:/Users/xiaod/resources/audio/background/"
-                        "background_music_fighting3.wav");
+                        "background_music_fighting2.wav",
+                        0.2f);
+  soundEngine.SetBackgroundMusicNames(
+      {"background_fight0", "background_fight1", "background_fight2"},
+      /*isFighting=*/true);
 
   // Game Play sound
   soundEngine.LoadSound(
@@ -950,7 +954,7 @@ void GameManager::LoadSound() {
       "earthquake", "C:/Users/xiaod/resources/audio/gameplay/earthquake.wav");
   soundEngine.LoadSound(
       "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav",
-      0.5f);
+      0.4f);
   soundEngine.LoadSound(
       "bubble_explode",
       "C:/Users/xiaod/resources/audio/gameplay/bubble_explode5.wav", 0.8f);
@@ -1661,8 +1665,10 @@ void GameManager::Update(float dt) {
       // Go to the state of LOSE
       this->GoToState(GameState::LOSE);
       // Gradually lower the volume of the background music
-      SoundEngine::GetInstance().GraduallyChangeVolume("background_fight0", 0.f,
-                                                       3.f);
+      std::string currentBackgroundMusic =
+          SoundEngine::GetInstance().GetPlayingBackgroundMusic();
+      SoundEngine::GetInstance().GraduallyChangeVolume(currentBackgroundMusic,
+                                                       0.f, 3.f);
     }
   }
 
@@ -2011,8 +2017,10 @@ void GameManager::Update(float dt) {
         ++(this->level);
         if (this->level > this->GetNumGameLevels()) {
           // Gradually lower the fighting music volume as we are ready to win
-          SoundEngine::GetInstance().GraduallyChangeVolume("background_fight0",
-                                                           0.f, 3.f);
+          std::string currentBackgroundMusic =
+              SoundEngine::GetInstance().GetPlayingBackgroundMusic();
+          SoundEngine::GetInstance().GraduallyChangeVolume(
+              currentBackgroundMusic, 0.f, 3.f);
         }
         break;
       }
@@ -2424,10 +2432,11 @@ void GameManager::Update(float dt) {
     gameCharacters["liuche"]->SetState(GameCharacterState::SAD);
     gameCharacters["weizifu"]->SetState(GameCharacterState::SAD);
     gameCharacters["weiqing"]->SetState(GameCharacterState::FIGHTING);
-    if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
-      SoundEngine::GetInstance().StopSound("background_relax");
-    }
-    SoundEngine::GetInstance().PlaySound("background_fight0", true);
+    // if (SoundEngine::GetInstance().IsPlaying("background_relax")) {
+    //   SoundEngine::GetInstance().StopSound("background_relax");
+    // }
+    // SoundEngine::GetInstance().PlaySound("background_fight0", false);
+    SoundEngine::GetInstance().StartBackgroundMusic(/*isFighting=*/true);
   }
 
   // Check if the event timer for shaking the screen has expired.
@@ -2640,6 +2649,8 @@ void GameManager::Update(float dt) {
   SoundEngine::GetInstance().UpdateSourcesVolume(dt);
   // Clean up the sound sources that are not playing.
   SoundEngine::GetInstance().CleanUpSources();
+  // Refresh the background music if needed.
+  SoundEngine::GetInstance().RefreshBackgroundMusic(dt);
 }
 
 void GameManager::Render() {
@@ -3136,12 +3147,14 @@ void GameManager::SetState(GameState newState) {
              this->state == GameState::STORY) {
     // Reset the background music to the main theme.
     SoundEngine& soundEngine = SoundEngine::GetInstance();
-    if (soundEngine.IsPlaying("background_fight0")) {
-      soundEngine.StopSound("background_fight0");
+    /*std::string currentMusic = soundEngine.GetPlayingBackgroundMusic();
+    if (!currentMusic.empty() && soundEngine.IsFightingMusic(currentMusic)) {
+      soundEngine.StopSound(currentMusic);
     }
     if (!soundEngine.IsPlaying("background_relax")) {
       soundEngine.PlaySound("background_relax", true);
-    }
+    }*/
+    soundEngine.StartBackgroundMusic(/*isFighting=*/false);
   } else if (this->state == GameState::SPLASH_SCREEN) {
     // Play the white noise sound effect.
     SoundEngine& soundEngine = SoundEngine::GetInstance();
