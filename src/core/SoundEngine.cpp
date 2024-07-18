@@ -363,12 +363,6 @@ void SoundEngine::PlaySound(const std::string& name, bool loop, float volume) {
   sources_[name].emplace_back(source);
   SetVolume(source, volume);
   ++play_counts_[name];
-  //// Wait for the sound to finish
-  // ALint source_state;
-  // do {
-  //   alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-  // } while (source_state == AL_PLAYING);
-  // alDeleteSources(1, &source);
 }
 
 void SoundEngine::StopSound(const std::string& name) {

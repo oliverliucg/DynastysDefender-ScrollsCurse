@@ -932,10 +932,6 @@ void GameManager::LoadSound() {
                         "C:/Users/xiaod/resources/audio/background/"
                         "background_music_relaxing1.wav",
                         0.3f);
-  // soundEngine.LoadSound(
-  //     "background_relax2",
-  //     "C:/Users/xiaod/resources/audio/background/background_music_relaxing2.wav",
-  //     0.3f);
   soundEngine.SetBackgroundMusicNames(
       {"background_relax0", "background_relax1"},
       /*isFighting=*/false);
@@ -1453,6 +1449,12 @@ void GameManager::ProcessInput(float dt) {
 }
 
 void GameManager::Update(float dt) {
+  // Update sound sources' volume.
+  SoundEngine::GetInstance().UpdateSourcesVolume(dt);
+  // Clean up the sound sources that are not playing.
+  SoundEngine::GetInstance().CleanUpSources();
+  // Refresh the background music if needed.
+  SoundEngine::GetInstance().RefreshBackgroundMusic(dt);
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
       postProcessor->SetChaos(true);
@@ -1521,9 +1523,15 @@ void GameManager::Update(float dt) {
         this->SetState(GameState::INTRO);
         SoundEngine& soundEngine = SoundEngine::GetInstance();
         // Stop splash screen sound.
-        soundEngine.StopSound("splash_end");
-        soundEngine.StopSound("shock_wave");
-        soundEngine.StopSound("white_noise");
+        if (soundEngine.IsPlaying("splash_end")) {
+          soundEngine.StopSound("splash_end");
+        }
+        if (soundEngine.IsPlaying("shock_wave")) {
+          soundEngine.StopSound("shock_wave");
+        }
+        if (soundEngine.IsPlaying("white_noise")) {
+          soundEngine.StopSound("white_noise");
+        }
         // Remove the splash screen sound
         soundEngine.UnloadSound("splash_end");
         soundEngine.UnloadSound("shock_wave");
@@ -2660,13 +2668,6 @@ void GameManager::Update(float dt) {
     }
     this->texts.at("score")->SetAlpha(alpha);
   }
-
-  // Update sound sources' volume.
-  SoundEngine::GetInstance().UpdateSourcesVolume(dt);
-  // Clean up the sound sources that are not playing.
-  SoundEngine::GetInstance().CleanUpSources();
-  // Refresh the background music if needed.
-  SoundEngine::GetInstance().RefreshBackgroundMusic(dt);
 }
 
 void GameManager::Render() {
@@ -3342,6 +3343,7 @@ void GameManager::LoadTexts() {
   std::vector<std::u32string> textsToLoad;
   textsToLoad.push_back(resourceManager.GetText("story", "1"));
   textsToLoad.push_back(resourceManager.GetText("story", "2"));
+  textsToLoad.push_back(resourceManager.GetText("story", "3"));
   if (texts.find("story") == texts.end()) {
     texts["story"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBaseUnit / 2.0f,
