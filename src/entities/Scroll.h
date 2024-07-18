@@ -112,7 +112,7 @@ class Scroll : public GameObject {
   // draw scroll
   void Draw(std::shared_ptr<Renderer> renderer) override;
 
-  static const float kSilkEdgeWidth;
+  static float GetSilkEdgeWidth() { return 0.1f * kBaseUnit; }
 
  private:
   glm::vec2 center, rollerSize;

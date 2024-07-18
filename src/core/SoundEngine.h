@@ -24,8 +24,9 @@ enum class BackgroundMusicState { Relaxing, Fighting, None };
 struct BackgroundMusicInfo {
   BackgroundMusicState state;
   std::string currentMusic;
+  std::string lastMusic;
   float timerInterval;
-  const float expectedInterval = 5.f;
+  const float expectedInterval = 6.f;
   // background music (fighting)
   std::vector<std::string> fightingMusic;
   // background music (relaxing)
@@ -34,33 +35,11 @@ struct BackgroundMusicInfo {
   BackgroundMusicInfo()
       : state(BackgroundMusicState::None),
         currentMusic(""),
+        lastMusic(""),
         timerInterval(0.0f) {}
-  void Refresh() {
-    if (state == BackgroundMusicState::Fighting) {
-      assert(!fightingMusic.empty() && "No fighting music available");
-      size_t nextMusicIdx =
-          generateRandomInt<size_t>(0, fightingMusic.size() - 1);
-      if (fightingMusic[nextMusicIdx] == currentMusic) {
-        nextMusicIdx = (nextMusicIdx + 1) % fightingMusic.size();
-      }
-      currentMusic = fightingMusic[nextMusicIdx];
-    } else if (state == BackgroundMusicState::Relaxing) {
-      assert(!relaxingMusic.empty() && "No relaxing music available");
-      size_t nextMusicIdx =
-          generateRandomInt<size_t>(0, relaxingMusic.size() - 1);
-      if (relaxingMusic[nextMusicIdx] == currentMusic) {
-        nextMusicIdx = (nextMusicIdx + 1) % relaxingMusic.size();
-      }
-      currentMusic = relaxingMusic[nextMusicIdx];
-    }
-    timerInterval = 0.0f;
-  }
+  void Refresh();
 
-  void Reset() {
-    state = BackgroundMusicState::None;
-    currentMusic = "";
-    timerInterval = 0.0f;
-  }
+  void Reset();
 };
 
 class SoundEngine {

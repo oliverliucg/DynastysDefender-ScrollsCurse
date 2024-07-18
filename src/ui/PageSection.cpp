@@ -1,7 +1,5 @@
 #include "PageSection.h"
 
-const float PageSection::kScrollIconWidth = 0.5f * kBaseUnit;
-
 PageSection::PageSection(const std::string& name)
     : name_(name),
       position_(glm::vec2(0.f)),
@@ -205,9 +203,8 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer,
   float scroll_height =
       std::max(0.8f * kBaseUnit, (max_height_ / height) * max_height_);
   scroll_icon_->SetSize(
-      glm::vec2(PageSection::kScrollIconWidth, scroll_height));
+      glm::vec2(PageSection::GetScrollIconWidth(), scroll_height));
   // Set the center of the icon to be at the right bottom of the text box.
-  // float scrollCenterX = this->GetPosition().x + this->GetMaxWidth();
   scroll_icon_->SetCenter(
       glm::vec2(scrollIconCenterX,
                 this->GetPosition().y + scroll_icon_->GetSize().y * 0.5f));
@@ -245,20 +242,6 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer,
   color_renderer_ = colorRenderer;
   circle_renderer_ = circleRenderer;
   line_renderer_ = lineRenderer;
-  // auto textUnit = std::dynamic_pointer_cast<TextUnit>(content_[order_[0]]);
-  // float textHeight =
-  //     textUnit->GetText()->GetTextSize(textUnit->GetTextRenderer()).y;
-  // float textHeight2 = this->GetHeight();
-  // std::cout << "text height: " << textHeight << std::endl;
-  // std::cout << "text height2: " << textHeight2 << std::endl;
-  // std::cout << "text section name: " << name_ << std::endl;
-  // std::cout << "relations: " << scroll_relation_.x << " " <<
-  // scroll_relation_.y
-  //           << " " << scroll_relation_.z << std::endl;
-  // std::cout << "height: " << height << std::endl;
-  // std::cout << "max height: " << max_height_ << std::endl;
-  // std::cout << "expecting max offset: "
-  //           << 0.95f * max_height_ - this->GetHeight() << std::endl;
 }
 
 void PageSection::UpdateScrollIconAndSectionOffset() {
@@ -285,7 +268,7 @@ void PageSection::UpdateScrollIconAndSectionOffset() {
   float scroll_height =
       std::max(0.8f * kBaseUnit, (max_height_ / height) * max_height_);
   scroll_icon_->SetSize(
-      glm::vec2(PageSection::kScrollIconWidth, scroll_height));
+      glm::vec2(PageSection::GetScrollIconWidth(), scroll_height));
 
   float newExpectedOffset =
       lines_[2].y - lines_[0].y - scroll_icon_->GetSize().y;
@@ -343,7 +326,6 @@ void PageSection::MoveScrollIcon(float scroll_y_offset) {
   // between the offset of scroll icon and the offset of the content in the
   // section
   glm::vec2 position = scroll_icon_->GetPosition();
-  glm::vec2 size = scroll_icon_->GetSize();
   glm::vec3 relation = GetScrollRelationShip();
   float newOffset = getYOfLine(position.y - lines_[0].y, relation);
   SetOffset(newOffset);

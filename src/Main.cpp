@@ -87,13 +87,6 @@ int main() {
                                 kWindowedModeSizePadding.height);
   InitParametersForCurrentWindowSize(kVirtualScreenSize.x,
                                      kVirtualScreenSize.y);
-  std::cout << "Resolution: " << mode->width << "x" << mode->height
-            << std::endl;
-  std::cout << "WINDOWED_MODE_SCREEN_WIDTH: " << kWindowedModeSize.x
-            << " WINDOWED_MODE_SCREEN_HEIGHT: " << kWindowedModeSize.y
-            << std::endl;
-  std::cout << "FULL_SCREEN_WINDOW_WIDTH: " << kFullScreenSize.x
-            << " FULL_SCREEN_WINDOW_HEIGHT: " << kFullScreenSize.y << std::endl;
   ScreenMode initialScreenMode = configManager.GetScreenMode();
 
   // By default, the screen mode is set to full screen mode
@@ -122,7 +115,7 @@ int main() {
                               "DynastysDefender-ScrollsCurse", NULL, NULL);
   }
   if (window == NULL) {
-    std::cout << "Failed to create GLFW window" << std::endl;
+    std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return EXIT_FAILURE;
   }
@@ -137,7 +130,7 @@ int main() {
 
   // Use GLAD to load OpenGL functions
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cout << "Failed to initialize GLAD" << std::endl;
+    std::cerr << "Failed to initialize GLAD" << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -155,9 +148,6 @@ int main() {
   Renderer::SetActualWindowSizePadding(SCREEN_SIZE_PADDING);
   GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
   gameManager.PreLoad();
-
-  std::cout << "Screen width: " << SCREEN_WIDTH
-            << " Screen height: " << SCREEN_HEIGHT << std::endl;
 
   glfwSetWindowUserPointer(window, &gameManager);
 
@@ -296,8 +286,6 @@ int main() {
   glfwDestroyWindow(window);
   glfwTerminate();
 
-  std::cout << "SCREEN_WIDTH: " << SCREEN_WIDTH
-            << " SCREEN_HEIGHT: " << SCREEN_HEIGHT << std::endl;
   return EXIT_SUCCESS;
 }
 
@@ -459,7 +447,7 @@ void RecreateWindow(GLFWwindow** window, int width, int height,
                              NULL, NULL);
 
   if (*window == NULL) {
-    std::cout << "Failed to create GLFW window" << std::endl;
+    std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return;
   }

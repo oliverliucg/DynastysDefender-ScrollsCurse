@@ -59,7 +59,7 @@ class PageSection {
   bool IsMouseInBox(glm::vec2 mouse_position);
   void Draw();
 
-  static const float kScrollIconWidth;
+  static float GetScrollIconWidth() { return 0.5f * kBaseUnit; }
 
  private:
   std::string name_;

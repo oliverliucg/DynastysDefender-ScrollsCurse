@@ -1,5 +1,38 @@
 #include "SoundEngine.h"
 
+void BackgroundMusicInfo::Refresh() {
+  if (state == BackgroundMusicState::None) {
+    return;
+  }
+  const auto& targetMusicVec =
+      (state == BackgroundMusicState::Fighting) ? fightingMusic : relaxingMusic;
+  assert(!targetMusicVec.empty() && "No music available");
+  size_t nextMusicIdx = generateRandomInt<size_t>(0, targetMusicVec.size() - 1);
+  while ((targetMusicVec[nextMusicIdx] == currentMusic ||
+          targetMusicVec[nextMusicIdx] == lastMusic)) {
+    if (targetMusicVec.size() <= 1) {
+      break;
+    } else if (targetMusicVec.size() == 2) {
+      if (targetMusicVec[nextMusicIdx] == currentMusic) {
+        nextMusicIdx = (nextMusicIdx + 1) % targetMusicVec.size();
+        break;
+      }
+    } else {
+      nextMusicIdx = (nextMusicIdx + 1) % targetMusicVec.size();
+    }
+  }
+  lastMusic = currentMusic;
+  currentMusic = targetMusicVec[nextMusicIdx];
+  timerInterval = 0.f;
+}
+
+void BackgroundMusicInfo::Reset() {
+  state = BackgroundMusicState::None;
+  currentMusic = "";
+  lastMusic = "";
+  timerInterval = 0.0f;
+}
+
 // Get the singleton instance
 SoundEngine& SoundEngine::GetInstance() {
   static SoundEngine instance;
@@ -514,6 +547,8 @@ void SoundEngine::StartBackgroundMusic(bool isFighting) {
     default:
       break;
   }
+  background_music_info_.timerInterval = 0.f;
+  background_music_info_.lastMusic = "";
   PlaySound(background_music_info_.currentMusic, false);
 }
 

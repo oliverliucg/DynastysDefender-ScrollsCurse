@@ -1,7 +1,5 @@
 #include "Scroll.h"
 
-const float Scroll::kSilkEdgeWidth = 0.1f * kBubbleRadius;
-
 Scroll::Scroll(glm::vec2 center, glm::vec2 rollerSize, glm::vec2 silkSize,
                Texture2D rollerTexture)
     : GameObject(),

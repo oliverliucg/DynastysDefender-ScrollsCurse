@@ -551,12 +551,13 @@ void GameManager::Init() {
   if (textSection->NeedScrollIcon()) {
     // Adjust the line width of text content
     textSection->SetMaxWidth(textSection->GetMaxWidth() -
-                             PageSection::kScrollIconWidth);
+                             PageSection::GetScrollIconWidth());
     // Create scroll icon
-    textSection->InitScrollIcon(
-        colorRenderer, circleRenderer, lineRenderer,
-        this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x -
-            Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
+    textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
+                                this->gameBoard->GetPosition().x +
+                                    this->gameBoard->GetSize().x -
+                                    Scroll::GetSilkEdgeWidth() -
+                                    0.5f * PageSection::GetScrollIconWidth());
   }
 
   pages.at("story")->UpdatePosition();
@@ -639,12 +640,13 @@ void GameManager::Init() {
   if (textSection->NeedScrollIcon()) {
     // Adjust the line width of text content
     textSection->SetMaxWidth(textSection->GetMaxWidth() -
-                             PageSection::kScrollIconWidth);
+                             PageSection::GetScrollIconWidth());
     // Create scroll icon
-    textSection->InitScrollIcon(
-        colorRenderer, circleRenderer, lineRenderer,
-        this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x -
-            Scroll::kSilkEdgeWidth - 0.5f * PageSection::kScrollIconWidth);
+    textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
+                                this->gameBoard->GetPosition().x +
+                                    this->gameBoard->GetSize().x -
+                                    Scroll::GetSilkEdgeWidth() -
+                                    0.5f * PageSection::GetScrollIconWidth());
   }
 
   // Create page "difficulty"
@@ -904,13 +906,11 @@ void GameManager::LoadSound() {
   soundEngine.LoadSound(
       "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise2.wav",
       0.7f);
-  soundEngine.LoadSound("splash",
-                        "C:/Users/xiaod/resources/audio/splash/splash.wav");
-  soundEngine.LoadSound("shock_wave",
-                        "C:/Users/xiaod/resources/audio/splash/shock_wave.wav");
+  soundEngine.LoadSound(
+      "shock_wave", "C:/Users/xiaod/resources/audio/splash/shock_wave1.wav");
   soundEngine.LoadSound("splash_end",
                         "C:/Users/xiaod/resources/audio/splash/splash_end.wav",
-                        0.02f);
+                        0.35f);
   // Loas key typing sound
   soundEngine.LoadSound("key_s",
                         "C:/Users/xiaod/resources/audio/keypressed/key_s.wav");
@@ -925,11 +925,20 @@ void GameManager::LoadSound() {
 
   // background music
   soundEngine.LoadSound(
-      "background_relax",
+      "background_relax0",
       "C:/Users/xiaod/resources/audio/background/background_music_relaxing.wav",
       0.3f);
-  soundEngine.SetBackgroundMusicNames({"background_relax"},
-                                      /*isFighting=*/false);
+  soundEngine.LoadSound("background_relax1",
+                        "C:/Users/xiaod/resources/audio/background/"
+                        "background_music_relaxing1.wav",
+                        0.3f);
+  // soundEngine.LoadSound(
+  //     "background_relax2",
+  //     "C:/Users/xiaod/resources/audio/background/background_music_relaxing2.wav",
+  //     0.3f);
+  soundEngine.SetBackgroundMusicNames(
+      {"background_relax0", "background_relax1"},
+      /*isFighting=*/false);
   soundEngine.LoadSound("background_fight0",
                         "C:/Users/xiaod/resources/audio/background/"
                         "background_music_fighting0.wav",
@@ -1479,20 +1488,19 @@ void GameManager::Update(float dt) {
             originalSampleOffsets -
             intensifyDiffProportion *
                 (originalSampleOffsets - targetSampleOffsets);
-        targetSampleOffsets;
         SoundEngine& soundEngine = SoundEngine::GetInstance();
-        if (newSampleOffsets >= 1 / 1050.f &&
+        constexpr float thresholdSampleOffsets = 1.f / 1050.f;
+        if (newSampleOffsets >= thresholdSampleOffsets &&
             soundEngine.GetPlayCount("shock_wave") == 0) {
           soundEngine.PlaySound("shock_wave");
           soundEngine.PlaySound("splash_end", false);
         }
         if (soundEngine.IsPlaying("splash_end")) {
-          float thresholdSampleOffsets = 1.f / 1050.f;
           float sampleOffsetsDiffProportion =
               (thresholdSampleOffsets - newSampleOffsets) /
               (thresholdSampleOffsets - targetSampleOffsets);
           float splashSoundVolume =
-              glm::mix(0.02f, 0.3f, sampleOffsetsDiffProportion);
+              glm::mix(0.02f, 0.35f, sampleOffsetsDiffProportion);
           soundEngine.SetVolume("splash_end", splashSoundVolume);
         }
         if (newIntensity < targetIntensity) {
@@ -1514,9 +1522,11 @@ void GameManager::Update(float dt) {
         SoundEngine& soundEngine = SoundEngine::GetInstance();
         // Stop splash screen sound.
         soundEngine.StopSound("splash_end");
+        soundEngine.StopSound("shock_wave");
         soundEngine.StopSound("white_noise");
         // Remove the splash screen sound
         soundEngine.UnloadSound("splash_end");
+        soundEngine.UnloadSound("shock_wave");
         soundEngine.UnloadSound("white_noise");
       } else if (timer->HasEvent("splash") &&
                  !timer->IsEventTimerExpired("splash")) {
@@ -1532,7 +1542,7 @@ void GameManager::Update(float dt) {
               (originalSampleOffsets - newSampleOffsets) /
               (originalSampleOffsets - targetSampleOffsets);
           float splashSoundVolume =
-              glm::mix(0.3f, 0.02f, sampleOffsetsDiffProportion);
+              glm::mix(0.35f, 0.02f, sampleOffsetsDiffProportion);
           soundEngine.SetVolume("splash_end", splashSoundVolume);
           float newIntensity =
               originalIntensity -
@@ -1573,8 +1583,14 @@ void GameManager::Update(float dt) {
       }
     } else if (timer->HasEvent("introFadeOut") &&
                timer->IsEventTimerExpired("introFadeOut")) {
+      // Unload the key typing sound
+      SoundEngine& soundEngine = SoundEngine::GetInstance();
       this->SetState(GameState::INITIAL);
       this->GoToState(GameState::STORY);
+      soundEngine.UnloadSound("key_s");
+      soundEngine.UnloadSound("keys_s_j");
+      soundEngine.UnloadSound("key_enter");
+      soundEngine.UnloadSound("key_space");
     }
     return;
   }
