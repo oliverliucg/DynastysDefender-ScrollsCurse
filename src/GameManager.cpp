@@ -1684,15 +1684,20 @@ void GameManager::Update(float dt) {
       gameCharacters["weiqing"]->RotateTo(
           gameCharacters["weiqing"]->GetTargetRoll(), -2.4f * glm::pi<float>(),
           dt);
-    } else if (gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() == 0) {
+    } else if (gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() == 0 &&
+               gameCharacters["weiqing"]->GetState() !=
+                   GameCharacterState::SAD) {
       gameCharacters["weiqing"]->SetState(GameCharacterState::SAD);
       // Go to the state of LOSE
       this->GoToState(GameState::LOSE);
       // Gradually lower the volume of the background music
+      auto& soundEngine = SoundEngine::GetInstance();
       std::string currentBackgroundMusic =
-          SoundEngine::GetInstance().GetPlayingBackgroundMusic();
-      SoundEngine::GetInstance().GraduallyChangeVolume(currentBackgroundMusic,
-                                                       0.f, 3.f);
+          soundEngine.GetPlayingBackgroundMusic();
+      if (soundEngine.IsPlaying(currentBackgroundMusic)) {
+        soundEngine.GraduallyChangeVolume(currentBackgroundMusic, 0.f, 3.f);
+      }
+      soundEngine.DoNotPlayNextBackgroundMusic();
     }
   }
 
@@ -2041,10 +2046,13 @@ void GameManager::Update(float dt) {
         ++(this->level);
         if (this->level > this->GetNumGameLevels()) {
           // Gradually lower the fighting music volume as we are ready to win
+          auto& soundEngine = SoundEngine::GetInstance();
           std::string currentBackgroundMusic =
-              SoundEngine::GetInstance().GetPlayingBackgroundMusic();
-          SoundEngine::GetInstance().GraduallyChangeVolume(
-              currentBackgroundMusic, 0.f, 3.f);
+              soundEngine.GetPlayingBackgroundMusic();
+          if (soundEngine.IsPlaying(currentBackgroundMusic)) {
+            soundEngine.GraduallyChangeVolume(currentBackgroundMusic, 0.f, 3.f);
+          }
+          soundEngine.DoNotPlayNextBackgroundMusic();
         }
         break;
       }
@@ -2275,7 +2283,7 @@ void GameManager::Update(float dt) {
           gameBoard->SetState(GameBoardState::ACTIVE);
           // Set the scoll state to be OPENING.
           SetScrollState(ScrollState::OPENING);
-          if (lastLastState == GameState::EXIT) {
+          if (lastLastState == GameState::INTRO) {
             // Set the offset of the text "Story".
             glm::vec2 buttonSectionPos = this->pages.at("story")
                                              ->GetSection("storybuttonsection")
@@ -2306,7 +2314,7 @@ void GameManager::Update(float dt) {
       float offset = textSection->GetOffset();
       targetOffset = std::min(0.f, targetOffset);
       if (offset > targetOffset) {
-        offset = std::max(offset - 5 * kBaseUnit * dt, targetOffset);
+        offset = std::max(offset - 3.f * kBaseUnit * dt, targetOffset);
         this->pages.at("story")
             ->GetSection("storytextsection")
             ->SetOffset(offset);
@@ -3352,7 +3360,7 @@ void GameManager::LoadTexts() {
     for (const auto& textToLoad : textsToLoad) {
       texts["story"]->AddParagraph(textToLoad);
     }
-    texts["story"]->SetScale(0.03f / kFontScale);
+    texts["story"]->SetScale(0.026f / kFontScale);
   } else {
     for (size_t i = 0; i < textsToLoad.size(); ++i) {
       texts["story"]->SetParagraph(i, textsToLoad[i]);
@@ -3378,6 +3386,7 @@ void GameManager::LoadTexts() {
       texts["control"]->SetParagraph(i, textsToLoad[i]);
     }
   }
+
   textsToLoad.clear();
 
   if (texts.find("victory") == texts.end()) {

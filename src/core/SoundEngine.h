@@ -88,6 +88,10 @@ class SoundEngine {
 
   void RefreshBackgroundMusic(float dt);
 
+  void StopBackgroundMusic();
+
+  void DoNotPlayNextBackgroundMusic();
+
   std::string GetPlayingBackgroundMusic() {
     return background_music_info_.currentMusic;
   }

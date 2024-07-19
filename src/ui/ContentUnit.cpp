@@ -188,8 +188,8 @@ void OptionUnit::UpdateHeight() {
 void OptionUnit::SetPosition(glm::vec2 pos) {
   if (image_on_left_) {
     icon_->SetPosition(pos);
-    text_->SetPosition(pos +
-                       glm::vec2(icon_->GetSize().x + horizontal_spacing_, 0));
+    text_->SetPosition(pos + glm::vec2(icon_->GetSize().x + horizontal_spacing_,
+                                       0.18f * kBaseUnit));
   } else {
     text_->SetPosition(pos);
     icon_->SetPosition(

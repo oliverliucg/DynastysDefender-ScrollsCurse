@@ -564,6 +564,21 @@ void SoundEngine::RefreshBackgroundMusic(float dt) {
   }
 }
 
+void SoundEngine::StopBackgroundMusic() {
+  if (background_music_info_.state == BackgroundMusicState::None) {
+    return;
+  }
+  if (!background_music_info_.currentMusic.empty() &&
+      IsPlaying(background_music_info_.currentMusic)) {
+    StopSound(background_music_info_.currentMusic);
+  }
+  background_music_info_.Reset();
+}
+
+void SoundEngine::DoNotPlayNextBackgroundMusic() {
+  background_music_info_.Reset();
+}
+
 float SoundEngine::GetPlaybackPosition(ALuint source) {
   float currentTime = 0.0f;
   alGetSourcef(source, AL_SEC_OFFSET, &currentTime);
