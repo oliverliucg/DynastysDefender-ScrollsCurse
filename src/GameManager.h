@@ -68,15 +68,6 @@ enum class GameState {
 // Transition between states
 enum class TransitionState { START, TRANSITION, END };
 
-// GameState to string
-static std::unordered_map<GameState, std::string> GameStateMap = {
-    {GameState::INITIAL, "INITIAL"},     {GameState::STORY, "STORY"},
-    {GameState::ACTIVE, "ACTIVE"},       {GameState::CONTROL, "CONTROL"},
-    {GameState::PREPARING, "PREPARING"}, {GameState::WIN, "WIN"},
-    {GameState::LOSE, "LOSE"},           {GameState::STORY_END, "STORY_END"},
-    {GameState::EXIT, "EXIT"},           {GameState::UNDEFINED, "UNDEFINED"},
-};
-
 struct GameLevel {
   // Num of colors
   int numColors;

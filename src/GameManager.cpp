@@ -380,7 +380,7 @@ void GameManager::Init() {
   auto startButtonUnit = std::make_shared<ButtonUnit>(
       "startbuttonunit", buttons["start"], textRenderer, colorRenderer);
   auto controlButtonUnit = std::make_shared<ButtonUnit>(
-      "controlbuttonunit", buttons["control"], textRenderer, colorRenderer);
+      "controlbuttonunit", buttons["controls"], textRenderer, colorRenderer);
   auto difficultyButtonUnit = std::make_shared<ButtonUnit>(
       "difficultybuttonunit", buttons["difficulty"], textRenderer,
       colorRenderer);
@@ -561,8 +561,8 @@ void GameManager::Init() {
   }
 
   pages.at("story")->UpdatePosition();
-  // Create page "control"
-  textUnit = std::make_shared<TextUnit>("controltextunit", texts["control"],
+  // Create page "controls"
+  textUnit = std::make_shared<TextUnit>("controltextunit", texts["controls"],
                                         textRenderer);
   /*auto startButtonUnit = std::make_shared<ButtonUnit>("startbuttonunit",
    * buttons["controlstart"], textRenderer, colorRenderer);*/
@@ -594,23 +594,23 @@ void GameManager::Init() {
                                      0.1f * kBaseUnit);
   buttonSection->SetOrder({"resumebuttonunit", "restartbuttonunit",
                            "stopbuttonunit", "backbuttonunit"});
-  pages["control"] = std::make_unique<Page>("control");
-  pages["control"]->AddSection(textSection);
-  pages["control"]->AddSection(buttonSection);
-  // Set the top, bottom and left spacing of the page "control".
-  pages["control"]->SetTopSpacing(0.5f * kBaseUnit);
-  pages["control"]->SetBottomSpacing(0.5f * kBaseUnit);
-  pages["control"]->SetLeftSpacing(0.5f * kBaseUnit);
-  // Set the inter spacing between the sections of the page "control".
-  pages["control"]->SetInterSectionSpacing(
+  pages["controls"] = std::make_unique<Page>("controls");
+  pages["controls"]->AddSection(textSection);
+  pages["controls"]->AddSection(buttonSection);
+  // Set the top, bottom and left spacing of the page "controls".
+  pages["controls"]->SetTopSpacing(0.5f * kBaseUnit);
+  pages["controls"]->SetBottomSpacing(0.5f * kBaseUnit);
+  pages["controls"]->SetLeftSpacing(0.5f * kBaseUnit);
+  // Set the inter spacing between the sections of the page "controls".
+  pages["controls"]->SetInterSectionSpacing(
       "controltextsection", "controlbuttonsection", kCommonInterSectionSpacing);
 
   commonButtionPosition = glm::vec2(
-      pages["control"]->GetPosition().x + pages["control"]->GetLeftSpacing(),
+      pages["controls"]->GetPosition().x + pages["controls"]->GetLeftSpacing(),
       this->height * 0.84f);
   commonButtonSize = glm::vec2(
       gameBoard->GetSize().x -
-          2 * (commonButtionPosition.x - pages["control"]->GetPosition().x),
+          2 * (commonButtionPosition.x - pages["controls"]->GetPosition().x),
       kBaseUnit * 2.0f);
   for (const auto& buttonName : buttonSection->GetOrder()) {
     std::shared_ptr<ButtonUnit> buttonUnit =
@@ -621,22 +621,24 @@ void GameManager::Init() {
     auto button = buttonUnit->GetButton();
     button->SetTextOnCenter(true);
   }
-  /* buttonSection->SetOrder({ "backbuttonunit" });*/
-  interspacingBetweenTextAndButton = pages["control"]->GetInterSectionSpacing(
+  // Contorls page only has "back" button when the game is not started
+  buttonSection->SetOrder({"backbuttonunit"});
+
+  interspacingBetweenTextAndButton = pages["controls"]->GetInterSectionSpacing(
       "controltextsection", "controlbuttonsection");
   maxHeightForTextSection =
       gameBoard->GetSize().y - buttonSection->GetHeight() -
-      pages["control"]->GetBottomSpacing() - pages["control"]->GetTopSpacing() -
-      interspacingBetweenTextAndButton;
+      pages["controls"]->GetBottomSpacing() -
+      pages["controls"]->GetTopSpacing() - interspacingBetweenTextAndButton;
   textSection->SetMaxHeight(maxHeightForTextSection);
   textSection->SetMaxWidth(gameBoard->GetSize().x -
-                           pages["control"]->GetLeftSpacing() -
+                           pages["controls"]->GetLeftSpacing() -
                            0.5 * kBaseUnit);
-  pages["control"]->SetPosition(glm::vec2(
-      this->gameBoard->GetPosition().x,
-      std::max(
-          this->gameBoard->GetCenter().y - pages["control"]->GetHeight() * 0.5f,
-          this->gameBoard->GetPosition().y)));
+  pages["controls"]->SetPosition(
+      glm::vec2(this->gameBoard->GetPosition().x,
+                std::max(this->gameBoard->GetCenter().y -
+                             pages["controls"]->GetHeight() * 0.5f,
+                         this->gameBoard->GetPosition().y)));
   if (textSection->NeedScrollIcon()) {
     // Adjust the line width of text content
     textSection->SetMaxWidth(textSection->GetMaxWidth() -
@@ -1082,17 +1084,37 @@ void GameManager::ProcessInput(float dt) {
       if (this->targetState == GameState::UNDEFINED) {
         // if Q is pressed, then we go to the state 'Control' of the game.
         this->GoToState(GameState::CONTROL);
-        // Get the buttion section of the page "control"
+        // Get the buttion section of the page "controls"
         auto buttonSection =
-            pages.at("control")->GetSection("controlbuttonsection");
+            pages.at("controls")->GetSection("controlbuttonsection");
         // Set the order of the buttons in the button section of the page
+        auto oldButtonSectionHeight = buttonSection->GetHeight();
         buttonSection->SetOrder(
             {"resumebuttonunit", "restartbuttonunit", "stopbuttonunit"});
-        pages.at("control")->SetPosition(
-            glm::vec2(this->gameBoard->GetPosition().x,
-                      std::max(this->gameBoard->GetCenter().y -
-                                   pages.at("control")->GetHeight() * 0.5f,
-                               this->gameBoard->GetPosition().y)));
+        auto newButtonSectionHeight = buttonSection->GetHeight();
+        auto textSection =
+            pages.at("controls")->GetSection("controltextsection");
+        textSection->SetMaxHeight(textSection->GetMaxHeight() +
+                                  oldButtonSectionHeight -
+                                  newButtonSectionHeight);
+
+        pages.at("controls")
+            ->SetPosition(
+                glm::vec2(this->gameBoard->GetPosition().x,
+                          std::max(this->gameBoard->GetCenter().y -
+                                       pages.at("controls")->GetHeight() * 0.5f,
+                                   this->gameBoard->GetPosition().y)));
+        if (textSection->NeedScrollIcon()) {
+          // Adjust the line width of text content
+          textSection->SetMaxWidth(textSection->GetMaxWidth() -
+                                   PageSection::GetScrollIconWidth());
+          // Create scroll icon
+          textSection->InitScrollIcon(
+              colorRenderer, circleRenderer, lineRenderer,
+              this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x -
+                  Scroll::GetSilkEdgeWidth() -
+                  0.5f * PageSection::GetScrollIconWidth());
+        }
         // Set scroll state to be CLOSING
         this->scroll->SetState(ScrollState::CLOSING);
         // pause timer of related events if it is not paused yet.
@@ -1156,9 +1178,9 @@ void GameManager::ProcessInput(float dt) {
   }
 
   if (!activePage.empty()) {
-    // Move the text content of the page "control" based on the scroll offset.
+    // Move the text content of the page "controls" based on the scroll offset.
     if (this->scrollYOffset != 0.f) {
-      // Iterate over the sections of the page "control"
+      // Iterate over the sections of the page "controls"
       for (auto sectionName : pages.at(activePage)->GetOrder()) {
         auto section = pages.at(activePage)->GetSection(sectionName);
         // Skip if the scroll icon is not allowed.
@@ -1234,21 +1256,43 @@ void GameManager::ProcessInput(float dt) {
               button->SetState(ButtonState::kPressed);
               // Play the sound of clicking the button
               SoundEngine::GetInstance().PlaySound("button_click");
-              if (content == "control") {
+              if (content == "controls") {
                 this->GoToState(GameState::CONTROL);
-                // Get the buttion section of the page "control"
+                // Reset the layout of the control page if needed.
                 auto buttonSection =
-                    pages.at("control")->GetSection("controlbuttonsection");
-                // Set the order of the buttons in the button section of the
-                // page
+                    pages.at("controls")->GetSection("controlbuttonsection");
+                auto oldButtonSectionHeight = buttonSection->GetHeight();
                 buttonSection->SetOrder({"backbuttonunit"});
-                // Update the page "control" position.
-                /*  pages.at("control")->UpdateComponentsHeight();*/
-                pages.at("control")->SetPosition(glm::vec2(
-                    this->gameBoard->GetPosition().x,
-                    std::max(this->gameBoard->GetCenter().y -
-                                 pages.at("control")->GetHeight() * 0.5f,
-                             this->gameBoard->GetPosition().y)));
+                auto newButtonSectionHeight = buttonSection->GetHeight();
+                auto textSection =
+                    pages.at("controls")->GetSection("controltextsection");
+                textSection->SetMaxHeight(textSection->GetMaxHeight() +
+                                          oldButtonSectionHeight -
+                                          newButtonSectionHeight);
+
+                // Update the page "controls" position.
+                pages.at("controls")
+                    ->SetPosition(glm::vec2(
+                        this->gameBoard->GetPosition().x,
+                        std::max(this->gameBoard->GetCenter().y -
+                                     pages.at("controls")->GetHeight() * 0.5f,
+                                 this->gameBoard->GetPosition().y)));
+
+                if (textSection->NeedScrollIcon()) {
+                  // Adjust the line width of text content
+                  textSection->SetMaxWidth(textSection->GetMaxWidth() -
+                                           PageSection::GetScrollIconWidth());
+                  // Create scroll icon
+                  textSection->InitScrollIcon(
+                      colorRenderer, circleRenderer, lineRenderer,
+                      this->gameBoard->GetPosition().x +
+                          this->gameBoard->GetSize().x -
+                          Scroll::GetSilkEdgeWidth() -
+                          0.5f * PageSection::GetScrollIconWidth());
+                } else {
+                  // Remove the scroll icon if exists
+                  textSection->DeleteScrollIcon();
+                }
               } else if (content == "difficulty") {
                 this->GoToState(GameState::DIFFICULTY_SETTINGS);
               } else if (content == "displaysettings") {
@@ -1295,6 +1339,8 @@ void GameManager::ProcessInput(float dt) {
                     gameCharacters["weiqing"]->GetHealth().GetTotalHealth();
                 gameCharacters["weiqing"]->GetHealth().SetCurrentHealth(
                     totalHealth);
+                // Delete the objects carried by the characters
+                gameCharacters["guojie"]->ClearCarriedObjects();
 
                 // Delete all the arrows
                 arrows.clear();
@@ -2350,34 +2396,11 @@ void GameManager::Update(float dt) {
   }
   if (this->state == GameState::CONTROL) {
     if (this->transitionState == TransitionState::TRANSITION) {
-      // Set the button "Start", "Story", and "Exit" to from kInactive to
-      // kNormal.
-      if (this->lastState == GameState::STORY &&
-          buttons["start"]->GetState() == ButtonState::kInactive) {
-        //            auto buttonSection =
-        //            pages["control"]->GetSection("controlbuttonsection"); for
-        //            (const auto& buttonName : buttonSection->GetOrder()) {
-        //                std::shared_ptr<ButtonUnit> buttonUnit =
-        //                std::dynamic_pointer_cast<ButtonUnit>(buttonSection->GetContent(buttonName));
-        //	buttonUnit->GetButton()->SetState(ButtonState::kNormal);
-
-        //}
-
-        /*AdjustButtonsHorizontalPosition({ "back", "exit" });*/
-      } else if (this->lastState == GameState::ACTIVE &&
-                 buttons["restart"]->GetState() == ButtonState::kInactive) {
-        buttons["restart"]->SetState(ButtonState::kNormal);
-        buttons["resume"]->SetState(ButtonState::kNormal);
-        buttons["stop"]->SetState(ButtonState::kNormal);
-        /*AdjustButtonsHorizontalPosition({ "restart", "resume", "stop" });*/
-      } else {
-        if (this->scroll->GetState() == ScrollState::OPENED &&
-            (buttons["back"]->GetState() != ButtonState::kInactive ||
-             buttons["restart"]->GetState() != ButtonState::kInactive)) {
-          this->SetTransitionState(TransitionState::END);
-        }
+      if (this->scroll->GetState() == ScrollState::OPENED &&
+          (buttons["back"]->GetState() != ButtonState::kInactive ||
+           buttons["restart"]->GetState() != ButtonState::kInactive)) {
+        this->SetTransitionState(TransitionState::END);
       }
-      activePage = "control";
     }
     if (this->targetState != GameState::UNDEFINED &&
         this->scroll->GetState() == ScrollState::CLOSED) {
@@ -2991,6 +3014,18 @@ void GameManager::Render() {
       }
     }
 
+    // Draw arrows when the game is paused but not stopped.
+    if (this->state == GameState::CONTROL &&
+        this->lastState == GameState::ACTIVE) {
+      for (auto& arrow : arrows) {
+        if (arrow->IsPenetrating() || arrow->IsStopped()) {
+          arrow->Draw(spriteDynamicRenderer, arrow->GetTextureCoords());
+        } else {
+          arrow->Draw(spriteRenderer);
+        }
+      }
+    }
+
     // Draw scroll
     scroll->Draw(spriteRenderer);
     // Enable scissor test
@@ -3013,20 +3048,6 @@ void GameManager::Render() {
       pages.at(activePage)->Draw();
     }
 
-    //      //// Render the buttons that is active
-    //      //if (this->state != GameState::CONTROL) {
-    //      //    auto it = buttons.begin();
-    //      //    while (it != buttons.end())
-    //      //    {
-    //      //        if (it->second->GetState() != ButtonState::kInactive) {
-    //      //            it->second->Draw(textRenderer, colorRenderer);
-    //      //        }
-    //      //        ++it;
-    //      //    }
-    //      //}
-
-    // Disable scissor test
-    /*     glDisable(GL_SCISSOR_TEST);*/
     handler.DisableScissorTest();
   }
 
@@ -3110,7 +3131,7 @@ std::string GameManager::GetPageName(GameState gameState) {
     case GameState::STORY:
       return "story";
     case GameState::CONTROL:
-      return "control";
+      return "controls";
     case GameState::DIFFICULTY_SETTINGS:
       return "difficulty";
     case GameState::DISPLAY_SETTINGS:
@@ -3151,7 +3172,14 @@ void GameManager::SetState(GameState newState) {
         }
       }
     }
-    // Refresh the position of each units in the active page.
+    // if (this->state == GameState::CONTROL && this->lastState ==
+    // GameState::ACTIVE) {
+    //   // Consider buttons "Resume", "Restart", and "Stop" size.
+    //   auto buttonSection =
+    //   pages.at(activePage)->GetSection("controlbuttonsection");
+    //   buttonSection->SetOrder({"resume", "restart", "stop"});
+    // }
+    //  Refresh the position of each units in the active page.
     pages.at(activePage)->UpdatePosition();
   }
   if (this->state == GameState::WIN || this->state == GameState::LOSE) {
@@ -3368,22 +3396,22 @@ void GameManager::LoadTexts() {
   }
 
   textsToLoad.clear();
-  textsToLoad.push_back(resourceManager.GetText("control", "1"));
-  textsToLoad.push_back(resourceManager.GetText("control", "2"));
-  textsToLoad.push_back(resourceManager.GetText("control", "3"));
-  textsToLoad.push_back(resourceManager.GetText("control", "4"));
-  if (texts.find("control") == texts.end()) {
-    texts["control"] = std::make_shared<Text>(
+  textsToLoad.push_back(resourceManager.GetText("controls", "1"));
+  textsToLoad.push_back(resourceManager.GetText("controls", "2"));
+  textsToLoad.push_back(resourceManager.GetText("controls", "3"));
+  textsToLoad.push_back(resourceManager.GetText("controls", "4"));
+  if (texts.find("controls") == texts.end()) {
+    texts["controls"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBaseUnit / 2.0f,
                           gameBoard->GetPosition().y + kBaseUnit / 2.0f),
         /*lineWidth=*/gameBoard->GetSize().x - kBaseUnit);
     for (const auto& textToLoad : textsToLoad) {
-      texts["control"]->AddParagraph(textToLoad);
+      texts["controls"]->AddParagraph(textToLoad);
     }
-    texts["control"]->SetScale(0.0216f / kFontScale);
+    texts["controls"]->SetScale(0.0216f / kFontScale);
   } else {
     for (size_t i = 0; i < textsToLoad.size(); ++i) {
-      texts["control"]->SetParagraph(i, textsToLoad[i]);
+      texts["controls"]->SetParagraph(i, textsToLoad[i]);
     }
   }
 
@@ -3536,13 +3564,13 @@ void GameManager::ReloadTexts() {
   }
 
   textsToLoad.clear();
-  textsToLoad.push_back(resourceManager.GetText("control", "1"));
-  textsToLoad.push_back(resourceManager.GetText("control", "2"));
-  textsToLoad.push_back(resourceManager.GetText("control", "3"));
-  textsToLoad.push_back(resourceManager.GetText("control", "4"));
-  texts["control"]->RemoveAllParagraphs(false);
+  textsToLoad.push_back(resourceManager.GetText("controls", "1"));
+  textsToLoad.push_back(resourceManager.GetText("controls", "2"));
+  textsToLoad.push_back(resourceManager.GetText("controls", "3"));
+  textsToLoad.push_back(resourceManager.GetText("controls", "4"));
+  texts["controls"]->RemoveAllParagraphs(false);
   for (size_t i = 0; i < textsToLoad.size(); ++i) {
-    texts["control"]->AddParagraph(textsToLoad[i]);
+    texts["controls"]->AddParagraph(textsToLoad[i]);
   }
 
   textsToLoad.clear();
@@ -3645,7 +3673,7 @@ void GameManager::ReloadTexts() {
 void GameManager::LoadButtons() {
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   //  Create buttons
-  std::vector<std::string> buttonNames = {"back",       "control",
+  std::vector<std::string> buttonNames = {"back",       "controls",
                                           "start",      "exit",
                                           "restart",    "resume",
                                           "stop",       "displaysettings",
@@ -3667,7 +3695,7 @@ void GameManager::LoadButtons() {
 void GameManager::ReloadButtons() {
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   //  Create buttons
-  std::vector<std::string> buttonNames = {"back",       "control",
+  std::vector<std::string> buttonNames = {"back",       "controls",
                                           "start",      "exit",
                                           "restart",    "resume",
                                           "stop",       "displaysettings",

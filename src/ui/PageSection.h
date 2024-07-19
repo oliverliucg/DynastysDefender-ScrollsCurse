@@ -54,6 +54,7 @@ class PageSection {
   glm::vec3 GetScrollRelationShip() const;
   Capsule& GetScrollIcon();
   void MoveScrollIcon(float scroll_y_offset);
+  void DeleteScrollIcon();
   bool NeedScrollIcon();
   bool IsScrollIconInitialized();
   bool IsMouseInBox(glm::vec2 mouse_position);

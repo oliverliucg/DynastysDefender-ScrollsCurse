@@ -331,6 +331,11 @@ void PageSection::MoveScrollIcon(float scroll_y_offset) {
   SetOffset(newOffset);
 }
 
+void PageSection::DeleteScrollIcon() {
+  scroll_icon_ = nullptr;
+  SetOffset(0.f);
+}
+
 bool PageSection::NeedScrollIcon() {
   float height = GetHeight();
   return height > max_height_;

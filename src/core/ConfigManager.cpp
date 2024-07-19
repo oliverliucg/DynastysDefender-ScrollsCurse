@@ -179,11 +179,11 @@ int64_t ConfigManager::GetScore() const {
 std::pair<char32_t, std::string> ConfigManager::GetFontFilePath(
     char32_t character, CharStyle style) const {
   std::string style_str = char_style_map.at(style);
-  if (0x0020 <= character && character <= 0x017F) {
-    // If character is from 0 to 00FF, it is for English and French, and we
-    // would load the latin font
+  if (0x0020 <= character && character <= 0x017F || character == 0x2022) {
+    // If character is from 0x0020 to 0x017F, it is for English and French, and
+    // we would load the latin font
     return std::make_pair(
-        0, config_.at("language").at("en").at("font").at(style_str));
+        0x0020, config_.at("language").at("en").at("font").at(style_str));
   } else if (0x4E00 <= character && character <= 0x9FFF) {
     // If character is from 4E00 to 9FFF, it is for simplified Chinese or
     // traditional chinese, and we would load the chinese font
