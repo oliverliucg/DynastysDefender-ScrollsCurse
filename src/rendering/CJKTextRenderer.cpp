@@ -1,4 +1,4 @@
-#include "CJKTextRenderer.h"
+﻿#include "CJKTextRenderer.h"
 
 std::pair<glm::vec3, bool> CJKTextRenderer::GetTextSize(
     std::u32string text, float scale, float lineWidth, float lineSpacingFactor,
@@ -51,13 +51,18 @@ std::pair<glm::vec3, bool> CJKTextRenderer::GetTextSize(
       continue;
     }
     word.push_back(text[i]);
+    // If the next character is a period, then append th period to the word.
+    if (i + 1 < text.size() && text[i + 1] == U'。') {
+      word.push_back(text[++i]);
+    }
     auto wordStyles = getEachCharacterStyle(word, charStyle);
     word = wordStyles.first;
     auto styles = wordStyles.second;
-
-    assert((word.size() == 1 || word.size() == tabSize) &&
+    assert((word.size() == 1 || word.size() == tabSize ||
+            word.size() == 2 && word[1] == U'。') &&
            styles.size() == word.size() + 1 &&
-           "The word should only contain one character.");
+           "The word should only contain one character or a tab or "
+           "one character followed by a period character.");
     charStyle = styles.back();
 
     // Get the x where the word ends.
@@ -170,12 +175,18 @@ std::pair<float, float> CJKTextRenderer::RenderText(
       continue;
     }
     word.push_back(text[i]);
+    // If the next character is a period, then append th period to the word.
+    if (i + 1 < text.size() && text[i + 1] == U'。') {
+      word.push_back(text[++i]);
+    }
     auto wordStyles = getEachCharacterStyle(word, charStyle);
     word = wordStyles.first;
     auto styles = wordStyles.second;
-    assert((word.size() == 1 || word.size() == tabSize) &&
+    assert((word.size() == 1 || word.size() == tabSize ||
+            word.size() == 2 && word[1] == U'。') &&
            styles.size() == word.size() + 1 &&
-           "The word should only contain one character.");
+           "The word should only contain one character or a tab or "
+           "one character followed by a period character.");
     charStyle = styles.back();
 
     // Get the x where the word ends.
@@ -322,12 +333,18 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
       continue;
     }
     word.push_back(text[i]);
+    // If the next character is a period, then append th period to the word.
+    if (i + 1 < text.size() && text[i + 1] == U'。') {
+      word.push_back(text[++i]);
+    }
     auto wordStyles = getEachCharacterStyle(word, charStyle);
     word = wordStyles.first;
     auto styles = wordStyles.second;
-    assert((word.size() == 1 || word.size() == tabSize) &&
+    assert((word.size() == 1 || word.size() == tabSize ||
+            word.size() == 2 && word[1] == U'。') &&
            styles.size() == word.size() + 1 &&
-           "The word should only contain one character.");
+           "The word should only contain one character or a tab or "
+           "one character followed by a period character.");
     charStyle = styles.back();
 
     // Get the x where the word ends.
