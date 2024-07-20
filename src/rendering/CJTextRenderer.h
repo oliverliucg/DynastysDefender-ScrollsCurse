@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "TextRenderer.h"
 
-class CJKTextRenderer : public TextRenderer {
+class CJTextRenderer : public TextRenderer {
  public:
-  CJKTextRenderer(const Shader& shader, unsigned int width, unsigned int height,
-                  char32_t benchmarkChar = U'힣')
+  CJTextRenderer(const Shader& shader, unsigned int width, unsigned int height,
+                 char32_t benchmarkChar = U'힣')
       : TextRenderer(shader, width, height, benchmarkChar) {}
 
   //  Get the height and width of the text

@@ -1,6 +1,6 @@
-﻿#include "CJKTextRenderer.h"
+﻿#include "CJTextRenderer.h"
 
-std::pair<glm::vec3, bool> CJKTextRenderer::GetTextSize(
+std::pair<glm::vec3, bool> CJTextRenderer::GetTextSize(
     std::u32string text, float scale, float lineWidth, float lineSpacingFactor,
     float additionalPadding) {
   glm::vec2 finalSize = glm::vec2(0.f);
@@ -20,7 +20,7 @@ std::pair<glm::vec3, bool> CJKTextRenderer::GetTextSize(
                       additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line. For
-  //  CJK characters, each character can be seen as a word.
+  //  CJ characters, each character can be seen as a word.
   bool firstWord = true;
 
   // char style
@@ -34,7 +34,7 @@ std::pair<glm::vec3, bool> CJKTextRenderer::GetTextSize(
   std::u32string word;
 
   for (size_t i = 0; i < text.size(); ++i) {
-    // For CJK characters, we don't need to check if it is a space, each
+    // For CJ characters, we don't need to check if it is a space, each
     // character can be seen as a word. When it is '{', '}', '[', ']', '\t', we
     // would continue to find the next character.
     if (text[i] == U'{' || text[i] == U'}' || text[i] == U'[' ||
@@ -126,7 +126,7 @@ std::pair<glm::vec3, bool> CJKTextRenderer::GetTextSize(
                         hasDescendersInLastLine);
 }
 
-std::pair<float, float> CJKTextRenderer::RenderText(
+std::pair<float, float> CJTextRenderer::RenderText(
     std::u32string text, float x, float y, float scale, float lineWidth,
     float lineSpacingFactor, float additionalPadding, glm::vec3 color,
     float alpha) {
@@ -151,7 +151,7 @@ std::pair<float, float> CJKTextRenderer::RenderText(
                       additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line. For
-  //  CJK characters, each character can be seen as a word.
+  //  CJ characters, each character can be seen as a word.
   bool firstWord = true;
 
   // char style
@@ -160,7 +160,7 @@ std::pair<float, float> CJKTextRenderer::RenderText(
   std::u32string word;
 
   for (size_t i = 0; i < text.size(); ++i) {
-    // For CJK characters, we don't need to check if it is a space, each
+    // For CJ characters, we don't need to check if it is a space, each
     // character can be seen as a word. When it is '{', '}', '[', ']', '\t', we
     // would continue to find the next character.
     if (text[i] == U'{' || text[i] == U'}' || text[i] == U'[' ||
@@ -267,7 +267,7 @@ std::pair<float, float> CJKTextRenderer::RenderText(
       lineSpacing);
 }
 
-std::pair<float, float> CJKTextRenderer::RenderCenteredText(
+std::pair<float, float> CJTextRenderer::RenderCenteredText(
     std::u32string text, float x, float y, float scale, float lineWidth,
     float lineSpacingFactor, float additionalPadding, glm::vec2 center,
     glm::vec3 color, float alpha) {
@@ -298,7 +298,7 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
                       additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line. For
-  //  CJK characters, each character can be seen as a word.
+  //  CJ characters, each character can be seen as a word.
   bool firstWord = true;
 
   // char style
@@ -316,7 +316,7 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
                           scale * 0.5f));
 
   for (size_t i = 0; i < text.size(); ++i) {
-    // For CJK characters, we don't need to check if it is a space, each
+    // For CJ characters, we don't need to check if it is a space, each
     // character can be seen as a word. When it is '{', '}', '[', ']', '\t', we
     // would continue to find the next character.
     if (text[i] == U'{' || text[i] == U'}' || text[i] == U'[' ||
@@ -436,7 +436,7 @@ std::pair<float, float> CJKTextRenderer::RenderCenteredText(
       lineSpacing);
 }
 
-std::pair<float, float> CJKTextRenderer::RenderRightAlignedText(
+std::pair<float, float> CJTextRenderer::RenderRightAlignedText(
     std::u32string text, float x, float y, float scale, float lineWidth,
     float lineSpacingFactor, float additionalPadding, glm::vec3 color,
     float alpha) {
@@ -461,7 +461,7 @@ std::pair<float, float> CJKTextRenderer::RenderRightAlignedText(
                       additionalPadding;
 
   //  A boolean value for whether the word is the first word of the line. For
-  //  CJK characters, each character can be seen as a word.
+  //  CJ characters, each character can be seen as a word.
   bool firstWord = true;
 
   // char style
@@ -473,7 +473,7 @@ std::pair<float, float> CJKTextRenderer::RenderRightAlignedText(
   std::vector<float> xpositions, ypositions, widths, heights;
 
   for (size_t i = 0; i < text.size(); ++i) {
-    // For CJK characters, we don't need to check if it is a space, each
+    // For CJ characters, we don't need to check if it is a space, each
     // character can be seen as a word. When it is '{', '}', '[', ']', '\t', we
     // would continue to find the next character.
     if (text[i] == U'{' || text[i] == U'}' || text[i] == U'[' ||

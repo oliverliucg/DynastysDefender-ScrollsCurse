@@ -19,7 +19,7 @@
 #include "Arrow.h"
 #include "Bubble.h"
 #include "Button.h"
-#include "CJKTextRenderer.h"
+#include "CJTextRenderer.h"
 #include "Capsule.h"
 #include "CircleRenderer.h"
 #include "ColorRenderer.h"

@@ -9,7 +9,7 @@ add_library(rendering_lib STATIC
 	ColorRenderer.cpp
 	LineRenderer.cpp
 	WesternTextRenderer.cpp
-	CJKTextRenderer.cpp
+	CJTextRenderer.cpp
 	TextRenderer.cpp
 	Renderer.cpp
 )

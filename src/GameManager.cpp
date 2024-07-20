@@ -3320,7 +3320,7 @@ void GameManager::LoadTextRenderer() {
               benchmark);
           break;
         default:
-          textRenderers[language] = std::make_shared<CJKTextRenderer>(
+          textRenderers[language] = std::make_shared<CJTextRenderer>(
               resourceManager.GetShader("text"), this->width, this->height,
               benchmark);
       }
@@ -3348,7 +3348,7 @@ void GameManager::ReloadTextRenderer() {
             benchmark);
         break;
       default:
-        textRenderers[language] = std::make_shared<CJKTextRenderer>(
+        textRenderers[language] = std::make_shared<CJTextRenderer>(
             resourceManager.GetShader("text"), this->width, this->height,
             benchmark);
     }
