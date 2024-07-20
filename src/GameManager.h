@@ -75,8 +75,9 @@ struct GameLevel {
   int numInitialBubbles;
   // The least distance between the bubble and the bottom of the game board
   float minDistanceToBottom;
-  // The least distance between the bubble and the center of the shooter
-  float minDistanceToShooter;
+  // The parameters for the ellipse centered at the shooter and the new bubble
+  // should be generated outside of it.
+  float minHorizontalDistanceToShooter, minVerticalDistanceToShooter;
   // Probability that a new bubble is generated adjacent to the most recently
   // added bubble
   float probabilityNewBubbleIsNeighborOfLastAdded;
@@ -400,7 +401,8 @@ class GameManager {
   // Update the free slots of the game board after inserting a new bubble.
   void UpdateFreeSlots(std::unique_ptr<Bubble>& bubble,
                        float minDistanceToBottom = 0.f,
-                       float minDistanceToShooter = 0.f);
+                       float minHorizontalDistanceToShooter = 0.f,
+                       float minVerticalDistanceToShooter = 0.f);
 
   // Generate random static bubbles on the free slots of the game board.
   void GenerateRandomStaticBubblesHelper(GameLevel gameLevel);

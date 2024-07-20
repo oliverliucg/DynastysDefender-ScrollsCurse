@@ -4446,7 +4446,8 @@ std::vector<glm::vec2> GameManager::GetPotentialNeighborFreeSlots(
 
 void GameManager::UpdateFreeSlots(std::unique_ptr<Bubble>& bubble,
                                   float minDistanceToBottom,
-                                  float minDistanceToShooter) {
+                                  float minHorizontalDistanceToShooter,
+                                  float minVerticalDistanceToShooter) {
   // Get the center of the bubble
   glm::vec2 bubbleCenter = bubble->GetCenter();
   // Remove the free slots whose distance to the bubble center is less than
@@ -4468,13 +4469,14 @@ void GameManager::UpdateFreeSlots(std::unique_ptr<Bubble>& bubble,
   // minDistanceToBottom.
   glm::vec2 shooterCenter = this->shooter->GetCarriedBubble().GetCenter();
   float gameBoardBottomBound = this->gameBoard->GetBoundaries()[3];
+  Ellipse ellipse(shooterCenter, minHorizontalDistanceToShooter,
+                  minVerticalDistanceToShooter);
   potentialFreeSlots.erase(
       std::remove_if(potentialFreeSlots.begin(), potentialFreeSlots.end(),
                      [&](glm::vec2 slotCenter) {
-                       return glm::distance(slotCenter, shooterCenter) <
-                                  minDistanceToShooter ||
-                              slotCenter.y >
-                                  gameBoardBottomBound - minDistanceToBottom;
+                       return slotCenter.y >
+                                  gameBoardBottomBound - minDistanceToBottom ||
+                              ellipse.isWithin(slotCenter);
                      }),
       potentialFreeSlots.end());
 
@@ -4593,7 +4595,9 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
     statics[lastAddedBubbleID] = std::move(newBubble);
 
     // Update the free slots
-    UpdateFreeSlots(statics[lastAddedBubbleID]);
+    UpdateFreeSlots(statics[lastAddedBubbleID], gameLevel.minDistanceToBottom,
+                    gameLevel.minHorizontalDistanceToShooter,
+                    gameLevel.minVerticalDistanceToShooter);
 
     // Memorize the id of the new bubble
     addedBubbleIds.emplace_back(lastAddedBubbleID);
@@ -4611,10 +4615,9 @@ void GameManager::GenerateRandomStaticBubbles() {
   gameLevel.numColors =
       level < colorMap.size() ? std::sqrt(level * 4.f - 3.f) : colorMap.size();
   gameLevel.numInitialBubbles = 10 + level * 5;
-  gameLevel.minDistanceToBottom =
-      4 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
-  gameLevel.minDistanceToShooter =
-      5 * kBubbleRadius + (3 - 0.1f * level) * kBubbleRadius;
+  gameLevel.minDistanceToBottom = 4 * kBaseUnit + kBubbleRadius;
+  gameLevel.minHorizontalDistanceToShooter = 3 * kBaseUnit + kBubbleRadius;
+  gameLevel.minVerticalDistanceToShooter = 6 * kBaseUnit;
   float difficultyScalingFactor = 0.8f;
   switch (this->difficulty) {
     case Difficulty::MEDIUM:
@@ -4679,56 +4682,6 @@ void GameManager::GenerateRandomStaticBubbles() {
 
   this->shooter->UpdateCarriedBubbleRadius(kBubbleRadius);
   GenerateRandomStaticBubblesHelper(gameLevel);
-  /*if (level <= GetNumGameLevels()) {
-    gameLevel.numColors = 1;
-    gameLevel.numInitialBubbles = 10;
-    gameLevel.maxInitialBubbleDepth = 22 * kBaseUnit;
-    gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 1.f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubble = 1.f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 1.f;
-    GenerateRandomStaticBubblesHelper(gameLevel);
-  } else if (level == 2) {
-    gameLevel.numColors = 3;
-    gameLevel.numInitialBubbles = 30;
-    gameLevel.maxInitialBubbleDepth = 24 * kBaseUnit;
-    gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.85f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.85f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.85f;
-    GenerateRandomStaticBubblesHelper(gameLevel);
-  } else if (level == 3) {
-    gameLevel.numColors = 5;
-    gameLevel.numInitialBubbles = 50;
-    gameLevel.maxInitialBubbleDepth = 26 * kBaseUnit;
-    gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.7f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.7f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.7f;
-    GenerateRandomStaticBubblesHelper(gameLevel);
-  } else if (level == 4) {
-    gameLevel.numColors = 7;
-    gameLevel.numInitialBubbles = 70;
-    gameLevel.maxInitialBubbleDepth = 28 * kBaseUnit;
-    gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.55f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.55f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.55f;
-    GenerateRandomStaticBubblesHelper(gameLevel);
-  } else if (level == 5) {
-    gameLevel.numColors = 9;
-    gameLevel.numInitialBubbles = 90;
-    gameLevel.maxInitialBubbleDepth = 32 * kBaseUnit;
-    gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.4f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.4f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.4f;
-    GenerateRandomStaticBubblesHelper(gameLevel);
-  }
-  else if (level >= 6) {
-    gameLevel.numColors = 10;
-    gameLevel.numInitialBubbles = 110;
-    gameLevel.maxInitialBubbleDepth = 32 * kBaseUnit;
-    gameLevel.probabilityNewBubbleIsNeighborOfLastAdded = 0.25f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubble = 0.25f;
-    gameLevel.probabilityNewBubbleIsNeighborOfBubbleOfSameColor = 0.25f;
-    GenerateRandomStaticBubblesHelper(gameLevel);
-  }*/
 }
 
 float GameManager::GetNarrowingTimeInterval() {

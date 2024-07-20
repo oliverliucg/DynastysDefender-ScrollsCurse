@@ -122,6 +122,27 @@ extern float kVelocityUnit;
 // number of directions of a neighbor bubble
 const int kNumNeighborDirections = 12;
 
+struct Ellipse {
+  glm::vec2 center;
+  float a;
+  float b;
+  // Checks if a point is within the ellipse (including the boundary).
+  bool isWithin(const glm::vec2& point) const {
+    return (point.x - center.x) * (point.x - center.x) / (a * a) +
+               (point.y - center.y) * (point.y - center.y) / (b * b) <=
+           1;
+  }
+};
+
+struct Circle {
+  glm::vec2 center;
+  float radius;
+};
+
+struct Line {
+  float A, B, C;  // Line equation: Ax + By + C = 0
+};
+
 bool areFloatsEqual(float a, float b, float epsilon = 1e-4);
 
 bool areFloatsEqual(const glm::vec2& a, const glm::vec2& b,
@@ -301,15 +322,6 @@ glm::vec4 mixBoundaries(glm::vec4 boundary1, glm::vec4 boundary2);
 // Adjust the size of a rectangle to fit the aspect ratio of a standard size
 SizePadding adjustToAspectRatio(int width, int height, int standardWidth,
                                 int standardHeight);
-
-struct Circle {
-  glm::vec2 center;
-  float radius;
-};
-
-struct Line {
-  float A, B, C;  // Line equation: Ax + By + C = 0
-};
 
 // A singleton resource manager class that hosts several functions to load
 // Textures and Shaders. Each loaded texture and/or shader is also stored for
