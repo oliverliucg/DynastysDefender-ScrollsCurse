@@ -1,0 +1,48 @@
+{
+  "introduction": "Esta obra de ficción fue inspirada por eventos y personajes históricos de la Dinastía Han Occidental de China.",
+  "story": {
+    "1": "En el año 124 a.C., el Edicto de Concesión emitido por el Emperador Han Wudi, Liu Che, causó gran descontento en Liu An, el rey de Huainan. Con la ambición de largo plazo de usurpar el poder, Liu An envió secretamente a su hija Liu Ling a Chang'an para que secretamente se ganara la confianza de los consejeros más cercanos del emperador y comenzó a planear un asesinato.",
+    "2": "Al enterarse de que Liu Che pronto visitaría la residencia de la princesa, Liu Ling y su confidente Guo Jie rápidamente finalizaron su plan de asesinato. En el día del banquete, Guo Jie, disfrazado de sirviente, se infiltró silenciosamente en la residencia. Mientras Liu Che y los invitados bebían y reían, Guo Jie aprovechó la oportunidad y disparó secretamente una flecha a Liu Che. La emperatriz Wei Zifu, con gran perspicacia, detectó el peligro y empujó a Liu Che a un lado justo a tiempo para salvarle la vida.",
+    "3": "Después del intento de asesinato fallido, Guo Jie inmediatamente saltó frente a Liu Che y la emperatriz Wei Zifu, tomando a ambos como rehenes. Al ver esto, el general Wei Qing se apresuró a rescatarlos. En ese momento, Guo Jie sacó un pergamino lleno de poder misterioso de su manga, y mientras se desplegaba, burbujas mágicas de colores estallaron. Wei Qing tuvo que estallar todas las burbujas en un tiempo limitado para romper la magia de Guo Jie y liberar a Liu Che y a la emperatriz Wei Zifu del peligro."
+  },
+  "controls": {
+    "1": "{Disparar Burbuja}: Presiona la {Barra Espaciadora} para disparar una burbuja.",
+    "2": "{Apuntar con el Lanzador}:\n\t• {Rotación Izquierda}: Mantén presionada la {Tecla de Flecha Izquierda} para rotar el lanzador en sentido antihorario.\n\t• {Rotación Derecha}: Mantén presionada la {Tecla de Flecha Derecha} para rotar el lanzador en sentido horario.",
+    "3": "{Apuntado Preciso}: Mantén presionada la {Tecla Ctrl} para disminuir la velocidad de rotación del lanzador, permitiendo ajustes direccionales precisos.",
+    "4": "{Pausar Juego}: Presiona la {Tecla Q} para pausar el juego. Esto mostrará un menú con las siguientes opciones:\n\t• {Reiniciar}: Comenzar el juego de nuevo desde el principio.\n\t• {Reanudar}: Continuar tu sesión de juego actual.\n\t• {Detener}: Salir del juego actual y volver al menú principal."
+  },
+  "characterintro": {
+    "liuche": "{Liu Che}: Emperador Wu de Han, uno de los emperadores más influyentes de la historia china. Durante su reinado, inició numerosas reformas importantes y acciones militares que tuvieron un profundo impacto en la historia de China. En un banquete en la mansión de la princesa, fue repentinamente atacado por el asesino Guo Jie y sometido.",
+    "weizifu": "{Wei Zifu}: La emperatriz de Emperador Wu y hermana de Wei Qing. En el banquete en la mansión de la princesa, ella rápidamente empujó a Liu Che cuando Guo Jie disparó una flecha fría para asesinarlo, evitando que él fuera herido. Sin embargo, ella y Liu Che todavía fueron retenidos por el asesino.",
+    "weiqing": "{Wei Qing}: Un famoso general de la dinastía Han Occidental, conocido por sus victorias contra los Xiongnu, fue nombrado Gran General. Cuando Liu Che y Wei Zifu fueron retenidos por el asesino, Wei Qing inició rápidamente una operación de rescate. Tenía que romper una maldición de un pergamino mágico en un tiempo específico para derrotar al asesino y rescatar a Liu Che y Wei Zifu.",
+    "guojie": "{Guo Jie}: Un caballero de la dinastía Han occidental, notorio por su crueldad. En su juventud, descubrió accidentalmente un pergamino mágico maldito durante un saqueo de tumbas. Este pergamino podía esconderse flexiblemente en su manga y consumía una cantidad significativa de energía al ser utilizado. Durante la rebelión del Rey de Huainan, fue instruido por la Hija Noble Liu Ling para asesinar al Emperador Liu Che."
+  },
+  "score": "{Puntuación}",
+  "prompttomainmenu": "{Presiona Enter para proceder al Menú Principal}",
+  "victory": "{[VICTORIA]}",
+  "defeated": "{[DERROTA]}",
+  "screenmode": {
+    "fullscreen": "Pantalla completa",
+    "windowedborderless": "Sin bordes",
+    "windowed": "Ventana"
+  },
+  "difficulty": {
+    "easy": "Fácil",
+    "medium": "Medio",
+    "hard": "Difícil",
+    "expert": "Experto"
+  },
+  "button": {
+    "start": "Inicio",
+    "controls": "Controles",
+    "difficulty": "Dificultad",
+    "story": "Historia",
+    "exit": "Salir",
+    "back": "Atrás",
+    "resume": "Reanudar",
+    "restart": "Reiniciar",
+    "stop": "Detener",
+    "displaysettings": "Visualización",
+    "languagepreference": "Idioma"
+  }
+}

@@ -45,11 +45,9 @@ void GameManager::PreLoad() {
 
   // load logo
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/oliverliulogo4k.png", false, "logo");
-  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt",
-                             "C:/Users/xiaod/resources/shaders/sprite.fs.txt",
-                             nullptr, "sprite");
+  resourceManager.LoadTexture("textures/oliverliulogo4k.png", false, "logo");
+  resourceManager.LoadShader("shaders/sprite.vs", "shaders/sprite.fs", nullptr,
+                             "sprite");
   glm::mat4 projection =
       glm::ortho(0.0f, static_cast<float>(this->width),
                  static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
@@ -62,25 +60,18 @@ void GameManager::PreLoad() {
 void GameManager::Init() {
   // load shaders
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  resourceManager.LoadShader(
-      "C:/Users/xiaod/resources/shaders/post_processing.vs.txt",
-      "C:/Users/xiaod/resources/shaders/post_processing.fs.txt", nullptr,
-      "postprocessing");
-  resourceManager.LoadShader(
-      "C:/Users/xiaod/resources/shaders/pure_color.vs.txt",
-      "C:/Users/xiaod/resources/shaders/pure_color.fs.txt", nullptr,
-      "purecolor");
-  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/ray.vs.txt",
-                             "C:/Users/xiaod/resources/shaders/ray.fs.txt",
-                             nullptr, "ray");
-  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/particle.vs.txt",
-                             "C:/Users/xiaod/resources/shaders/particle.fs.txt",
+  resourceManager.LoadShader("shaders/post_processing.vs",
+                             "shaders/post_processing.fs", nullptr,
+                             "postprocessing");
+  resourceManager.LoadShader("shaders/pure_color.vs", "shaders/pure_color.fs",
+                             nullptr, "purecolor");
+  resourceManager.LoadShader("shaders/ray.vs", "shaders/ray.fs", nullptr,
+                             "ray");
+  resourceManager.LoadShader("shaders/particle.vs", "shaders/particle.fs",
                              nullptr, "particle");
-  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/text_2d.vs.txt",
-                             "C:/Users/xiaod/resources/shaders/text_2d.fs.txt",
+  resourceManager.LoadShader("shaders/text_2d.vs", "shaders/text_2d.fs",
                              nullptr, "text");
-  resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/discard.vs.txt",
-                             "C:/Users/xiaod/resources/shaders/discard.fs.txt",
+  resourceManager.LoadShader("shaders/discard.vs", "shaders/discard.fs",
                              nullptr, "discard");
 
   // configure shaders
@@ -88,8 +79,7 @@ void GameManager::Init() {
       glm::ortho(0.0f, static_cast<float>(this->width),
                  static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
   if (!resourceManager.HasShader("sprite")) {
-    resourceManager.LoadShader("C:/Users/xiaod/resources/shaders/sprite.vs.txt",
-                               "C:/Users/xiaod/resources/shaders/sprite.fs.txt",
+    resourceManager.LoadShader("shaders/sprite.vs", "shaders/sprite.fs",
                                nullptr, "sprite");
     resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
     resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
@@ -126,73 +116,32 @@ void GameManager::Init() {
       resourceManager.GetShader("postprocessing"), this->width, this->height);
 
   // load textures
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/brush2.png",
-                              true, "mouse");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/splash2.png",
-                              false, "splash");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/handynastry4.png", true, "background");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/arenagray.png",
-                              true, "gameboard");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/graybubble.png", true, "bubble");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/ancient_arrow.png", true, "shooter");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/ancient_arrow1.png", true, "shooter1");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/ancient_arrow_h.png", true, "arrow");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/ancient_arrow_h_1.png", true,
-      "arrow1");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/ancient_arrow_h_2.png", true,
-      "arrow2");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/ancient_arrow_h_3.png", true,
-      "arrow3");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/particle.png",
-                              true, "particle");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/particle1.png",
-                              true, "particle1");
-  resourceManager.LoadTexture("C:/Users/xiaod/resources/textures/cracks.png",
-                              true, "cracks");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/liuchesad2.png", true, "liuchesad");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/liuchehappy3.png", true,
-      "liuchehappy");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/liucheangry.png", true, "liucheangry");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weizifusad3.png", true, "weizifusad");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weizifuhappy3.png", true,
-      "weizifuhappy");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/guojiefight2.png", true,
-      "guojiefight");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/guojiesad2.png", true, "guojiesad");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqingfight2.png", true,
-      "weiqingfight");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqingsad2.png", true, "weiqingsad");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqinghappy2.png", true,
-      "weiqinghappy");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/weiqingwin2.png", true, "weiqingwin");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/scroll_paper1.png", true,
-      "scrollpaper");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/scroll_upper.png", true,
-      "scrollupper");
-  resourceManager.LoadTexture(
-      "C:/Users/xiaod/resources/textures/scroll_lower.png", true,
-      "scrolllower");
+  resourceManager.LoadTexture("textures/brush2.png", true, "mouse");
+  resourceManager.LoadTexture("textures/splash2.png", false, "splash");
+  resourceManager.LoadTexture("textures/handynastry4.png", true, "background");
+  resourceManager.LoadTexture("textures/graybubble.png", true, "bubble");
+  resourceManager.LoadTexture("textures/ancient_arrow1.png", true, "shooter1");
+  resourceManager.LoadTexture("textures/ancient_arrow_h_3.png", true, "arrow3");
+  resourceManager.LoadTexture("textures/particle.png", true, "particle");
+  resourceManager.LoadTexture("textures/particle1.png", true, "particle1");
+  resourceManager.LoadTexture("textures/cracks.png", true, "cracks");
+  resourceManager.LoadTexture("textures/liuchesad2.png", true, "liuchesad");
+  resourceManager.LoadTexture("textures/liuchehappy3.png", true, "liuchehappy");
+  resourceManager.LoadTexture("textures/liucheangry.png", true, "liucheangry");
+  resourceManager.LoadTexture("textures/weizifusad3.png", true, "weizifusad");
+  resourceManager.LoadTexture("textures/weizifuhappy3.png", true,
+                              "weizifuhappy");
+  resourceManager.LoadTexture("textures/guojiefight2.png", true, "guojiefight");
+  resourceManager.LoadTexture("textures/guojiesad2.png", true, "guojiesad");
+  resourceManager.LoadTexture("textures/weiqingfight2.png", true,
+                              "weiqingfight");
+  resourceManager.LoadTexture("textures/weiqingsad2.png", true, "weiqingsad");
+  resourceManager.LoadTexture("textures/weiqinghappy2.png", true,
+                              "weiqinghappy");
+  resourceManager.LoadTexture("textures/weiqingwin2.png", true, "weiqingwin");
+  resourceManager.LoadTexture("textures/scroll_paper1.png", true,
+                              "scrollpaper");
+  resourceManager.LoadTexture("textures/scroll_upper.png", true, "scrollupper");
 
   // Create game board
   gameBoard = std::make_unique<GameBoard>(
@@ -905,48 +854,35 @@ void GameManager::LoadSound() {
   // Add sound resources
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   // Load splash screen sound
-  soundEngine.LoadSound(
-      "white_noise", "C:/Users/xiaod/resources/audio/splash/white_noise2.wav",
-      0.7f);
-  soundEngine.LoadSound(
-      "shock_wave", "C:/Users/xiaod/resources/audio/splash/shock_wave1.wav");
-  soundEngine.LoadSound("splash_end",
-                        "C:/Users/xiaod/resources/audio/splash/splash_end.wav",
-                        0.35f);
+  soundEngine.LoadSound("white_noise", "audio/splash/white_noise2.wav", 0.7f);
+  soundEngine.LoadSound("shock_wave", "audio/splash/shock_wave1.wav");
+  soundEngine.LoadSound("splash_end", "audio/splash/splash_end.wav", 0.35f);
   // Loas key typing sound
-  soundEngine.LoadSound("key_s",
-                        "C:/Users/xiaod/resources/audio/keypressed/key_s.wav");
-  soundEngine.LoadSound(
-      "keys_s_j", "C:/Users/xiaod/resources/audio/keypressed/keys_s_j.wav",
-      0.5f);
-  soundEngine.LoadSound(
-      "key_enter", "C:/Users/xiaod/resources/audio/keypressed/key_enter.wav");
-  soundEngine.LoadSound(
-      "key_space", "C:/Users/xiaod/resources/audio/keypressed/key_space.wav",
-      0.15f);
+  soundEngine.LoadSound("key_s", "audio/keypressed/key_s.wav");
+  soundEngine.LoadSound("keys_s_j", "audio/keypressed/keys_s_j.wav", 0.5f);
+  soundEngine.LoadSound("key_enter", "audio/keypressed/key_enter.wav");
+  soundEngine.LoadSound("key_space", "audio/keypressed/key_space.wav", 0.15f);
 
   // background music
-  soundEngine.LoadSound(
-      "background_relax0",
-      "C:/Users/xiaod/resources/audio/background/background_music_relaxing.wav",
-      0.3f);
+  soundEngine.LoadSound("background_relax0",
+                        "audio/background/background_music_relaxing.wav", 0.3f);
   soundEngine.LoadSound("background_relax1",
-                        "C:/Users/xiaod/resources/audio/background/"
+                        "audio/background/"
                         "background_music_relaxing1.wav",
                         0.3f);
   soundEngine.SetBackgroundMusicNames(
       {"background_relax0", "background_relax1"},
       /*isFighting=*/false);
   soundEngine.LoadSound("background_fight0",
-                        "C:/Users/xiaod/resources/audio/background/"
+                        "audio/background/"
                         "background_music_fighting0.wav",
                         0.2f);
   soundEngine.LoadSound("background_fight1",
-                        "C:/Users/xiaod/resources/audio/background/"
+                        "audio/background/"
                         "background_music_fighting1.wav",
                         0.2f);
   soundEngine.LoadSound("background_fight2",
-                        "C:/Users/xiaod/resources/audio/background/"
+                        "audio/background/"
                         "background_music_fighting2.wav",
                         0.2f);
   soundEngine.SetBackgroundMusicNames(
@@ -954,63 +890,36 @@ void GameManager::LoadSound() {
       /*isFighting=*/true);
 
   // Game Play sound
-  soundEngine.LoadSound(
-      "wood_collide",
-      "C:/Users/xiaod/resources/audio/gameplay/wood_collide.wav", 0.8f);
-  soundEngine.LoadSound(
-      "earthquake", "C:/Users/xiaod/resources/audio/gameplay/earthquake.wav");
-  soundEngine.LoadSound(
-      "bubble_pop", "C:/Users/xiaod/resources/audio/gameplay/bubble_pop.wav",
-      0.4f);
-  soundEngine.LoadSound(
-      "bubble_explode",
-      "C:/Users/xiaod/resources/audio/gameplay/bubble_explode5.wav", 0.8f);
-  soundEngine.LoadSound("bubbleexplode",
-                        "C:/Users/xiaod/resources/audio/bleep.wav");
-  soundEngine.LoadSound(
-      "arrow_shoot",
-      "C:/Users/xiaod/resources/audio/gameplay/bubble_shoot.wav");
-  soundEngine.LoadSound(
-      "arrow_hit", "C:/Users/xiaod/resources/audio/gameplay/arrow_hit1.wav");
-  soundEngine.LoadSound(
-      "scroll_open",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_open3.wav");
-  soundEngine.LoadSound(
-      "scroll_close",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_close3.wav");
-  soundEngine.LoadSound(
-      "scroll_closed",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_closed1.wav", 0.7f);
-  soundEngine.LoadSound(
-      "scroll_hit", "C:/Users/xiaod/resources/audio/gameplay/scroll_hit2.wav",
-      0.8f);
-  soundEngine.LoadSound(
-      "scroll_vibrate",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_vibrate5.wav");
-  soundEngine.LoadSound(
-      "scroll_out_sleeve",
-      "C:/Users/xiaod/resources/audio/gameplay/wood_swing.wav", 0.7f);
-  soundEngine.LoadSound(
-      "flip_paper", "C:/Users/xiaod/resources/audio/gameplay/flip_paper2.wav");
-  soundEngine.LoadSound("drop",
-                        "C:/Users/xiaod/resources/audio/gameplay/drop5.wav");
-  soundEngine.LoadSound(
-      "scroll_explode",
-      "C:/Users/xiaod/resources/audio/gameplay/scroll_explode4.wav");
+  soundEngine.LoadSound("wood_collide", "audio/gameplay/wood_collide.wav",
+                        0.8f);
+  soundEngine.LoadSound("earthquake", "audio/gameplay/earthquake.wav");
+  soundEngine.LoadSound("bubble_pop", "audio/gameplay/bubble_pop.wav", 0.4f);
+  soundEngine.LoadSound("bubble_explode", "audio/gameplay/bubble_explode5.wav",
+                        0.8f);
+  soundEngine.LoadSound("bubbleexplode", "audio/bleep.wav");
+  soundEngine.LoadSound("arrow_shoot", "audio/gameplay/bubble_shoot.wav");
+  soundEngine.LoadSound("arrow_hit", "audio/gameplay/arrow_hit1.wav");
+  soundEngine.LoadSound("scroll_open", "audio/gameplay/scroll_open3.wav");
+  soundEngine.LoadSound("scroll_close", "audio/gameplay/scroll_close3.wav");
+  soundEngine.LoadSound("scroll_closed", "audio/gameplay/scroll_closed1.wav",
+                        0.7f);
+  soundEngine.LoadSound("scroll_hit", "audio/gameplay/scroll_hit2.wav", 0.8f);
+  soundEngine.LoadSound("scroll_vibrate", "audio/gameplay/scroll_vibrate5.wav");
+  soundEngine.LoadSound("scroll_out_sleeve", "audio/gameplay/wood_swing.wav",
+                        0.7f);
+  soundEngine.LoadSound("flip_paper", "audio/gameplay/flip_paper2.wav");
+  soundEngine.LoadSound("drop", "audio/gameplay/drop5.wav");
+  // soundEngine.LoadSound(
+  //     "scroll_explode",
+  //     "audio/gameplay/scroll_explode4.wav");
 
   // Victory sound
-  soundEngine.LoadSound(
-      "victory", "C:/Users/xiaod/resources/audio/background/victory2.wav",
-      0.7f);
+  soundEngine.LoadSound("victory", "audio/background/victory2.wav", 0.7f);
   // Defeated sound
-  soundEngine.LoadSound(
-      "defeated", "C:/Users/xiaod/resources/audio/background/defeated.wav",
-      1.f);
+  soundEngine.LoadSound("defeated", "audio/background/defeated.wav", 1.f);
 
   // Interaction
-  soundEngine.LoadSound(
-      "button_click",
-      "C:/Users/xiaod/resources/audio/interaction/button_click1.wav");
+  soundEngine.LoadSound("button_click", "audio/interaction/button_click1.wav");
 }
 
 void GameManager::Reload() {

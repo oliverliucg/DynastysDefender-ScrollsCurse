@@ -1,6 +1,4 @@
-﻿// Main.cpp : Defines the entry point for the application.
-
-#pragma once
+﻿// Main.cpp : Defines the entry point for the game.
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -53,7 +51,7 @@ int main() {
 
   // load configurations
   ConfigManager& configManager = ConfigManager::GetInstance();
-  configManager.SetConfigPath("C:/Users/xiaod/resources/settings/config.json");
+  configManager.SetConfigPath("settings/config.json");
   assert(configManager.LoadConfig() && "Failed to load configurations.");
 
   // Initialize GLFW

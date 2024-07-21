@@ -1,0 +1,48 @@
+{
+  "introduction": "Questa opera di finzione è stata ispirata da eventi storici e personaggi della Dinastia Han Occidentale della Cina.",
+  "story": {
+    "1": "Nel 124 a.C., l'Ordine di Concessione emesso dall'imperatore Han Wudi, Liu Che, causò grande scontento a Liu An, il re di Huainan. Con una lunga ambizione di usurpare il potere, Liu An inviò segretamente sua figlia Liu Ling a Chang'an per intessere segretamente relazioni con i consiglieri più vicini all'imperatore e iniziò a pianificare un'azione di assassinio.",
+    "2": "Appena apprese che Liu Che avrebbe presto visitato la residenza della principessa, Liu Ling e il suo fidato Guo Jie finalizzarono rapidamente il loro piano di assassinio. Il giorno del banchetto, Guo Jie, travestito da servo, si infiltrò silenziosamente nella residenza. Mentre Liu Che e gli ospiti bevevano e ridevano, Guo Jie colse l'opportunità e sparò segretamente una freccia a Liu Che. L'imperatrice Wei Zifu, con grande acume, percepì il pericolo e spostò rapidamente Liu Che di lato, salvandogli la vita.",
+    "3": "Dopo il fallito tentativo di assassinio, Guo Jie si lanciò immediatamente davanti a Liu Che e all'imperatrice Wei Zifu, prendendoli in ostaggio. Vedendo ciò, il generale Wei Qing si affrettò a soccorrerli. In quel momento, Guo Jie estrasse un rotolo pieno di potere misterioso dalla sua manica, e mentre si dispiegava, scoppiarono bolle magiche colorate. Wei Qing doveva far scoppiare tutte le bolle in un tempo limitato per rompere la magia di Guo Jie e liberare Liu Che e l'imperatrice Wei Zifu dal pericolo."
+  },
+  "controls": {
+    "1": "{Spara Bolle}: Premi la {Barra Spaziatrice} per sparare una bolla.",
+    "2": "{Orientamento del Lanciatore}:\n\t• {Rotazione Sinistra}: Tieni premuto il {Tasto Freccia Sinistra} per ruotare il lanciatore in senso antiorario.\n\t• {Rotazione Destra}: Tieni premuto il {Tasto Freccia Destra} per ruotare il lanciatore in senso orario.",
+    "3": "{Mirino di Precisione}: Tieni premuto il {Tasto Ctrl} per rallentare la rotazione del lanciatore, permettendo regolazioni direzionali precise.",
+    "4": "{Pausa Gioco}: Premi il {Tasto Q} per mettere in pausa il gioco. Verrà visualizzato un menù con le seguenti opzioni:\n\t• {Riavvia}: Inizia il gioco daccapo.\n\t• {Riprendi}: Continua la tua sessione di gioco corrente.\n\t• {Ferma}: Esci dal gioco corrente e torna al menù principale."
+  },
+  "characterintro": {
+    "liuche": "{Liu Che}: Imperatore Wu di Han, uno degli imperatori più influenti nella storia cinese. Durante il suo regno, ha avviato numerose riforme significative e azioni militari, avendo un profondo impatto sulla storia cinese. In un banchetto nella residenza della principessa, fu improvvisamente attaccato dall'assassino Guo Jie e sopraffatto.",
+    "weizifu": "{Wei Zifu}: L'imperatrice di Imperatore Wu e sorella di Wei Qing. Nel banchetto nella residenza della principessa, lei prontamente spinse Liu Che quando Guo Jie scagliò una fredda freccia per assassinarlo, prevenendo che lui fosse ferito. Tuttavia, lei e Liu Che furono comunque tenuti in ostaggio dall'assassino.",
+    "weiqing": "{Wei Qing}: Un famoso generale della dinastia Han Occidentale, noto per le sue vittorie contro gli Xiongnu, fu nominato Grande Generale. Quando Liu Che e Wei Zifu furono tenuti dall'assassino, Wei Qing avviò rapidamente un'operazione di soccorso. Doveva rompere una maledizione di un rotolo magico entro un tempo specifico per sconfiggere l'assassino e liberare Liu Che e Wei Zifu.",
+    "guojie": "{Guo Jie}: Un cavaliere della dinastia Han occidentale, noto per la sua spietatezza. In gioventù, scoprì accidentalmente un rotolo magico maledetto durante un saccheggio di tombe. Questo rotolo poteva essere nascosto flessibilmente nella sua manica e consumava una notevole quantità di energia quando utilizzato. Nel caso della ribellione del Re di Huainan, fu incaricato dalla Nobile Figlia Liu Ling di assassinare l'Imperatore Liu Che."
+  },
+  "score": "{Punteggio}",
+  "prompttomainmenu": "{Premi Invio per procedere al Menu Principale}",
+  "victory": "{[VITTORIA]}",
+  "defeated": "{[SCONFITTA]}",
+  "screenmode": {
+    "fullscreen": "Schermo intero",
+    "windowedborderless": "Senza bordi",
+    "windowed": "Finestra"
+  },
+  "difficulty": {
+    "easy": "Facile",
+    "medium": "Medio",
+    "hard": "Difficile",
+    "expert": "Esperto"
+  },
+  "button": {
+    "start": "Avvia",
+    "controls": "Comandi",
+    "difficulty": "Difficoltà",
+    "story": "Storia",
+    "exit": "Esci",
+    "back": "Indietro",
+    "resume": "Riprendi",
+    "restart": "Riavvia",
+    "stop": "Ferma",
+    "displaysettings": "Visualizzazione",
+    "languagepreference": "Lingua"
+  }
+}

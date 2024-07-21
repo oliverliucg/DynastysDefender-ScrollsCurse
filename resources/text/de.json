@@ -1,0 +1,48 @@
+{
+  "introduction": "Dieses fiktive Werk wurde von historischen Ereignissen und Persönlichkeiten der Westlichen Han-Dynastie Chinas inspiriert.",
+  "story": {
+    "1": "Im Jahr 124 v. Chr. löste die von Kaiser Han Wudi, Liu Che, erlassene Bestowal Order großen Unmut bei Liu An, dem König von Huainan, aus. Mit dem lang gehegten Ziel der Machtübernahme schickte Liu An seine Tochter Liu Ling heimlich nach Chang'an, um heimlich Verbindungen zu den engsten Beratern des Kaisers zu knüpfen und begann mit der Planung eines Attentats.",
+    "2": "Als bekannt wurde, dass Liu Che bald den Haushalt der Prinzessin besuchen würde, finalisierten Liu Ling und ihr Vertrauter Guo Jie schnell ihren Mordplan. Am Tag des Banketts schlich sich Guo Jie, verkleidet als Diener, heimlich in die Residenz. Während Liu Che und die Gäste Wein tranken und lachten, ergriff Guo Jie die Gelegenheit und schoss heimlich einen Pfeil auf Liu Che. Die Kaiserin Wei Zifu erkannte scharfsinnig die Gefahr und stieß Liu Che rechtzeitig zur Seite, um ihm das Leben zu retten.",
+    "3": "Nach dem gescheiterten Mordversuch sprang Guo Jie sofort vor Liu Che und Kaiserin Wei Zifu und nahm sie als Geiseln. Als General Wei Qing dies sah, eilte er zur Rettung. In diesem Moment zog Guo Jie eine Rolle voller geheimnisvoller Kraft aus seinem Ärmel, und als sie sich entfaltete, sprudelten bunte magische Blasen hervor. Wei Qing musste innerhalb kürzester Zeit alle Blasen sprengen, um Guo Jies Magie zu brechen und Liu Che sowie Kaiserin Wei Zifu aus der Gefahr zu befreien."
+  },
+  "controls": {
+    "1": "{Blase schießen}: Drücken Sie die {Leertaste}, um eine Blase abzufeuern.",
+    "2": "{Ausrichtung des Abschussgeräts}:\n\t• {Linksdrehung}: Halten Sie die {Pfeiltaste Links}, um das Abschussgerät gegen den Uhrzeigersinn zu drehen.\n\t• {Rechtsdrehung}: Halten Sie die {Pfeiltaste Rechts}, um das Abschussgerät im Uhrzeigersinn zu drehen.",
+    "3": "{Präzisionszielung}: Halten Sie die {Strg-Taste}, um die Drehung des Abschussgeräts zu verlangsamen, was präzise Richtungsanpassungen ermöglicht.",
+    "4": "{Spiel pausieren}: Drücken Sie die {Q-Taste}, um das Spiel zu pausieren. Es wird ein Menü mit folgenden Optionen angezeigt:\n\t• {Neustart}: Das Spiel von Anfang an neu starten.\n\t• {Fortsetzen}: Ihre aktuelle Spielsitzung fortsetzen.\n\t• {Stopp}: Das aktuelle Spiel beenden und zum Hauptmenü zurückkehren."
+  },
+  "characterintro": {
+    "liuche": "{Liu Che}: Han Wudi, einer der einflussreichsten Kaiser in der Geschichte Chinas. Während seiner Regentschaft führte er viele wichtige Reformen und militärische Aktionen durch, die tiefgreifende Auswirkungen auf die chinesische Geschichte hatten. Bei einem Bankett im Palast der Prinzessin wurde er von dem Attentäter Guo Jie überraschend angegriffen und überwältigt.",
+    "weizifu": "{Wei Zifu}: Die Kaiserin von Han Wudi und die Schwester von Wei Qing. Bei dem Bankett im Palast der Prinzessin schubste sie Liu Che geistesgegenwärtig zur Seite, als Guo Jie einen kalten Pfeil auf ihn schoss, um ihn vor Verletzungen zu bewahren. Dennoch wurden sie und Liu Che anschließend von dem Attentäter festgehalten.",
+    "weiqing": "{Wei Qing}: Ein berühmter General aus der westlichen Han-Dynastie, bekannt für seine Erfolge im Kampf gegen die Xiongnu, wurde zum Großgeneral ernannt. Als Liu Che und Wei Zifu von dem Attentäter festgehalten wurden, startete Wei Qing eine rasche Rettungsaktion. Er musste innerhalb einer bestimmten Zeit einen Fluch eines magischen Schriftrollen brechen, um den Attentäter zu besiegen und Liu Che sowie Wei Zifu zu befreien.",
+    "guojie": "{Guo Jie}: Ein Ritter aus der westlichen Han-Dynastie, bekannt für seine rücksichtslose Grausamkeit. In seiner Jugend entdeckte er zufällig eine magische, verfluchte Schriftrolle bei einem Grabraub. Diese Rolle konnte flexibel in seiner Ärmel versteckt werden und verbrauchte viel Energie bei der Benutzung. Im Fall der Rebellion des Königs von Huainan wurde er von Edelfrau Liu Ling beauftragt, Kaiser Liu Che zu ermorden."
+  },
+  "score": "{Punktzahl}",
+  "prompttomainmenu": "{Drücken Sie die Eingabetaste, um zum Hauptmenü zu gelangen}",
+  "victory": "{[SIEG]}",
+  "defeated": "{[NIEDERLAGE]}",
+  "screenmode": {
+    "fullscreen": "Vollbild",
+    "windowedborderless": "Rahmenlos",
+    "windowed": "Fenstermodus"
+  },
+  "difficulty": {
+    "easy": "Leicht",
+    "medium": "Mittel",
+    "hard": "Schwer",
+    "expert": "Experte"
+  },
+  "button": {
+    "start": "Start",
+    "controls": "Steuerung",
+    "difficulty": "Schwierigkeitsgrad",
+    "story": "Geschichte",
+    "exit": "Beenden",
+    "back": "Zurück",
+    "resume": "Fortsetzen",
+    "restart": "Neustart",
+    "stop": "Stopp",
+    "displaysettings": "Anzeige",
+    "languagepreference": "Sprache"
+  }
+}

@@ -7,10 +7,18 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
+          "cacheVariables": {
+            "CMAKE_C_COMPILER": "cl.exe",
+            "CMAKE_CXX_COMPILER": "cl.exe",
+            "LIB_PATH": "C:/Users/xiaod/Documents/libraries/opengl",
+            "BOOST_ROOT": "C:/Users/xiaod/boost_1_85_0/boost_1_85_0",
+            "COPY_SHADERS": "OFF", // Default value
+            "COPY_FONTS": "OFF", // Default value
+            "COPY_SETTINGS": "OFF", // Default value
+            "COPY_TEXT": "OFF", // Default value
+            "COPY_TEXTURES": "OFF", // Default value
+            "COPY_AUDIO": "OFF" // Default value
+          },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -18,24 +26,36 @@
             }
         },
         {
-            "name": "x64-debug",
-            "displayName": "x64 Debug",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
+          "name": "x64-debug",
+          "displayName": "x64 Debug",
+          "inherits": "windows-base",
+          "architecture": {
+            "value": "x64",
+            "strategy": "external"
+          },
+          "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "COPY_SHADERS": "OFF",
+            "COPY_FONTS": "OFF",
+            "COPY_SETTINGS": "OFF",
+            "COPY_TEXT": "OFF",
+            "COPY_TEXTURES": "OFF",
+            "COPY_AUDIO": "OFF"
+          }
         },
         {
             "name": "x64-release",
             "displayName": "x64 Release",
             "inherits": "x64-debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+          "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Release",
+            "COPY_SHADERS": "OFF",
+            "COPY_FONTS": "OFF",
+            "COPY_SETTINGS": "OFF",
+            "COPY_TEXT": "OFF",
+            "COPY_TEXTURES": "OFF",
+            "COPY_AUDIO": "OFF"
+          }
         },
         {
             "name": "x86-debug",

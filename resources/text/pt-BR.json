@@ -1,0 +1,48 @@
+{
+  "introduction": "Esta obra de ficção foi inspirada por eventos e personagens históricos da Dinastia Han Ocidental da China.",
+  "story": {
+    "1": "Em 124 a.C., o Decreto de Concessão emitido pelo Imperador Han Wudi, Liu Che, causou grande descontentamento em Liu An, o Rei de Huainan. Com a ambição de longa data de usurpar o poder, Liu An enviou secretamente sua filha Liu Ling para Chang'an para secretamente se infiltrar e ganhar a confiança dos conselheiros mais próximos do imperador e começou a planejar uma ação de assassinato.",
+    "2": "Ao saber que Liu Che visitaria em breve a residência da princesa, Liu Ling e seu confidente Guo Jie rapidamente finalizaram seu plano de assassinato. No dia do banquete, Guo Jie, disfarçado de servo, infiltrou-se silenciosamente na residência. Enquanto Liu Che e os convidados bebiam e riam, Guo Jie aproveitou a oportunidade e disparou secretamente uma flecha em Liu Che. A Imperatriz Wei Zifu, com perspicácia, detectou o perigo e rapidamente empurrou Liu Che para o lado, salvando sua vida.",
+    "3": "Após a tentativa de assassinato fracassada, Guo Jie imediatamente pulou na frente de Liu Che e da Imperatriz Wei Zifu, tomando-os como reféns. Vendo isso, o General Wei Qing apressou-se em resgatá-los. Naquele momento, Guo Jie puxou um pergaminho cheio de poder misterioso de sua manga, e enquanto ele se desdobrava, bolhas mágicas coloridas explodiram. Wei Qing teve que estourar todas as bolhas em um tempo limitado para quebrar a magia de Guo Jie e libertar Liu Che e a Imperatriz Wei Zifu do perigo."
+  },
+  "controls": {
+    "1": "{Disparar Bolha}: Pressione a {Barra de Espaço} para disparar uma bolha.",
+    "2": "{Ajustar Lançador}:\n\t• {Rotação à Esquerda}: Segure a {Tecla de Seta para Esquerda} para girar o lançador no sentido anti-horário.\n\t• {Rotação à Direita}: Segure a {Tecla de Seta para Direita} para girar o lançador no sentido horário.",
+    "3": "{Mira de Precisão}: Segure a {Tecla Ctrl} para reduzir a velocidade de rotação do lançador, permitindo ajustes direcionais precisos.",
+    "4": "{Pausar Jogo}: Pressione a {Tecla Q} para pausar o jogo. Será exibido um menu com as seguintes opções:\n\t• {Reiniciar}: Comece o jogo desde o início.\n\t• {Continuar}: Continue sua sessão de jogo atual.\n\t• {Parar}: Saia do jogo atual e retorne ao menu principal."
+  },
+  "characterintro": {
+    "liuche": "{Liu Che}: Imperador Wu de Han, um dos imperadores mais influentes da história chinesa. Durante seu reinado, ele iniciou numerosas reformas significativas e ações militares que tiveram um profundo impacto na história da China. Em um banquete na mansão da princesa, ele foi repentinamente atacado pelo assassino Guo Jie e subjugado.",
+    "weizifu": "{Wei Zifu}: A imperatriz de Imperador Wu e irmã de Wei Qing. No banquete na mansão da princesa, ela rapidamente empurrou Liu Che quando Guo Jie disparou uma flecha fria para assassiná-lo, evitando que ele fosse ferido. No entanto, ela e Liu Che ainda foram mantidos reféns pelo assassino.",
+    "weiqing": "{Wei Qing}: Um famoso general da dinastia Han Ocidental, conhecido por suas vitórias contra os Xiongnu, foi nomeado Grande General. Quando Liu Che e Wei Zifu foram mantidos pelo assassino, Wei Qing rapidamente iniciou uma operação de resgate. Ele tinha que quebrar uma maldição de um pergaminho mágico dentro de um tempo específico para derrotar o assassino e resgatar Liu Che e Wei Zifu.",
+    "guojie": "{Guo Jie}: Um cavaleiro da dinastia Han Ocidental , notório por sua crueldade. Em sua juventude, ele descobriu acidentalmente um pergaminho mágico amaldiçoado durante um roubo de túmulo. Este pergaminho podia ser flexivelmente escondido em sua manga e consumia uma quantidade significativa de energia quando usado. Durante a rebelião do Rei de Huainan, ele foi instruído pela Filha Nobre Liu Ling a assassinar o Imperador Liu Che."
+  },
+  "score": "{Pontuação}",
+  "prompttomainmenu": "{Pressione Enter para prosseguir ao Menu Principal}",
+  "victory": "{[VITÓRIA]}",
+  "defeated": "{[DERROTA]}",
+  "screenmode": {
+    "fullscreen": "Tela cheia",
+    "windowedborderless": "Sem bordas",
+    "windowed": "Modo janela"
+  },
+  "difficulty": {
+    "easy": "Fácil",
+    "medium": "Médio",
+    "hard": "Difícil",
+    "expert": "Especialista"
+  },
+  "button": {
+    "start": "Iniciar",
+    "controls": "Controles",
+    "difficulty": "Dificuldade",
+    "story": "História",
+    "exit": "Sair",
+    "back": "Voltar",
+    "resume": "Continuar",
+    "restart": "Reiniciar",
+    "stop": "Parar",
+    "displaysettings": "Visualização",
+    "languagepreference": "Idioma"
+  }
+}

@@ -3,9 +3,12 @@
 # Print the CMAKE_SOURCE_DIR and PROJECT_SOURCE_DIR
 message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-# Set a variable for the library path
-set(LIB_PATH "C:/Users/xiaod/Documents/libraries/opengl")
-set(BOOST_ROOT "C:/Users/xiaod/boost_1_85_0/boost_1_85_0")
+
+# Access the paths set in CMakePresets.json
+set(LIB_PATH ${OpenGL_PATH} CACHE PATH "Path to OpenGL related libraries")
+set(BOOST_ROOT ${BOOST_ROOT} CACHE PATH "Path to Boost libraries")
+message(STATUS "LIB_PATH: ${LIB_PATH}")
+message(STATUS "BOOST_ROOT: ${BOOST_ROOT}")
 set(Boost_LIBRARY_DIR "${BOOST_ROOT}/stage/lib")
 
 # Add source to this project's executable.
@@ -18,6 +21,84 @@ add_executable(DynastysDefender-ScrollsCurse
     "particles/ShadowTrailSystem.cpp" 
     "particles/ParticleSystem.cpp"
 )
+
+# Copy shaders to the build directory
+if(COPY_SHADERS STREQUAL "ON")
+    message(STATUS "Copying shaders from ${SHADERS_SOURCE_DIR} to ${SHADERS_DEST_DIR}")
+    add_custom_command(
+        TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${SHADERS_SOURCE_DIR} ${SHADERS_DEST_DIR}
+        COMMENT "Copying shaders to build directory"
+    )
+else()
+    message(STATUS "COPY_SHADERS is not ON, no copying will be done")
+endif()
+
+# Copy fonts to the build directory
+if(COPY_FONTS STREQUAL "ON")
+    message(STATUS "Copying fonts from ${FONTS_SOURCE_DIR} to ${FONTS_DEST_DIR}")
+    add_custom_command(
+        TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${FONTS_SOURCE_DIR} ${FONTS_DEST_DIR}
+        COMMENT "Copying fonts to build directory"
+    )
+else()
+    message(STATUS "COPY_SHADERS is not ON, no copying will be done")
+endif()
+
+# Copy settings to the build directory
+if(COPY_SETTINGS STREQUAL "ON")
+	message(STATUS "Copying settings from ${SETTINGS_SOURCE_DIR} to ${SETTINGS_DEST_DIR}")
+	add_custom_command(
+		TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${SETTINGS_SOURCE_DIR} ${SETTINGS_DEST_DIR}
+		COMMENT "Copying settings to build directory"
+	)
+else()
+	message(STATUS "COPY_SETTINGS is not ON, no copying will be done")
+endif()
+
+# Copy text to the build directory
+if(COPY_TEXT STREQUAL "ON")
+	message(STATUS "Copying text from ${TEXT_SOURCE_DIR} to ${TEXT_DEST_DIR}")
+	add_custom_command(
+		TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${TEXT_SOURCE_DIR} ${TEXT_DEST_DIR}
+		COMMENT "Copying text to build directory"
+	)
+else()
+	message(STATUS "COPY_TEXT is not ON, no copying will be done")
+endif()
+
+# Copy textures to the build directory
+if(COPY_TEXTURES STREQUAL "ON")
+	message(STATUS "Copying textures from ${TEXTURES_SOURCE_DIR} to ${TEXTURES_DEST_DIR}")
+	add_custom_command(
+		TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${TEXTURES_SOURCE_DIR} ${TEXTURES_DEST_DIR}
+		COMMENT "Copying textures to build directory"
+	)
+else()
+	message(STATUS "COPY_TEXTURES is not ON, no copying will be done")
+endif()
+
+# Copy audio to the build directory
+if(COPY_AUDIO STREQUAL "ON")
+	message(STATUS "Copying audio from ${AUDIO_SOURCE_DIR} to ${AUDIO_DEST_DIR}")
+	add_custom_command(
+		TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${AUDIO_SOURCE_DIR} ${AUDIO_DEST_DIR}
+		COMMENT "Copying audio to build directory"
+	)
+else()
+	message(STATUS "COPY_AUDIO is not ON, no copying will be done")
+endif()
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)

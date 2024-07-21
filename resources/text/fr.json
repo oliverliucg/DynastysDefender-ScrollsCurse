@@ -1,0 +1,48 @@
+{
+  "introduction": "Cette œuvre de fiction a été inspirée par des événements historiques et des personnages de la Dynastie Han Occidentale de Chine.",
+  "story": {
+    "1": "En 124 av. J.-C., l'Ordonnance de Concession promulguée par l'empereur Han Wudi, Liu Che, a fortement mécontenté Liu An, le roi de Huainan. Ayant depuis longtemps l'ambition de usurper le pouvoir, Liu An a envoyé secrètement sa fille Liu Ling à Chang'an pour tisser des liens secrets avec les conseillers les plus proches de l'empereur et a commencé à planifier un assassinat.",
+    "2": "Apprenant que Liu Che allait bientôt visiter la résidence de la princesse, Liu Ling et son confident Guo Jie ont rapidement finalisé leur plan d'assassinat. Le jour du banquet, Guo Jie, déguisé en serviteur, s'est infiltré discrètement dans la résidence. Alors que Liu Che et les invités buvaient et riaient, Guo Jie a saisi l'opportunité et a secrètement tiré une flèche sur Liu Che. L'impératrice Wei Zifu, avec une grande perspicacité, a détecté le danger et a poussé Liu Che de côté juste à temps pour lui sauver la vie.",
+    "3": "Après l'échec de l'assassinat, Guo Jie a immédiatement sauté devant Liu Che et l'impératrice Wei Zifu, les prenant en otage. Voyant cela, le général Wei Qing s'est précipité pour les secourir. À ce moment, Guo Jie a sorti un rouleau rempli de puissance mystérieuse de sa manche, et alors qu'il se déroulait, des bulles magiques colorées ont éclaté. Wei Qing devait faire éclater toutes les bulles dans un temps limité pour briser la magie de Guo Jie et libérer Liu Che et l'impératrice Wei Zifu du danger."
+  },
+  "controls": {
+    "1": "{Tirer Bulle}: Appuyez sur la {Barre d'espace} pour tirer une bulle.",
+    "2": "{Orientation du Lanceur}:\n\t• {Rotation à Gauche}: Maintenez la {Touche Flèche Gauche} pour tourner le lanceur dans le sens antihoraire.\n\t• {Rotation à Droite}: Maintenez la {Touche Flèche Droite} pour tourner le lanceur dans le sens horaire.",
+    "3": "{Visée Précise}: Maintenez la {Touche Ctrl} pour ralentir la rotation du lanceur, permettant des ajustements directionnels précis.",
+    "4": "{Pause du Jeu}: Appuyez sur la {Touche Q} pour mettre le jeu en pause. Cela affichera un menu avec les options suivantes:\n\t• {Redémarrer}: Commencer le jeu depuis le début.\n\t• {Reprendre}: Continuer votre session de jeu actuelle.\n\t• {Arrêter}: Quitter le jeu actuel et retourner au menu principal."
+  },
+  "characterintro": {
+    "liuche": "{Liu Che} : Empereur Wu de Han, l'un des empereurs les plus influents de l'histoire chinoise. Pendant son règne, il a initié de nombreuses réformes importantes et des actions militaires, ayant un impact profond sur l'histoire de la Chine. Lors d'un banquet dans le manoir de la princesse, il fut soudainement attaqué par l'assassin Guo Jie et maîtrisé.",
+    "weizifu": "{Wei Zifu} : L'impératrice de l'empereur Wu et sœur de Wei Qing. Lors du banquet dans le manoir de la princesse, elle a rapidement poussé Liu Che lorsque Guo Jie a tiré une flèche froide pour l'assassiner, évitant qu'il ne soit blessé. Cependant, elle et Liu Che étaient toujours retenus par l'assassin.",
+    "weiqing": "{Wei Qing} : Un célèbre général de la dynastie Han occidentale, reconnu pour ses victoires contre les Xiongnu, il a été nommé Grand Général. Lorsque Liu Che et Wei Zifu ont été retenus par l'assassin, Wei Qing a rapidement initié une opération de sauvetage. Il devait briser une malédiction d'un rouleau magique dans un temps spécifique pour vaincre l'assassin et sauver Liu Che et Wei Zifu.",
+    "guojie": "{Guo Jie} : Un chevalier de la dynastie Han occidentale, notoire pour sa cruauté. Dans sa jeunesse, il a découvert par hasard un rouleau magique maudit lors d'un pillage de tombe. Ce rouleau pouvait être caché de manière flexible dans sa manche et consommait une quantité significative d'énergie lorsqu'il était utilisé. Lors de la rébellion du roi de Huainan, il fut instruit par la Noble Fille Liu Ling d'assassiner l'Empereur Liu Che."
+  },
+  "score": "{Score}",
+  "prompttomainmenu": "{Appuyez sur Entrée pour accéder au Menu Principal}",
+  "victory": "{[VICTOIRE]}",
+  "defeated": "{[DÉFAITE]}",
+  "screenmode": {
+    "fullscreen": "Plein écran",
+    "windowedborderless": "Sans bordure",
+    "windowed": "Fenêtré"
+  },
+  "difficulty": {
+    "easy": "Facile",
+    "medium": "Moyen",
+    "hard": "Difficile",
+    "expert": "Expert"
+  },
+  "button": {
+    "start": "Démarrer",
+    "controls": "Contrôles",
+    "difficulty": "Difficulté",
+    "story": "Histoire",
+    "exit": "Quitter",
+    "back": "Retour",
+    "resume": "Reprendre",
+    "restart": "Redémarrer",
+    "stop": "Arrêter",
+    "displaysettings": "Affichage",
+    "languagepreference": "Langue"
+  }
+}

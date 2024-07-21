@@ -1,0 +1,48 @@
+{
+  "introduction": "This work of fiction was inspired by historical events and characters from China's Western Han Dynasty.",
+  "story": {
+    "1": "In 124 BC, the bestowal decree issued by Emperor Wu of Han sparked great dissatisfaction in Liu An, the King of Huainan. Harboring intentions of usurping power, Liu An covertly sent his daughter, Liu Ling, to Chang'an to secretly befriend the emperor's close advisors and meticulously plan an assassination.",
+    "2": "Upon learning that Liu Che was soon to visit the Princess's residence, Liu Ling and her confidant Guo Jie quickly finalized their assassination plan. On the day of the banquet, Guo Jie, disguised as a servant, quietly infiltrated the residence. As Liu Che and the guests were drinking and laughing, Guo Jie seized the opportunity and covertly shot an arrow at Liu Che. Empress Wei Zifu, with keen insight, detected the danger and pushed Liu Che aside just in time to save his life.",
+    "3": "After the failed assassination, Guo Jie immediately leapt in front of Liu Che and Empress Wei Zifu, taking them hostage. Seeing this, General Wei Qing hurried to the rescue. At that moment, Guo Jie pulled out a scroll filled with mysterious power from his sleeve, and as it unfolded, colorful magical bubbles burst forth. Wei Qing had to burst all the bubbles in a limited time to break Guo Jie's magic and free Liu Che and Empress Wei Zifu from danger."
+  },
+  "controls": {
+    "1": "{Shoot Bubble}: Press the {Space Bar} to fire a bubble.",
+    "2": "{Aim Shooter}:\n\t• {Left Rotation}: Hold the {Left Arrow Key} to rotate the shooter counter-clockwise.\n\t• {Right Rotation}: Hold the {Right Arrow Key} to rotate the shooter clockwise.",
+    "3": "{Precision Aiming}: Hold the {Ctrl Key} to slow down the shooter's rotation, allowing for precise directional adjustments.",
+    "4": "{Pause Game}: Press the {Q Key} to pause the game. This will display a menu with the following options:\n\t• {Restart}: Start the game over from the beginning.\n\t• {Resume}: Continue your current game session.\n\t• {Stop}: Exit the current game and return to the main menu."
+  },
+  "characterintro": {
+    "liuche": "{Liu Che}: Emperor Wu of Han, one of the most influential emperors in Chinese history. During his reign, he initiated numerous significant reforms and military actions, profoundly impacting Chinese history. At a banquet in the Princess's mansion, he was suddenly attacked by the assassin Guo Jie and subdued.",
+    "weizifu": "{Wei Zifu}: Emperor Wu's empress and Wei Qing's sister. At the banquet in the Princess's mansion, she swiftly pushed Liu Che away when Guo Jie shot a cold arrow to assassinate him, preventing him from being wounded. However, she and Liu Che were still held captive by the assassin.",
+    "weiqing": "{Wei Qing}: A famous general from the Western Han dynasty, renowned for his victories against the Xiongnu, he was appointed Grand General. When Liu Che and Wei Zifu were held by the assassin, Wei Qing quickly initiated a rescue operation. He had to break a curse from a magical scroll within a specific time to defeat the assassin and rescue Liu Che and Wei Zifu.",
+    "guojie": "{Guo Jie}: A knight from the Western Han dynasty, notorious for his ruthlessness. In his youth, he accidentally discovered a cursed magical scroll during a tomb raid. This scroll could be flexibly hidden in his sleeve and consumed a significant amount of energy when used. During the Huainan King's rebellion, he was instructed by Noble Daughter Liu Ling to assassinate Emperor Liu Che."
+  },
+  "score": "{Score}",
+  "prompttomainmenu": "{Press Enter to proceed to the Main Menu}",
+  "victory": "{[VICTORY]}",
+  "defeated": "{[DEFEATED]}",
+  "screenmode": {
+    "fullscreen": "Full-screen",
+    "windowedborderless": "Boarderless",
+    "windowed": "Windowed"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "expert": "Expert"
+  },
+  "button": {
+    "start": "Start",
+    "controls": "Controls",
+    "difficulty": "Difficulty",
+    "story": "Story",
+    "exit": "Exit",
+    "back": "Back",
+    "resume": "Resume",
+    "restart": "Restart",
+    "stop": "Stop",
+    "displaysettings": "Display",
+    "languagepreference": "Language"
+  }
+}
