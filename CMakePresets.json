@@ -7,18 +7,16 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
-          "cacheVariables": {
-            "CMAKE_C_COMPILER": "cl.exe",
-            "CMAKE_CXX_COMPILER": "cl.exe",
-            "LIB_PATH": "C:/Users/xiaod/Documents/libraries/opengl",
-            "BOOST_ROOT": "C:/Users/xiaod/boost_1_85_0/boost_1_85_0",
-            "COPY_SHADERS": "OFF", // Default value
-            "COPY_FONTS": "OFF", // Default value
-            "COPY_SETTINGS": "OFF", // Default value
-            "COPY_TEXT": "OFF", // Default value
-            "COPY_TEXTURES": "OFF", // Default value
-            "COPY_AUDIO": "OFF" // Default value
-          },
+            "cacheVariables": {
+              "CMAKE_C_COMPILER": "cl.exe",
+              "CMAKE_CXX_COMPILER": "cl.exe",
+              "COPY_SHADERS": "OFF",
+              "COPY_FONTS": "OFF",
+              "COPY_SETTINGS": "OFF",
+              "COPY_TEXT": "OFF",
+              "COPY_TEXTURES": "OFF",
+              "COPY_AUDIO": "OFF"
+            },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",

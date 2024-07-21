@@ -16,5 +16,5 @@ target_link_libraries(capsule_lib
 target_include_directories(capsule_lib
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
-	"${LIB_PATH}/include"
+	"${OPENGL_LIB_PATH}/include"
 )

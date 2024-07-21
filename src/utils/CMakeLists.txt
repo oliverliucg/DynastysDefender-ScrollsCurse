@@ -9,5 +9,5 @@ add_library(rendering_utils_lib STATIC
 target_include_directories(rendering_utils_lib
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
-	"${LIB_PATH}/include"
+	"${OPENGL_LIB_PATH}/include"
 )

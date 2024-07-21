@@ -896,7 +896,6 @@ void GameManager::LoadSound() {
   soundEngine.LoadSound("bubble_pop", "audio/gameplay/bubble_pop.wav", 0.4f);
   soundEngine.LoadSound("bubble_explode", "audio/gameplay/bubble_explode5.wav",
                         0.8f);
-  soundEngine.LoadSound("bubbleexplode", "audio/bleep.wav");
   soundEngine.LoadSound("arrow_shoot", "audio/gameplay/bubble_shoot.wav");
   soundEngine.LoadSound("arrow_hit", "audio/gameplay/arrow_hit1.wav");
   soundEngine.LoadSound("scroll_open", "audio/gameplay/scroll_open3.wav");

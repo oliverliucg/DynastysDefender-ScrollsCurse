@@ -5,9 +5,9 @@ message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 # Access the paths set in CMakePresets.json
-set(LIB_PATH ${OpenGL_PATH} CACHE PATH "Path to OpenGL related libraries")
-set(BOOST_ROOT ${BOOST_ROOT} CACHE PATH "Path to Boost libraries")
-message(STATUS "LIB_PATH: ${LIB_PATH}")
+set(OPENGL_LIB_PATH $ENV{OPENGL_LIB_PATH} CACHE PATH "Path to OpenGL related libraries")
+set(BOOST_ROOT $ENV{BOOST_ROOT} CACHE PATH "Path to Boost libraries")
+message(STATUS "OPENGL_LIB_PATH: ${OPENGL_LIB_PATH}")
 message(STATUS "BOOST_ROOT: ${BOOST_ROOT}")
 set(Boost_LIBRARY_DIR "${BOOST_ROOT}/stage/lib")
 
@@ -113,8 +113,8 @@ endif()
 
 # Link the library
 target_link_libraries(DynastysDefender-ScrollsCurse PRIVATE 
-    "${LIB_PATH}/glfw3.lib" 
-    "${LIB_PATH}/freetyped.lib" 
+    "${OPENGL_LIB_PATH}/glfw3.lib" 
+    "${OPENGL_LIB_PATH}/freetyped.lib" 
     entities_lib
 )
 
@@ -130,10 +130,10 @@ set(PARTICLES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/particles)
 
 # Include the header files
 target_include_directories(DynastysDefender-ScrollsCurse PRIVATE 
-    "${LIB_PATH}/include"
-    "${LIB_PATH}/include/KHR"
-    "${LIB_PATH}/include/GLFW"
-    "${LIB_PATH}/include/freetype"
+    "${OPENGL_LIB_PATH}/include"
+    "${OPENGL_LIB_PATH}/include/KHR"
+    "${OPENGL_LIB_PATH}/include/GLFW"
+    "${OPENGL_LIB_PATH}/include/freetype"
     ${CORE_DIR}
     ${ENTITIES_DIR}
     ${THIRD_PARTY_DIR}

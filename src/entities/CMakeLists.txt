@@ -23,7 +23,7 @@ target_link_libraries(entities_lib
 target_include_directories(entities_lib
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
-	"${LIB_PATH}/include"
+	"${OPENGL_LIB_PATH}/include"
 )
 
 add_subdirectory(base)

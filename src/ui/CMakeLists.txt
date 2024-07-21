@@ -19,5 +19,5 @@ target_link_libraries(ui_lib
 target_include_directories(ui_lib
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
-	"${LIB_PATH}/include"
+	"${OPENGL_LIB_PATH}/include"
 )
