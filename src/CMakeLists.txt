@@ -6,10 +6,16 @@ message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 # Access the paths set in CMakePresets.json
 set(OPENGL_LIB_PATH $ENV{OPENGL_LIB_PATH} CACHE PATH "Path to OpenGL related libraries")
-set(BOOST_ROOT $ENV{BOOST_ROOT} CACHE PATH "Path to Boost libraries")
 message(STATUS "OPENGL_LIB_PATH: ${OPENGL_LIB_PATH}")
-message(STATUS "BOOST_ROOT: ${BOOST_ROOT}")
-set(Boost_LIBRARY_DIR "${BOOST_ROOT}/stage/lib")
+
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.85.0 REQUIRED COMPONENTS locale system)
+# Check if Boost was found and print its include directories
+if(Boost_FOUND)
+    message(STATUS "Boost found: include at ${Boost_INCLUDE_DIRS}")
+endif()
 
 # Add source to this project's executable.
 add_executable(DynastysDefender-ScrollsCurse 
@@ -98,17 +104,6 @@ if(COPY_AUDIO STREQUAL "ON")
 	)
 else()
 	message(STATUS "COPY_AUDIO is not ON, no copying will be done")
-endif()
-
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-
-find_package(Boost 1.85.0 REQUIRED COMPONENTS locale system)
-
-# Check if Boost was found and print its include directories
-if(Boost_FOUND)
-    message(STATUS "Boost found: include at ${Boost_INCLUDE_DIRS}")
 endif()
 
 # Link the library
