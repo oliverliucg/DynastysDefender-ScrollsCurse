@@ -850,7 +850,7 @@ void GameManager::Init() {
   this->GoToState(GameState::SPLASH_SCREEN);
 }
 
-void GameManager::LoadSound() {
+void GameManager::LoadSounds() {
   // Add sound resources
   SoundEngine& soundEngine = SoundEngine::GetInstance();
   // Load splash screen sound
@@ -862,32 +862,6 @@ void GameManager::LoadSound() {
   soundEngine.LoadSound("keys_s_j", "audio/keypressed/keys_s_j.wav", 0.5f);
   soundEngine.LoadSound("key_enter", "audio/keypressed/key_enter.wav");
   soundEngine.LoadSound("key_space", "audio/keypressed/key_space.wav", 0.15f);
-
-  // background music
-  soundEngine.LoadSound("background_relax0",
-                        "audio/background/background_music_relaxing.wav", 0.3f);
-  soundEngine.LoadSound("background_relax1",
-                        "audio/background/"
-                        "background_music_relaxing1.wav",
-                        0.3f);
-  soundEngine.SetBackgroundMusicNames(
-      {"background_relax0", "background_relax1"},
-      /*isFighting=*/false);
-  soundEngine.LoadSound("background_fight0",
-                        "audio/background/"
-                        "background_music_fighting0.wav",
-                        0.2f);
-  soundEngine.LoadSound("background_fight1",
-                        "audio/background/"
-                        "background_music_fighting1.wav",
-                        0.2f);
-  soundEngine.LoadSound("background_fight2",
-                        "audio/background/"
-                        "background_music_fighting2.wav",
-                        0.2f);
-  soundEngine.SetBackgroundMusicNames(
-      {"background_fight0", "background_fight1", "background_fight2"},
-      /*isFighting=*/true);
 
   // Game Play sound
   soundEngine.LoadSound("wood_collide", "audio/gameplay/wood_collide.wav",
@@ -908,9 +882,6 @@ void GameManager::LoadSound() {
                         0.7f);
   soundEngine.LoadSound("flip_paper", "audio/gameplay/flip_paper2.wav");
   soundEngine.LoadSound("drop", "audio/gameplay/drop5.wav");
-  // soundEngine.LoadSound(
-  //     "scroll_explode",
-  //     "audio/gameplay/scroll_explode4.wav");
 
   // Victory sound
   soundEngine.LoadSound("victory", "audio/background/victory2.wav", 0.7f);
@@ -919,6 +890,32 @@ void GameManager::LoadSound() {
 
   // Interaction
   soundEngine.LoadSound("button_click", "audio/interaction/button_click1.wav");
+}
+
+void GameManager::LoadStreams() {
+  auto& soundEngine = SoundEngine::GetInstance();
+  // background music
+  soundEngine.LoadStream("background_relax0",
+                         "audio/background/background_music_relaxing.wav",
+                         0.3f);
+  soundEngine.LoadStream("background_relax1",
+                         "audio/background/background_music_relaxing1.wav",
+                         0.3f);
+  soundEngine.SetBackgroundMusicNames(
+      {"background_relax0", "background_relax1"},
+      /*isFighting=*/false);
+  soundEngine.LoadStream("background_fight0",
+                         "audio/background/background_music_fighting0.wav",
+                         0.2f);
+  soundEngine.LoadStream("background_fight1",
+                         "audio/background/background_music_fighting1.wav",
+                         0.2f);
+  soundEngine.LoadStream("background_fight2",
+                         "audio/background/background_music_fighting2.wav",
+                         0.2f);
+  soundEngine.SetBackgroundMusicNames(
+      {"background_fight0", "background_fight1", "background_fight2"},
+      /*isFighting=*/true);
 }
 
 void GameManager::Reload() {
@@ -1403,12 +1400,15 @@ void GameManager::ProcessInput(float dt) {
 }
 
 void GameManager::Update(float dt) {
+  auto& soundEngine = SoundEngine::GetInstance();
   // Update sound sources' volume.
-  SoundEngine::GetInstance().UpdateSourcesVolume(dt);
+  soundEngine.UpdateSourcesVolume(dt);
+  // Update stream sources' volume.
+  soundEngine.UpdateStreamsVolume(dt);
   // Clean up the sound sources that are not playing.
-  SoundEngine::GetInstance().CleanUpSources();
+  soundEngine.CleanUpSources();
   // Refresh the background music if needed.
-  SoundEngine::GetInstance().RefreshBackgroundMusic(dt);
+  soundEngine.RefreshBackgroundMusic(dt);
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
       postProcessor->SetChaos(true);
@@ -1648,8 +1648,9 @@ void GameManager::Update(float dt) {
       auto& soundEngine = SoundEngine::GetInstance();
       std::string currentBackgroundMusic =
           soundEngine.GetPlayingBackgroundMusic();
-      if (soundEngine.IsPlaying(currentBackgroundMusic)) {
-        soundEngine.GraduallyChangeVolume(currentBackgroundMusic, 0.f, 3.f);
+      if (soundEngine.IsStreamPlaying(currentBackgroundMusic)) {
+        soundEngine.GraduallyChangeStreamVolume(currentBackgroundMusic, 0.f,
+                                                3.f);
       }
       soundEngine.DoNotPlayNextBackgroundMusic();
     }
@@ -2003,8 +2004,9 @@ void GameManager::Update(float dt) {
           auto& soundEngine = SoundEngine::GetInstance();
           std::string currentBackgroundMusic =
               soundEngine.GetPlayingBackgroundMusic();
-          if (soundEngine.IsPlaying(currentBackgroundMusic)) {
-            soundEngine.GraduallyChangeVolume(currentBackgroundMusic, 0.f, 3.f);
+          if (soundEngine.IsStreamPlaying(currentBackgroundMusic)) {
+            soundEngine.GraduallyChangeStreamVolume(currentBackgroundMusic, 0.f,
+                                                    3.f);
           }
           soundEngine.DoNotPlayNextBackgroundMusic();
         }

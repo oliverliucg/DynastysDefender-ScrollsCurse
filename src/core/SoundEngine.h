@@ -1,13 +1,8 @@
 #pragma once
-#include "alhelpers.h"
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alext.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <iostream>
 #include <limits.h>
-#include <sndfile.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -15,8 +10,11 @@
 #include <unordered_set>
 
 #include "ResourceManager.h"
+#include "StreamPlayer.h"
 
 enum FormatType { Int16, Float, IMA4, MSADPCM };
+
+enum class StreamState { NOT_READY, READY, Playing, ENDED };
 
 // Background music state
 enum class BackgroundMusicState { Relaxing, Fighting, None };
@@ -40,18 +38,28 @@ struct BackgroundMusicInfo {
   void Refresh();
 
   void Reset();
+
+  void StopAtEndOfCurrentMusic();
 };
 
 class SoundEngine {
  public:
   // Get the singleton instance
   static SoundEngine& GetInstance();
+
   ALuint LoadSound(const std::string& name, const std::string& filename,
-                   float defaultVolume = 1.0f);
+                   float defaultVolume = 1.f);
   void UnloadSound(const std::string& name);
   void PlaySound(const std::string& name, bool loop = false,
                  float volume = -1.f);
   void StopSound(const std::string& name);
+
+  // Streaming
+  bool LoadStream(const std::string& name, const std::string& filename,
+                  float defaultVolume = 1.f);
+  void StreamPlayback(const std::string& streamName);
+  void PlayStream(const std::string& name, float volume = -1.f);
+  void ResetStream(const std::string& name);
 
   // Get count of times a sound has been played
   int GetPlayCount(const std::string& sourceName);
@@ -65,15 +73,37 @@ class SoundEngine {
   // Checks if a sound is playing
   bool IsPlaying(const std::string& sourceName);
 
+  // Gets stream state
+  StreamState GetStreamState(const std::string& sourceName);
+
+  // Sets stream state
+  void SetStreamState(const std::string& sourceName, StreamState state);
+
+  // Checks if it's streaming
+  bool IsStreamPlaying(const std::string& sourceName);
+
+  // Checks if the stream ended
+  bool IsStreamEnded(const std::string& sourceName);
+
   // Gradually change the volume of a sound
   void GraduallyChangeVolume(const std::string& sourceName, float targetVolume,
                              float duration);
 
+  // Gradually change the volume of streams
+  void GraduallyChangeStreamVolume(const std::string& sourceName,
+                                   float targetVolume, float duration);
+
   // Checks if a sound is gradually changing volume
   bool IsGraduallyChangingVolume(const std::string& sourceName);
 
+  // Checks if a stream is gradually changing volume
+  bool IsGraduallyChangingStreamVolume(const std::string& sourceName);
+
   // Update the volume of a sound that is gradually changing
   void UpdateSourcesVolume(float dt);
+
+  // Update the volume of streams that are gradually changing
+  void UpdateStreamsVolume(float dt);
 
   // Sets the volume of a sound
   void SetVolume(const std::string& sourceName, float volume);
@@ -110,6 +140,13 @@ class SoundEngine {
   ALCdevice* device_;
   ALCcontext* context_;
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
+  std::unordered_map<std::string, std::unique_ptr<StreamPlayer>>
+      streams_;  // Map of streams
+  std::unordered_map<std::string, StreamState>
+      stream_states_;               // Map of stream states
+  std::mutex stream_states_mutex_;  // Mutex for protecting stream_states_
+  std::unordered_map<std::string, std::thread>
+      stream_threads_;  // Map of stream threads
   std::unordered_map<std::string, float> default_volumes_;  // Map of default
                                                             // sound volumes
   std::unordered_map<std::string, std::vector<ALuint>>
@@ -120,8 +157,12 @@ class SoundEngine {
                      std::unordered_map<ALuint, glm::vec3>>  // Map of gradually
                                                              // changing volumes
       gradually_changing_volumes_;
+  std::unordered_map<std::string,
+                     glm::vec3>  // Map of gradually changing volumes
+      gradually_changing_stream_volumes_;
 
   BackgroundMusicInfo background_music_info_;
+  ALCint refresh_rate_;
 
   // Checks if a source is looping
   bool IsLooping(ALuint source);

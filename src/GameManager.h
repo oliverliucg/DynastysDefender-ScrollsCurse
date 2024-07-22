@@ -125,7 +125,8 @@ class GameManager {
 
   void PreLoad();
   void Init();
-  void LoadSound();
+  void LoadSounds();
+  void LoadStreams();
   void ProcessInput(float dt);
   void Update(float dt);
   void Render();

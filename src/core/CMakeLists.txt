@@ -4,6 +4,7 @@ add_library(core_lib STATIC
 	ResourceManager.cpp
 	ScissorBoxHandler.cpp
 	SoundEngine.cpp
+	StreamPlayer.cpp
 	${THIRD_PARTY_DIR}/alhelpers.c
 )
 
@@ -27,6 +28,7 @@ target_include_directories(core_lib
 	${UTILS_DIR}
 	"${OPENGL_LIB_PATH}/include/nlohmann"
 	"${OPENGL_LIB_PATH}/include/sndfile"
-	"${OPENGL_LIB_PATH}/include/AL"
+	"${OPENGL_LIB_PATH}/include/openalsoft/AL"
+	"${OPENGL_LIB_PATH}/include/openalsoft/common"
 	${Boost_INCLUDE_DIRS}
 )

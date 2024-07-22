@@ -34,9 +34,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "AL/al.h"
-#include "AL/alc.h"
-#include "AL/alext.h"
+#include <al.h>
+#include <alc.h>
+#include <alext.h>
 
 /* InitAL opens a device and sets up a context using default attributes, making
  * the program ready to call OpenAL functions. */

@@ -186,7 +186,8 @@ int main() {
         gameManager.targetState == GameState::UNDEFINED &&
         currentFrame - startFrame >= 2.85f) {
       gameManager.Init();
-      gameManager.LoadSound();
+      gameManager.LoadSounds();
+      gameManager.LoadStreams();
       assert(gameManager.targetState == GameState::SPLASH_SCREEN &&
              "Failed to initialize the game.");
       int framebufferWidth, framebufferHeight;

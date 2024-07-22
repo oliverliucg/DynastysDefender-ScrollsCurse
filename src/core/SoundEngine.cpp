@@ -1,5 +1,10 @@
 #include "SoundEngine.h"
 
+#include <alspan.h>
+#include <alstring.h>
+
+LPALBUFFERCALLBACKSOFT alBufferCallbackSOFT = nullptr;
+
 void BackgroundMusicInfo::Refresh() {
   if (state == BackgroundMusicState::None) {
     return;
@@ -33,6 +38,11 @@ void BackgroundMusicInfo::Reset() {
   timerInterval = 0.0f;
 }
 
+void BackgroundMusicInfo::StopAtEndOfCurrentMusic() {
+  state = BackgroundMusicState::None;
+  timerInterval = 0.0f;
+}
+
 // Get the singleton instance
 SoundEngine& SoundEngine::GetInstance() {
   static SoundEngine instance;
@@ -51,6 +61,16 @@ SoundEngine::SoundEngine() {
   if (!alcMakeContextCurrent(context_)) {
     std::cerr << "Error making OpenAL context current" << std::endl;
   }
+
+  if (!alIsExtensionPresent("AL_SOFT_callback_buffer")) {
+    std::cerr << "AL_SOFT_callback_buffer extension not available" << std::endl;
+  }
+
+  alBufferCallbackSOFT = reinterpret_cast<LPALBUFFERCALLBACKSOFT>(
+      alGetProcAddress("alBufferCallbackSOFT"));
+
+  alcGetIntegerv(alcGetContextsDevice(alcGetCurrentContext()), ALC_REFRESH, 1,
+                 &refresh_rate_);
 
   /* alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);*/
   // Error checking function
@@ -104,10 +124,24 @@ void SoundEngine::CleanUpSources(bool force) {
 }
 
 void SoundEngine::Clear() {
+  // Stop and reset all streams.
+  for (auto& [sourceName, stream] : streams_) {
+    ResetStream(sourceName);
+  }
+
   CleanUpSources(/*force=*/true);
   for (auto& buffer : buffers_) {
     alDeleteBuffers(1, &buffer.second);
   }
+  // Join all threads
+  for (auto& [name, thread] : stream_threads_) {
+    if (thread.joinable()) {
+      thread.join();  // Ensure the thread finishes
+    }
+  }
+  // Clear stream objects
+  streams_.clear();
+
   alcMakeContextCurrent(nullptr);
   alcDestroyContext(context_);
   alcCloseDevice(device_);
@@ -301,9 +335,10 @@ ALuint SoundEngine::LoadSound(const std::string& name,
     return 0;
   }
   num_bytes = (ALsizei)(num_frames / splblockalign * byteblockalign);
-
+#ifdef DEBUG
   printf("Loading: %s (%s, %dhz)\n", filename, FormatName(format),
          sfinfo.samplerate);
+#endif
   fflush(stdout);
 
   /* Buffer the audio data into a new buffer object, then free the data and
@@ -381,6 +416,66 @@ void SoundEngine::StopSound(const std::string& name) {
   sources_.erase(name);
 }
 
+bool SoundEngine::LoadStream(const std::string& name,
+                             const std::string& filename, float defaultVolume) {
+  streams_[name] = std::make_unique<StreamPlayer>();
+  if (!streams_[name]->Open(filename)) {
+    streams_.erase(name);
+    return false;
+  }
+  this->SetStreamState(name, StreamState::READY);
+  default_volumes_[name] = defaultVolume;
+  return true;
+}
+
+void SoundEngine::StreamPlayback(const std::string& streamName) {
+  auto& stream = streams_.at(streamName);
+  while (GetStreamState(streamName) == StreamState::Playing) {
+    if (!stream->Update()) {
+      this->SetStreamState(streamName, StreamState::ENDED);
+      break;
+    }
+    std::this_thread::sleep_for(
+        std::chrono::nanoseconds{std::chrono::seconds{1}} / refresh_rate_);
+  }
+}
+
+void SoundEngine::PlayStream(const std::string& name, float volume) {
+  if (IsStreamPlaying(name) || IsStreamEnded(name)) {
+    // Reset the stream
+    ResetStream(name);
+  }
+  if (volume < 0.f) {
+    volume = default_volumes_.at(name);
+  }
+  auto& stream = streams_.at(name);
+  if (!stream->Prepare()) {
+    stream->Close();
+  }
+  auto streamSource = stream->mSource;
+  this->SetVolume(streamSource, volume);
+  this->SetStreamState(name, StreamState::Playing);
+  // Check if there is already a thread for this stream and join it if it's
+  // joinable
+  auto it = stream_threads_.find(name);
+  if (it != stream_threads_.end() && it->second.joinable()) {
+    it->second.join();  // Join the existing thread before creating a new one
+  }
+  // Create a thread for playing the stream and store it in the map
+  stream_threads_[name] =
+      std::thread([this, name]() { this->StreamPlayback(name); });
+}
+
+void SoundEngine::ResetStream(const std::string& name) {
+  if (!IsStreamPlaying(name) && !IsStreamEnded(name)) {
+    return;
+  }
+  this->SetStreamState(name, StreamState::READY);
+  streams_.at(name)->Reset();
+  // Also reset the volume to the default one
+  this->SetVolume(streams_.at(name)->mSource, default_volumes_.at(name));
+}
+
 bool SoundEngine::IsPlaying(const std::string& sourceName) {
   if (sources_.find(sourceName) != sources_.end()) {
     ALuint source = sources_[sourceName].back();
@@ -391,12 +486,32 @@ bool SoundEngine::IsPlaying(const std::string& sourceName) {
   return false;
 }
 
+StreamState SoundEngine::GetStreamState(const std::string& sourceName) {
+  std::lock_guard<std::mutex> lock(stream_states_mutex_);
+  return stream_states_.at(sourceName);
+}
+
+void SoundEngine::SetStreamState(const std::string& sourceName,
+                                 StreamState state) {
+  std::lock_guard<std::mutex> lock(stream_states_mutex_);
+  stream_states_[sourceName] = state;
+}
+
+bool SoundEngine::IsStreamPlaying(const std::string& sourceName) {
+  return GetStreamState(sourceName) == StreamState::Playing;
+}
+
+bool SoundEngine::IsStreamEnded(const std::string& sourceName) {
+  return GetStreamState(sourceName) == StreamState::ENDED;
+}
+
 void SoundEngine::GraduallyChangeVolume(const std::string& sourceName,
                                         float targetVolume, float duration) {
-  if (targetVolume < 0.0f) {
-    targetVolume = 0.0f;
-  } else if (targetVolume > 1.0f) {
-    targetVolume = 1.0f;
+  targetVolume = std::clamp(targetVolume, 0.0f, 1.0f);
+  // Check if the source still exists. It may have been removed if the
+  // application lost focus for an extended period.
+  if (sources_.find(sourceName) == sources_.end()) {
+    return;
   }
   ALuint source = sources_.at(sourceName).back();
   float curVolume = GetVolume(source);
@@ -407,9 +522,31 @@ void SoundEngine::GraduallyChangeVolume(const std::string& sourceName,
       solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
 }
 
+void SoundEngine::GraduallyChangeStreamVolume(const std::string& sourceName,
+                                              float targetVolume,
+                                              float duration) {
+  // Only change the volume if the stream is playing
+  if (!IsStreamPlaying(sourceName)) {
+    return;
+  }
+  targetVolume = std::clamp(targetVolume, 0.0f, 1.0f);
+  float curVolume = GetVolume(streams_.at(sourceName)->mSource);
+  assert(targetVolume != curVolume && "Target volume is the same as current");
+  auto equationParams =
+      solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
+  gradually_changing_stream_volumes_[sourceName] =
+      solveQuadratic(curVolume, glm::vec2(duration, targetVolume));
+}
+
 bool SoundEngine::IsGraduallyChangingVolume(const std::string& sourceName) {
   return gradually_changing_volumes_.find(sourceName) !=
          gradually_changing_volumes_.end();
+}
+
+bool SoundEngine::IsGraduallyChangingStreamVolume(
+    const std::string& sourceName) {
+  return gradually_changing_stream_volumes_.find(sourceName) !=
+         gradually_changing_stream_volumes_.end();
 }
 
 void SoundEngine::UpdateSourcesVolume(float dt) {
@@ -464,6 +601,37 @@ void SoundEngine::UpdateSourcesVolume(float dt) {
   }
 }
 
+void SoundEngine::UpdateStreamsVolume(float dt) {
+  std::vector<std::string> sourceNamesToDelete;
+  for (auto& [sourceName, changeEquation] :
+       gradually_changing_stream_volumes_) {
+    if (!IsStreamPlaying(sourceName)) {
+      sourceNamesToDelete.emplace_back(sourceName);
+      continue;
+    }
+    auto& stream = streams_.at(sourceName);
+    float currentVolume = GetVolume(stream->mSource);
+    auto potentialCurrentTimePoint =
+        getXOfQuadratic(currentVolume, changeEquation).value();
+    float currentTimePoint = std::min(potentialCurrentTimePoint.first,
+                                      potentialCurrentTimePoint.second);
+    float duration = -changeEquation.y / (2 * changeEquation.x);
+    assert(currentTimePoint >= 0.f &&
+           !areFloatsGreater(currentTimePoint, duration) &&
+           "Invalid time point for gradually changing stream volume");
+    float newTimePoint = currentTimePoint + dt;
+    if (newTimePoint > duration) {
+      newTimePoint = duration;
+      sourceNamesToDelete.emplace_back(sourceName);
+    }
+    float newVolume = getYOfQuadratic(newTimePoint, changeEquation);
+    SetVolume(stream->mSource, newVolume);
+  }
+  for (const auto& sourceName : sourceNamesToDelete) {
+    gradually_changing_stream_volumes_.erase(sourceName);
+  }
+}
+
 void SoundEngine::SetVolume(const std::string& sourceName, float volume) {
   SetVolume(sources_.at(sourceName).back(), volume);
 }
@@ -495,11 +663,7 @@ bool SoundEngine::IsPlaying(ALuint source) {
 
 void SoundEngine::SetVolume(ALuint source, float volume) {
   // Check if the volume is within the valid range
-  if (volume < 0.0f) {
-    volume = 0.0f;
-  } else if (volume > 1.0f) {
-    volume = 1.0f;
-  }
+  volume = std::clamp(volume, 0.0f, 1.0f);
   alSourcef(source, AL_GAIN, volume);
 }
 
@@ -526,8 +690,10 @@ void SoundEngine::StartBackgroundMusic(bool isFighting) {
   }
   SetBackgroundMusicState(state);
   std::string currentMusic = background_music_info_.currentMusic;
-  if (!currentMusic.empty() && IsPlaying(currentMusic)) {
-    StopSound(currentMusic);
+  if (!currentMusic.empty() &&
+      (IsStreamPlaying(currentMusic) || IsStreamEnded(currentMusic))) {
+    // Reset the stream
+    ResetStream(currentMusic);
   }
   switch (state) {
     case BackgroundMusicState::Fighting:
@@ -543,7 +709,8 @@ void SoundEngine::StartBackgroundMusic(bool isFighting) {
   }
   background_music_info_.timerInterval = 0.f;
   background_music_info_.lastMusic = "";
-  PlaySound(background_music_info_.currentMusic, false);
+  // start streaming the background music
+  PlayStream(background_music_info_.currentMusic);
 }
 
 void SoundEngine::RefreshBackgroundMusic(float dt) {
@@ -552,20 +719,21 @@ void SoundEngine::RefreshBackgroundMusic(float dt) {
   } else {
     assert(!background_music_info_.currentMusic.empty() &&
            "No background music was playing");
-    if (IsPlaying(background_music_info_.currentMusic)) {
+
+    if (!IsStreamEnded(background_music_info_.currentMusic)) {
       return;
     }
     background_music_info_.timerInterval += dt;
     if (background_music_info_.timerInterval >=
         background_music_info_.expectedInterval) {
       background_music_info_.Refresh();
-      PlaySound(background_music_info_.currentMusic, false);
+      PlayStream(background_music_info_.currentMusic);
     }
   }
 }
 
 void SoundEngine::DoNotPlayNextBackgroundMusic() {
-  background_music_info_.Reset();
+  background_music_info_.StopAtEndOfCurrentMusic();
 }
 
 float SoundEngine::GetPlaybackPosition(ALuint source) {
