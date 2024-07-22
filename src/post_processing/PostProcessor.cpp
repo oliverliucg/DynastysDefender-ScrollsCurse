@@ -1,3 +1,21 @@
+/*
+ * PostProcessor.cpp
+ * Copyright (C) 2024 Oliver Liu
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "PostProcessor.h"
 
 PostProcessor::PostProcessor(Shader shader, unsigned int width,
@@ -211,19 +229,8 @@ void PostProcessor::initRenderData() {
 void PostProcessor::Resize(SizePadding sizePadding) {
   unsigned int width = sizePadding.width;
   unsigned int height = sizePadding.height;
-  // if (this->width == width && this->height == height)
-  //	return;
-  std::cout << "-------------------post processor resize----------------"
-            << std::endl;
-  std::cout << "width: " << width << " height: " << height << std::endl;
-  std::cout << "this->width: " << this->width
-            << " this->height: " << this->height << std::endl;
   this->width = width;
   this->height = height;
-
-  // if (height == 1440) {
-  //	height = 1559;
-  // }
 
   // Resize renderbuffer storage
   glBindRenderbuffer(GL_RENDERBUFFER, this->RBO);
@@ -238,32 +245,27 @@ void PostProcessor::Resize(SizePadding sizePadding) {
   int vpWidth = width;
   int vpHeight = height;
   glViewport(vpX, vpY, vpWidth, vpHeight);
-  std::cout << "vpX: " << vpX << " vpY: " << vpY << " vpWidth: " << vpWidth
-            << " vpHeight: " << vpHeight << std::endl;
 
   // read view port
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  std::cout << "viewport: " << viewport[0] << " " << viewport[1] << " "
-            << viewport[2] << " " << viewport[3] << std::endl;
 
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                             GL_RENDERBUFFER, this->RBO);
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO"
+    std::cerr << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO"
               << std::endl;
 
   // Resize intermediate framebuffer
   glBindFramebuffer(GL_FRAMEBUFFER, this->FBO);
   // read view port
   glGetIntegerv(GL_VIEWPORT, viewport);
-  std::cout << "viewport: " << viewport[0] << " " << viewport[1] << " "
-            << viewport[2] << " " << viewport[3] << std::endl;
+
   this->texture.Generate(this->width, this->height, NULL);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          this->texture.ID, 0);
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
+    std::cerr << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

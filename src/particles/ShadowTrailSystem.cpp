@@ -1,3 +1,21 @@
+/*
+ * ShadowTrailSystem.cpp
+ * Copyright (C) 2024 Oliver Liu
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ShadowTrailSystem.h"
 
 ShadowTrailSystem::ShadowTrailSystem(Shader shader, Texture2D texture,
@@ -48,16 +66,5 @@ void ShadowTrailSystem::respawnParticles(GameObject& object, int numParticles,
     this->particles[unusedParticle].scale = getRandomScale(scaleRange);
     this->particles[unusedParticle].fadeOutSpeed =
         0.6f * glm::length(velocity) / kBaseUnit + 0.4f;
-    // if (this->particles[unusedParticle].position.y >= 0.f) {
-    //     std::cout << "unused particle: " << unusedParticle << std::endl;
-    //     std::cout << "position: " <<
-    //     this->particles[unusedParticle].position.x << ", " <<
-    //     this->particles[unusedParticle].position.y << std::endl; std::cout <<
-    //     "color: " << rColor << std::endl; std::cout << "lifespan: " <<
-    //     this->particles[unusedParticle].lifespan << std::endl; std::cout <<
-    //     "velocity: " << this->particles[unusedParticle].velocity.x << ", " <<
-    //     this->particles[unusedParticle].velocity.y << std::endl; std::cout <<
-    //     "scale: " << this->particles[unusedParticle].scale << std::endl;
-    // }
   }
 }

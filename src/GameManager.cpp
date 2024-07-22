@@ -1,4 +1,22 @@
-﻿#include "GameManager.h"
+﻿/*
+ * GameManager.cpp
+ * Copyright (C) 2024 Oliver Liu
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "GameManager.h"
 
 #include <cstring>
 
@@ -2348,20 +2366,12 @@ void GameManager::Update(float dt) {
           glm::normalize(characterDirection) * characterVelocity;
 
       // Create shadow as the character moves.
-      /*      std::cout << "frame count while doing respawn: " <<
-       * this->frameCount << std::endl;*/
       shadowTrailSystem->respawnParticles(
           *character, 40, characterVelocityVec * 0.1f,
           glm::vec2(kBaseUnit * 0.2f, kBaseUnit * 0.4f),
           glm::vec2(character->GetSize().x * 0.46f,
                     character->GetSize().y * 0.48f));
 
-      /*           if (name == "guojie") {
-                                 character->SetAlpha(0.2f);
-                         }*/
-      ;
-      /*        glm::vec2 avgVelocity = character->GetVelocity() +
-       * character->GetAcceleration() * dt * 0.5f;*/
       character->MoveTo(character->GetCurrentTargetPosition(),
                         characterVelocity, dt);
       character->SetVelocity(character->GetVelocity() +
