@@ -11,6 +11,7 @@
 
 #include "ResourceManager.h"
 #include "StreamPlayer.h"
+#include "ThreadHandler.h"
 
 enum FormatType { Int16, Float, IMA4, MSADPCM };
 
@@ -139,14 +140,15 @@ class SoundEngine {
 
   ALCdevice* device_;
   ALCcontext* context_;
+  bool is_cleared_ = false;
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
   std::unordered_map<std::string, std::unique_ptr<StreamPlayer>>
       streams_;  // Map of streams
   std::unordered_map<std::string, StreamState>
       stream_states_;               // Map of stream states
   std::mutex stream_states_mutex_;  // Mutex for protecting stream_states_
-  std::unordered_map<std::string, std::thread>
-      stream_threads_;  // Map of stream threads
+  std::unordered_map<std::string, std::thread::id>
+      stream_thread_ids_;  // Map of stream thread ids
   std::unordered_map<std::string, float> default_volumes_;  // Map of default
                                                             // sound volumes
   std::unordered_map<std::string, std::vector<ALuint>>

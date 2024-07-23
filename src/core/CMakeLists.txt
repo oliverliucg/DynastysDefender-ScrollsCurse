@@ -5,6 +5,7 @@ add_library(core_lib STATIC
 	ScissorBoxHandler.cpp
 	SoundEngine.cpp
 	StreamPlayer.cpp
+	ThreadHandler.cpp
 	${THIRD_PARTY_DIR}/alhelpers.c
 )
 

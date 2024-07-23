@@ -9,7 +9,7 @@
     "1": "{Spara Bolle}: Premi la {Barra Spaziatrice} per sparare una bolla.",
     "2": "{Orientamento del Lanciatore}:\n\t• {Rotazione Sinistra}: Tieni premuto il {Tasto Freccia Sinistra} per ruotare il lanciatore in senso antiorario.\n\t• {Rotazione Destra}: Tieni premuto il {Tasto Freccia Destra} per ruotare il lanciatore in senso orario.",
     "3": "{Mirino di Precisione}: Tieni premuto il {Tasto Ctrl} per rallentare la rotazione del lanciatore, permettendo regolazioni direzionali precise.",
-    "4": "{Pausa Gioco}: Premi il {Tasto Q} per mettere in pausa il gioco. Verrà visualizzato un menù con le seguenti opzioni:\n\t• {Riavvia}: Inizia il gioco daccapo.\n\t• {Riprendi}: Continua la tua sessione di gioco corrente.\n\t• {Ferma}: Esci dal gioco corrente e torna al menù principale."
+    "4": "{Pausa Gioco}: Premi il {Tasto ESC} per mettere in pausa il gioco. Verrà visualizzato un menù con le seguenti opzioni:\n\t• {Riprendi}: Continua la tua sessione di gioco corrente.\n\t• {Riavvia}: Inizia il gioco daccapo.\n\t• {Ferma}: Esci dal gioco corrente e torna al menù principale."
   },
   "characterintro": {
     "liuche": "{Liu Che}: Imperatore Wu di Han, uno degli imperatori più influenti nella storia cinese. Durante il suo regno, ha avviato numerose riforme significative e azioni militari, avendo un profondo impatto sulla storia cinese. In un banchetto nella residenza della principessa, fu improvvisamente attaccato dall'assassino Guo Jie e sopraffatto.",

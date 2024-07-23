@@ -47,12 +47,12 @@
             "inherits": "x64-debug",
           "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Release",
-            "COPY_SHADERS": "ON",
-            "COPY_FONTS": "ON",
-            "COPY_SETTINGS": "ON",
-            "COPY_TEXT": "ON",
-            "COPY_TEXTURES": "ON",
-            "COPY_AUDIO": "ON"
+            "COPY_SHADERS": "OFF",
+            "COPY_FONTS": "OFF",
+            "COPY_SETTINGS": "OFF",
+            "COPY_TEXT": "OFF",
+            "COPY_TEXTURES": "OFF",
+            "COPY_AUDIO": "OFF"
           }
         },
         {

@@ -18,8 +18,6 @@
 
 #include "GameManager.h"
 
-#include <cstring>
-
 GameManager::GameManager(unsigned int width, unsigned int height)
     : state(GameState::INITIAL),
       lastState(GameState::UNDEFINED),
@@ -56,6 +54,8 @@ GameManager::GameManager(unsigned int width, unsigned int height)
 GameManager::~GameManager() {
   // Clear all resources
   this->ClearResources();
+  // Clear streams;
+  SoundEngine::GetInstance().Clear();
 }
 
 void GameManager::PreLoad() {
@@ -1001,11 +1001,12 @@ void GameManager::ProcessInput(float dt) {
       }
       shooter->GetRay().UpdatePath(this->gameBoard->GetValidBoundaries(),
                                    this->statics);
-    } else if (this->keys[GLFW_KEY_Q] &&
-               this->keysLocked[GLFW_KEY_Q] == false) {
-      this->keysLocked[GLFW_KEY_Q] = true;
+    } else if (this->keys[GLFW_KEY_ESCAPE] &&
+               this->keysLocked[GLFW_KEY_ESCAPE] == false) {
+      this->keysLocked[GLFW_KEY_ESCAPE] = true;
       if (this->targetState == GameState::UNDEFINED) {
-        // if Q is pressed, then we go to the state 'Control' of the game.
+        // if ESC is pressed, then we pause the game and go to the state
+        // 'Control' of the game.
         this->GoToState(GameState::CONTROL);
         // Get the buttion section of the page "controls"
         auto buttonSection =
@@ -4881,6 +4882,7 @@ void GameManager::ClearResources() {
   texts.clear();
   // Clear other resources
   ResourceManager::GetInstance().Clear();
+
   // Detach all shared pointers
   this->spriteRenderer = nullptr;
   this->spriteDynamicRenderer = nullptr;

@@ -142,6 +142,9 @@ void SoundEngine::CleanUpSources(bool force) {
 }
 
 void SoundEngine::Clear() {
+  if (is_cleared_) {
+    return;
+  }
   // Stop and reset all streams.
   for (auto& [sourceName, stream] : streams_) {
     ResetStream(sourceName);
@@ -152,10 +155,8 @@ void SoundEngine::Clear() {
     alDeleteBuffers(1, &buffer.second);
   }
   // Join all threads
-  for (auto& [name, thread] : stream_threads_) {
-    if (thread.joinable()) {
-      thread.join();  // Ensure the thread finishes
-    }
+  for (auto& [name, thread_id] : stream_thread_ids_) {
+    ThreadHandler::GetInstance().JoinThread(thread_id);
   }
   // Clear stream objects
   streams_.clear();
@@ -163,6 +164,7 @@ void SoundEngine::Clear() {
   alcMakeContextCurrent(nullptr);
   alcDestroyContext(context_);
   alcCloseDevice(device_);
+  is_cleared_ = true;
 }
 
 ALuint SoundEngine::LoadSound(const std::string& name,
@@ -447,8 +449,10 @@ bool SoundEngine::LoadStream(const std::string& name,
 }
 
 void SoundEngine::StreamPlayback(const std::string& streamName) {
+  auto& flag =
+      ThreadHandler::GetInstance().GetThreadFlag(std::this_thread::get_id());
   auto& stream = streams_.at(streamName);
-  while (GetStreamState(streamName) == StreamState::Playing) {
+  while (flag.load() && GetStreamState(streamName) == StreamState::Playing) {
     if (!stream->Update()) {
       this->SetStreamState(streamName, StreamState::ENDED);
       break;
@@ -467,21 +471,22 @@ void SoundEngine::PlayStream(const std::string& name, float volume) {
     volume = default_volumes_.at(name);
   }
   auto& stream = streams_.at(name);
+  // Check if there is already a thread for this stream. If so, terminate it.
+  auto it = stream_thread_ids_.find(name);
+  if (it != stream_thread_ids_.end()) {
+    ThreadHandler::GetInstance().TerminateThread(it->second);
+    stream_thread_ids_.erase(it);
+  }
   if (!stream->Prepare()) {
     stream->Close();
   }
   auto streamSource = stream->mSource;
   this->SetVolume(streamSource, volume);
   this->SetStreamState(name, StreamState::Playing);
-  // Check if there is already a thread for this stream and join it if it's
-  // joinable
-  auto it = stream_threads_.find(name);
-  if (it != stream_threads_.end() && it->second.joinable()) {
-    it->second.join();  // Join the existing thread before creating a new one
-  }
-  // Create a thread for playing the stream and store it in the map
-  stream_threads_[name] =
-      std::thread([this, name]() { this->StreamPlayback(name); });
+  // Create a thread for playing the stream and store its ID
+  auto threadId = ThreadHandler::GetInstance().CreateThread(
+      &SoundEngine::StreamPlayback, this, name);
+  stream_thread_ids_[name] = threadId;
 }
 
 void SoundEngine::ResetStream(const std::string& name) {
