@@ -68,7 +68,10 @@ int main() {
   // load configurations
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetConfigPath("settings/config.json");
-  assert(configManager.LoadConfig() && "Failed to load configurations.");
+  if (!configManager.LoadConfig()) {
+    std::cerr << "Failed to load configurations." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   // Initialize GLFW
   glfwInit();

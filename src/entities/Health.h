@@ -55,7 +55,7 @@ class Health {
   // The current health of the character
   int currentHealth;
   // Capsule representing the total health
-  Capsule totalHealthBar;
+  std::unique_ptr<Capsule> totalHealthBar;
   // Color of the health bar, by default the edge is white and the fill is
   // green.
   glm::vec4 healthBarEdgeColor;

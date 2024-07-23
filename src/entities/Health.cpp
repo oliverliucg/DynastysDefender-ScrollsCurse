@@ -125,23 +125,30 @@ void Health::SetCurrentHealth(int currentHealth) {
 
   //// Get the size of the current health bar based on the proportion of the
   //// current health to the total health
-  // currentHealthBar.SetSize(glm::vec2(totalHealthBar.GetSize().x,
-  //                                    totalHealthBar.GetSize().y *
+  // currentHealthBar.SetSize(glm::vec2(totalHealthBar->GetSize().x,
+  //                                    totalHealthBar->GetSize().y *
   //                                    proportion));
 
   //// The position is always the same as the position of the total health bar
   // currentHealthBar.SetCenter(
-  //     totalHealthBar.GetCenter() -
+  //     totalHealthBar->GetCenter() -
   //     glm::vec2(totalHealthBar.GetSize().y * (1.f - proportion) / 2.0f, 0));
 
   // currentHealthBar.SetRoll(glm::pi<float>() / 2.0f);
 }
 
 void Health::SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color) {
-  totalHealthBar.SetSize(glm::vec2(size.y, size.x));
-  totalHealthBar.SetCenter(pos + size / 2.0f);
-  totalHealthBar.SetColor(color);
-  totalHealthBar.SetRoll(glm::pi<float>() / 2.0f);
+  glm::vec2 capsuleSize = glm::vec2(size.y, size.x);
+  glm::vec2 capsuleCenter = pos + size / 2.f;
+  if (totalHealthBar == nullptr) {
+    totalHealthBar =
+        std::make_unique<Capsule>(capsuleCenter, capsuleSize, color);
+  } else {
+    totalHealthBar->SetSize(capsuleSize);
+    totalHealthBar->SetCenter(capsuleCenter);
+    totalHealthBar->SetColor(color);
+  }
+  totalHealthBar->SetRoll(glm::pi<float>() / 2.0f);
 
   // Set the initial position and target position and the faded position of the
   // damage text
@@ -159,7 +166,10 @@ void Health::SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color) {
 //   currentHealthBar.SetRoll(glm::pi<float>() / 2.0f);
 // }
 
-Capsule& Health::GetTotalHealthBar() { return totalHealthBar; }
+Capsule& Health::GetTotalHealthBar() {
+  assert(totalHealthBar != nullptr && "totalHealthBar should not be nullptr");
+  return *totalHealthBar;
+}
 
 // Capsule& Health::GetCurrentHealthBar() { return currentHealthBar; }
 
@@ -167,10 +177,10 @@ void Health::IncreaseHealth(int mount) {
   if (mount == 0) return;
   // Create a new damage text
   damageTexts.push_back(Text(
-      /*pos=*/this->totalHealthBar.GetCenter() + glm::vec2(0, 5 * kBaseUnit),
+      /*pos=*/this->totalHealthBar->GetCenter() + glm::vec2(0, 5 * kBaseUnit),
       /*lineWidth=*/10 * kBaseUnit));
   auto& damageText = damageTexts.back();
-  damageText.SetPosition(this->totalHealthBar.GetCenter() +
+  damageText.SetPosition(this->totalHealthBar->GetCenter() +
                          glm::vec2(0, 5 * kBaseUnit));
   std::u32string damageStr = intToU32String(mount * 1200 / totalHealth);
   if (mount < 0) {
@@ -192,17 +202,17 @@ void Health::SetDamagePopOutDirection(bool popOutToRight) {
   damagePopOutToRight = popOutToRight;
   if (!damagePopOutToRight) {
     damageTextInitialPosition =
-        totalHealthBar.GetCenter() + glm::vec2(-kBaseUnit, 5.5f * kBaseUnit);
+        totalHealthBar->GetCenter() + glm::vec2(-kBaseUnit, 5.5f * kBaseUnit);
     damageTextTargetPosition =
-        rotateVector(totalHealthBar.GetBottomSemiCircleCenter(),
-                     totalHealthBar.GetRoll(), totalHealthBar.GetCenter()) +
+        rotateVector(totalHealthBar->GetBottomSemiCircleCenter(),
+                     totalHealthBar->GetRoll(), totalHealthBar->GetCenter()) +
         glm::vec2(-kBaseUnit, 2.7f * kBaseUnit);
   } else {
     damageTextInitialPosition =
-        totalHealthBar.GetCenter() + glm::vec2(0, 5.5f * kBaseUnit);
+        totalHealthBar->GetCenter() + glm::vec2(0, 5.5f * kBaseUnit);
     damageTextTargetPosition =
-        rotateVector(totalHealthBar.GetTopSemiCircleCenter(),
-                     totalHealthBar.GetRoll(), totalHealthBar.GetCenter()) +
+        rotateVector(totalHealthBar->GetTopSemiCircleCenter(),
+                     totalHealthBar->GetRoll(), totalHealthBar->GetCenter()) +
         glm::vec2(0.f, 2.7f * kBaseUnit);
   }
   damageTextFadedPosition =
@@ -278,18 +288,18 @@ void Health::UpdateDamageTexts(float dt) {
 
 void Health::DrawHealthBar(std::shared_ptr<ColorRenderer> colorRenderer,
                            std::shared_ptr<CircleRenderer> circleRenderer) {
-  totalHealthBar.SetColor(healthBarEdgeColor);
-  totalHealthBar.DrawOutline(colorRenderer, circleRenderer);
+  totalHealthBar->SetColor(healthBarEdgeColor);
+  totalHealthBar->DrawOutline(colorRenderer, circleRenderer);
   // if (currentHealthBar.GetSize().y - currentHealthBar.GetSize().x >= 0.f) {
   //   currentHealthBar.Draw(colorRenderer, circleRenderer);
   // }
 
   if (currentHealth == totalHealth) {
     // Draw the total health bar
-    totalHealthBar.SetColor(healthBarFillColor);
-    totalHealthBar.Draw(colorRenderer, circleRenderer);
+    totalHealthBar->SetColor(healthBarFillColor);
+    totalHealthBar->Draw(colorRenderer, circleRenderer);
   } else if (currentHealth > 0) {
-    totalHealthBar.SetColor(healthBarFillColor);
+    totalHealthBar->SetColor(healthBarFillColor);
     float proportion = (float)currentHealth / (float)totalHealth;
     // apply scissors to the health bar
     ScissorBoxHandler& handler = ScissorBoxHandler::GetInstance();
@@ -302,7 +312,7 @@ void Health::DrawHealthBar(std::shared_ptr<ColorRenderer> colorRenderer,
         boundingBox.x, kWindowSize.y - boundingBox.w, scissorBoxWidth,
         scissorBoxHeight);
     handler.SetScissorBox(barScissorBox);
-    totalHealthBar.Draw(colorRenderer, circleRenderer);
+    totalHealthBar->Draw(colorRenderer, circleRenderer);
 
     // Restore the scissor box
     handler.RestoreScissorBox();
@@ -319,9 +329,9 @@ void Health::DrawDamageTexts(std::shared_ptr<TextRenderer> textRenderer) {
 }
 
 glm::vec4 Health::GetCurrentHealthBarBoundingBox() {
-  glm::vec2 center = totalHealthBar.GetCenter();
+  glm::vec2 center = totalHealthBar->GetCenter();
   glm::vec2 size =
-      glm::vec2(totalHealthBar.GetSize().y, totalHealthBar.GetSize().x);
+      glm::vec2(totalHealthBar->GetSize().y, totalHealthBar->GetSize().x);
   glm::vec4 bounds =
       glm::vec4(center.x - size.x / 2.0f, center.y - size.y / 2.0f,
                 center.x + size.x / 2.0f, center.y + size.y / 2.0f);

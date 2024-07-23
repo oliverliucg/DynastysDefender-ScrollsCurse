@@ -53,7 +53,7 @@ PostProcessor::PostProcessor(Shader shader, unsigned int width,
       GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,
       this->RBO);  // attach MS render buffer object to framebuffer
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO"
+    std::cerr << "ERROR::POSTPROCESSOR: Failed to initialize MSFBO"
               << std::endl;
   // also initialize the FBO/texture to blit multisampled color-buffer to; used
   // for shader operations (for postprocessing effects)
@@ -63,7 +63,7 @@ PostProcessor::PostProcessor(Shader shader, unsigned int width,
       GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->texture.ID,
       0);  // attach texture to framebuffer as its color attachment
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
+    std::cerr << "ERROR::POSTPROCESSOR: Failed to initialize FBO" << std::endl;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   // initialize render data and uniforms
   this->initRenderData();

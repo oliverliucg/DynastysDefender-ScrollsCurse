@@ -589,7 +589,8 @@ void SoundEngine::UpdateSourcesVolume(float dt) {
       const auto& quadraticParams = source.second;
       float currentVolume = GetVolume(source.first);
       if (currentVolume == 0.f) {
-        std::cout << "Volume is 0, removing source" << std::endl;
+        sourcesToDelete.insert(source.first);
+        continue;
       }
       auto potentialCurrentTimePoint =
           getXOfQuadratic(currentVolume, quadraticParams).value();

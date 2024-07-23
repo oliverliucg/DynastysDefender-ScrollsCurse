@@ -158,7 +158,6 @@ std::pair<float, float> WesternTextRenderer::RenderText(
     std::u32string text, float x, float y, float scale, float lineWidth,
     float lineSpacingFactor, float additionalPadding, glm::vec3 color,
     float alpha) {
-  /*std::cout << "render text: " << u32StringToString(text) << std::endl;*/
   // activate corresponding render state
   this->shader.Use();
   this->shader.SetVector3f("textColor", color);

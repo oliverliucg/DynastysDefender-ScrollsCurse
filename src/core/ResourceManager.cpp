@@ -243,10 +243,6 @@ glm::vec3 adjustColorForBrightBackground(glm::vec3 color) {
   hsv.z = std::min(hsv.z * 0.8f, 1.0f);
 
   // Convert back to RGB
-  // std::cout << "hsv: " << hsv.x << " " << hsv.y << " " << hsv.z << std::endl;
-  // auto newColor = hsv2rgb(hsv);
-  // std::cout << "newColor: " << newColor.r << " " << newColor.g << " "
-  //          << newColor.b << std::endl;
   return hsv2rgb(hsv);
 }
 

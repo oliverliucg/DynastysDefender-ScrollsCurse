@@ -11,7 +11,7 @@
 class Capsule : public GameObject {
  public:
   // Default constructor
-  Capsule() = default;
+  Capsule() = delete;
   // Default destructor
   ~Capsule() = default;
   // Constructs a new Capsule instance.

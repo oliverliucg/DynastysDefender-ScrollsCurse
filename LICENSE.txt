@@ -1,19 +1,19 @@
 DynastysDefender-ScrollsCurse License Information
 =================================================
 
-This project, "DynastysDefender-ScrollsCurse", uses multiple licenses for its files:
+This project, "DynastysDefender-ScrollsCurse", employs multiple licenses for its files:
 
 1. Source Code License
 ----------------------
-The source code files located in the "src", "settings", and "shaders" directories are licensed under the GNU General Public License v3.0 (GPL v3.0). This includes any scripts and code that are part of the functional elements of the game.
+The source code, settings, and shaders located in the "src", "resources/settings", and "resources/shaders" directories are covered under the GNU General Public License v3.0 (GPL v3.0). These include any scripts and code integral to the game's functionality.
 
-A copy of the GNU General Public License v3.0 is included in this project and can also be found at: https://www.gnu.org/licenses/gpl-3.0.en.html
+A copy of the GPL v3.0 is included in this project under 'GPLv3.txt'. The full license can also be accessed online at: https://www.gnu.org/licenses/gpl-3.0.en.html
 
 2. Asset License
 ----------------
-All assets including audio files (in WAV format), text content, and textures (in PNG format) located in the "resources/audio", "resources/text", and "resources/textures" directories are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+Assets including audio files (WAV format), text content, and textures (PNG format) located in the "resources/audio", "resources/text", and "resources/textures" directories are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
 
-A summary and full text of this license are available at: https://creativecommons.org/licenses/by-nc/4.0/
+Details and the full text of this license are provided in 'CC_BY_NC_4_0.txt' and can also be viewed at: https://creativecommons.org/licenses/by-nc/4.0/
 
 3. Public Domain
 ----------------
@@ -21,10 +21,10 @@ All fonts included in the "resources/fonts" directory are public domain and can 
 
 License Overview:
 -----------------
-- The GPL v3.0 license covers the source code, settings, and shaders, allowing users to modify and redistribute the code under the same license, provided all copies are accompanied by a copy of the GPL v3.0 license and a notice that modifications have been made.
+- The GPL v3.0 license permits the modification and redistribution of the source code, settings, and shaders under the same license, provided all copies are accompanied by a notice of modifications and a copy of the GPL v3.0 license.
 
-- The CC BY-NC 4.0 license covers non-code assets such as audio and textures. It permits redistribution and adaptation of these assets for non-commercial purposes only and requires attribution to the original creator.
+- The CC BY-NC 4.0 license allows for the redistribution and adaptation of the specified non-code assets for non-commercial purposes only, requiring attribution to the original creator.
 
-- Public domain assets, such as the fonts, are free from any copyright restrictions and may be used without attribution.
+- Public domain assets are free from any copyright restrictions and may be used without attribution.
 
-Please adhere to the licensing terms when using, modifying, or distributing files from this project. For any use outside the scope of these licenses, permission must be obtained from the copyright holder.
+Please adhere to the licensing terms when using, modifying, or distributing files from this project. For any use outside these licenses, permission must be obtained from the copyright holder.

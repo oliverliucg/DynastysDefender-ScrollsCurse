@@ -1547,8 +1547,11 @@ void GameManager::Update(float dt) {
       timer->SetEventTimer("intro", 4.f);
       timer->StartEventTimer("intro");
     } else if (timer->HasEvent("intro")) {
-      assert(!texts.at("introduction")->UpdateTypingEffect(dt) &&
-             "The introduction text should be fully typed.");
+      // Update the typing effect of the introduction text is necessary to flash
+      // the cursor.
+      bool isTyping = texts.at("introduction")->UpdateTypingEffect(dt);
+      assert(!isTyping &&
+             "The introduction text should already be fully typed.");
       // jump to the next state when the timer is expired
       if (timer->IsEventTimerExpired("intro")) {
         // Play sound of pressing key 'Enter'

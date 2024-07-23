@@ -214,20 +214,20 @@ void PageSection::InitScrollIcon(std::shared_ptr<ColorRenderer> colorRenderer,
     scroll_icon_ = nullptr;
     return;
   }
-  scroll_icon_ = std::make_unique<Capsule>();
+
   // Set the size of the scroll icon. The height of the scroll icon is based on
   // the difference between height and max_height_. The minimum height of the
   // scroll icon is 0.8 * kBaseUnit.
   float scroll_height =
       std::max(0.8f * kBaseUnit, (max_height_ / height) * max_height_);
-  scroll_icon_->SetSize(
-      glm::vec2(PageSection::GetScrollIconWidth(), scroll_height));
-  // Set the center of the icon to be at the right bottom of the text box.
-  scroll_icon_->SetCenter(
-      glm::vec2(scrollIconCenterX,
-                this->GetPosition().y + scroll_icon_->GetSize().y * 0.5f));
-  // Set the color of the scroll icon.
-  scroll_icon_->SetColor(glm::vec4(0.75294f, 0.43922f, 0.03922f, 1.0f));
+  glm::vec2 iconSize =
+      glm::vec2(PageSection::GetScrollIconWidth(), scroll_height);
+  glm::vec2 iconCenter =
+      glm::vec2(scrollIconCenterX, position_.y + iconSize.y * 0.5f);
+  glm::vec4 iconColor = glm::vec4(0.75294f, 0.43922f, 0.03922f, 1.0f);
+  scroll_icon_ = std::make_unique<Capsule>(/*center=*/iconCenter,
+                                           /*size=*/iconSize,
+                                           /*color=*/iconColor);
   // Set all parts of icon to be visible.
   scroll_icon_->SetRectangleVisible(true);
   scroll_icon_->SetTopSemiCircleVisible(true);
@@ -330,9 +330,7 @@ glm::vec3 PageSection::GetScrollRelationShip() const {
 }
 
 Capsule& PageSection::GetScrollIcon() {
-  if (scroll_icon_ == nullptr) {
-    scroll_icon_ = std::make_unique<Capsule>();
-  }
+  assert(scroll_icon_ != nullptr && "Scroll icon is not initialized!");
   return *scroll_icon_;
 }
 

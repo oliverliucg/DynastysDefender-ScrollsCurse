@@ -73,10 +73,18 @@ bool TypingEffect::Update(float dt) {
     timer = 0.f;
   }
   if (cursorEnabled) {
+    std::cout << "Before ====================================" << std::endl;
+    std::cout << "cursorTimer: " << cursorTimer << std::endl;
+    std::cout << "cursorInterval: " << cursorInterval << std::endl;
+    std::cout << "cursorVisible: " << cursorVisible << std::endl;
     while (cursorTimer >= cursorInterval) {
       cursorTimer -= cursorInterval;
       cursorVisible = !cursorVisible;
     }
+    std::cout << "After ====================================" << std::endl;
+    std::cout << "cursorTimer: " << cursorTimer << std::endl;
+    std::cout << "cursorInterval: " << cursorInterval << std::endl;
+    std::cout << "cursorVisible: " << cursorVisible << std::endl;
   } else {
     cursorVisible = false;
     cursorTimer = 0.f;
@@ -197,9 +205,7 @@ glm::vec2 Text::GetCenter() const { return center; }
 void Text::SetCenter(glm::vec2 center) { this->center = center; }
 
 Capsule& Text::GetScrollIcon() {
-  if (scrollIcon == nullptr) {
-    scrollIcon = std::make_unique<Capsule>();
-  }
+  assert(scrollIcon != nullptr && "Scroll icon not initialized");
   return *scrollIcon;
 }
 
