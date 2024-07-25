@@ -9,10 +9,10 @@
 class Timer {
  public:
   // Constructor
-  Timer();
+  Timer() = default;
 
   // Destructor
-  ~Timer();
+  ~Timer() = default;
 
   // Set timer for an event
   void SetEventTimer(std::string eventName, float time);

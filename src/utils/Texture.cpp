@@ -18,17 +18,7 @@
 
 #include "Texture.h"
 
-Texture2D::Texture2D()
-    : width(0),
-      height(0),
-      Internal_Format(GL_RGB),
-      Image_Format(GL_RGB),
-      Wrap_S(GL_REPEAT),
-      Wrap_T(GL_REPEAT),
-      Filter_Min(GL_LINEAR),
-      Filter_Max(GL_LINEAR) {
-  glGenTextures(1, &this->ID);
-}
+Texture2D::Texture2D() { glGenTextures(1, &this->ID); }
 
 void Texture2D::Generate(unsigned int width, unsigned int height,
                          unsigned char* data) {

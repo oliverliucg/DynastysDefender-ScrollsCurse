@@ -20,12 +20,10 @@
 
 CircleRenderer::CircleRenderer(const Shader& shader, float percentageOfCircle)
     : percentageOfCircle(percentageOfCircle),
-      numSegments(static_cast<size_t>(180.0f * percentageOfCircle)),
+      numSegments(static_cast<size_t>(360.f * percentageOfCircle)),
       Renderer(shader) {
   this->initRenderData(percentageOfCircle);
 }
-
-CircleRenderer::~CircleRenderer() {}
 
 void CircleRenderer::DrawCircle(glm::vec2 position, float radius, float rotate,
                                 glm::vec4 color) {

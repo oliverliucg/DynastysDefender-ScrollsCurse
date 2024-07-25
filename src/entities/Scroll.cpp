@@ -24,18 +24,7 @@ Scroll::Scroll(glm::vec2 center, glm::vec2 rollerSize, glm::vec2 silkSize,
       center(center),
       rollerSize(rollerSize),
       silkSize(silkSize),
-      state(ScrollState::OPENED),
-      targetSilkLenForNarrowing(0.f),
-      currentSilkLenForNarrowing(0.f),
-      targetSilkLenForClosing(0.f),
-      targetSilkLenForOpening(0.f),
-      velocityForNarrowing(kBaseUnit),
-      velocityForClosing(48 * kBaseUnit),
-      velocityForOpening(96 * kBaseUnit),
-      velocityForRetracting(24 * kBaseUnit),
-      targetPositionForRetracting(glm::vec2(0.f)),
-      targetPositionForDeploying(glm::vec2(0.f)),
-      targetPositionForAttacking(glm::vec2(0.f)) {
+      state(ScrollState::OPENED) {
   float silkLen = silkSize.y;
   topRoller = std::make_unique<GameObject>(
       /*pos=*/center -
@@ -59,12 +48,10 @@ Scroll::Scroll(glm::vec2 center, glm::vec2 rollerSize, glm::vec2 silkSize,
   topRoller->SetRotationPivot(rotationPivotForTopRoller);
   bottomRoller->SetRotationPivot(rotationPivotForBottomRoller);
 
-  //// Update the postion of the whole scroll, It equal the position of the top
+  //// Update the postion of the whole scroll, It equals the position of the top
   /// roller.
   // SetPosition(topRoller->GetPosition());
 }
-
-Scroll::~Scroll() {}
 
 glm::vec2 Scroll::GetPosition() const { return topRoller->GetPosition(); }
 

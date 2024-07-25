@@ -18,42 +18,13 @@
 
 #include "Health.h"
 
-Health::Health()
-    : totalHealth(0),
-      currentHealth(0),
-      healthBarEdgeColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
-      healthBarFillColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)),
-      damageTextInitialPosition(glm::vec2(0.f)),
-      damageTextTargetPosition(glm::vec2(0.f)),
-      damageTextFadedPosition(glm::vec2(0.f)),
-      damagePopOutToRight(true),
-      damageTextScale(1.f) {}
-
 Health::Health(int totalHealth)
-    : totalHealth(totalHealth),
-      currentHealth(totalHealth),
-      healthBarEdgeColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
-      healthBarFillColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)),
-      damageTextInitialPosition(glm::vec2(0.f)),
-      damageTextTargetPosition(glm::vec2(0.f)),
-      damageTextFadedPosition(glm::vec2(0.f)),
-      damagePopOutToRight(true),
-      damageTextScale(1.f) {}
+    : totalHealth(totalHealth), currentHealth(totalHealth) {}
 
 Health::Health(const Health& other)
     : totalHealth(other.totalHealth),
       currentHealth(other.currentHealth),
-      healthBarEdgeColor(other.healthBarEdgeColor),
-      healthBarFillColor(other.healthBarFillColor),
-      damageTextInitialPosition(other.damageTextInitialPosition),
-      damageTextTargetPosition(other.damageTextTargetPosition),
-      damageTextFadedPosition(glm::vec2(0.f)),
-      damagePopOutToRight(true),
-      damageTextScale(1.f) {}
-
-Health::Health(Health&& other) noexcept
-    : totalHealth(other.totalHealth),
-      currentHealth(other.currentHealth),
+      totalHealthBar(nullptr),
       healthBarEdgeColor(other.healthBarEdgeColor),
       healthBarFillColor(other.healthBarFillColor),
       damageTextInitialPosition(other.damageTextInitialPosition),
@@ -65,6 +36,7 @@ Health::Health(Health&& other) noexcept
 Health& Health::operator=(const Health& other) {
   totalHealth = other.totalHealth;
   currentHealth = other.currentHealth;
+  totalHealthBar = nullptr;
   healthBarEdgeColor = other.healthBarEdgeColor;
   healthBarFillColor = other.healthBarFillColor;
   damageTextInitialPosition = other.damageTextInitialPosition;
@@ -74,21 +46,6 @@ Health& Health::operator=(const Health& other) {
   damageTextScale = other.damageTextScale;
   return *this;
 }
-
-Health& Health::operator=(Health&& other) noexcept {
-  totalHealth = other.totalHealth;
-  currentHealth = other.currentHealth;
-  healthBarEdgeColor = other.healthBarEdgeColor;
-  healthBarFillColor = other.healthBarFillColor;
-  damageTextInitialPosition = other.damageTextInitialPosition;
-  damageTextTargetPosition = other.damageTextTargetPosition;
-  damageTextFadedPosition = other.damageTextFadedPosition;
-  damagePopOutToRight = other.damagePopOutToRight;
-  damageTextScale = other.damageTextScale;
-  return *this;
-}
-
-Health::~Health() {}
 
 int Health::GetTotalHealth() const { return totalHealth; }
 
@@ -120,21 +77,6 @@ void Health::SetCurrentHealth(int currentHealth) {
     color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
   }
   healthBarFillColor = color;
-
-  /*currentHealthBar.SetColor(color);*/
-
-  //// Get the size of the current health bar based on the proportion of the
-  //// current health to the total health
-  // currentHealthBar.SetSize(glm::vec2(totalHealthBar->GetSize().x,
-  //                                    totalHealthBar->GetSize().y *
-  //                                    proportion));
-
-  //// The position is always the same as the position of the total health bar
-  // currentHealthBar.SetCenter(
-  //     totalHealthBar->GetCenter() -
-  //     glm::vec2(totalHealthBar.GetSize().y * (1.f - proportion) / 2.0f, 0));
-
-  // currentHealthBar.SetRoll(glm::pi<float>() / 2.0f);
 }
 
 void Health::SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color) {
@@ -158,20 +100,10 @@ void Health::SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color) {
   damageTextScale = 0.06f * size.y / kBaseUnit / kFontScale;
 }
 
-// void Health::SetCurrentHealthBar(glm::vec2 pos, glm::vec2 size,
-//                                  glm::vec4 color) {
-//   currentHealthBar.SetSize(glm::vec2(size.y, size.x));
-//   currentHealthBar.SetCenter(pos + size / 2.0f);
-//   currentHealthBar.SetColor(color);
-//   currentHealthBar.SetRoll(glm::pi<float>() / 2.0f);
-// }
-
 Capsule& Health::GetTotalHealthBar() {
   assert(totalHealthBar != nullptr && "totalHealthBar should not be nullptr");
   return *totalHealthBar;
 }
-
-// Capsule& Health::GetCurrentHealthBar() { return currentHealthBar; }
 
 void Health::IncreaseHealth(int mount) {
   if (mount == 0) return;

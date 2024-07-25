@@ -20,14 +20,7 @@
 
 Arrow::Arrow(glm::vec2 pos, glm::vec2 size, Texture2D sprite)
     : GameObject(pos, size, 0.0f, glm::vec2(0.5f, 0.5f), glm::vec2(0.0f, 0.0f),
-                 glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), sprite),
-      isFired(false),
-      isStopped(false),
-      isPenetrating(false),
-      speed(0.0f),
-      penetrationRatio(0.0f),
-      penetrationPosition(glm::vec2(0.f)),
-      targetPosition(glm::vec2(0.f)) {}
+                 glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), sprite) {}
 
 Arrow::Arrow(const Arrow& other)
     : GameObject(other),
@@ -134,10 +127,6 @@ void Arrow::Update(float dt) {
     }
 
     if (!this->isPenetrating) {
-      //// Calculate the penetration position based on the penetration ratio
-      // glm::vec2 penetrationPosition = this->targetPosition -
-      // GetArrowHeadDirection() * this->size.x * this->penetrationRatio;
-      //  Get distance from the penetration position to the target
       float distanceFromPenetrationToTarget =
           glm::length(this->targetPosition - this->penetrationPosition);
       // Get distance from the arrow to the target
@@ -170,56 +159,3 @@ glm::vec4 Arrow::GetTextureCoords() {
     return glm::vec4(actualPenetrationRatio, 0.0f, 1.0f, 1.0f);
   }
 }
-
-// void Arrow::Draw(std::shared_ptr<Renderer> renderer) {
-//
-//	if (this->isPenetrating) {
-//		// Enable scissor test
-//		glEnable(GL_SCISSOR_TEST);
-//
-//		// Get direction from the penetration position to the target
-//		glm::vec2 direction = glm::normalize(this->targetPosition -
-// this->penetrationPosition);
-//
-//
-//		// Calculate the scissor box
-//		glm::vec4 newScissorBox = glm::vec4(0.0f, 0.0f, (this->size.x +
-// this->size.y) * this->scale, (this->size.x + this->size.y) * this->scale);
-// if (direction.x < 0.f) { 			newScissorBox.x =
-// this->penetrationPosition.x;
-//		}
-//		else if (direction.x > 0.f) {
-//			newScissorBox.x = this->penetrationPosition.x -
-// GetArrowHeadDirection().x * this->size.x * (1 - this->penetrationPosition.x);
-//			newScissorBox.z = GetArrowHeadDirection().x *
-// this->size.x * (1 - this->penetrationPosition.x);
-//		}
-//		else {
-//			newScissorBox.x = 0.f;
-//			newScissorBox.z = kWindowSize.x;
-//		}
-//		if (direction.y == 0.f) {
-//			newScissorBox.y = 0.f;
-//			newScissorBox.w = kWindowSize.y;
-//		}
-//		else if (direction.y > 0.f) {
-//			newScissorBox.y = this->penetrationPosition.y;
-//		}
-//		else if (direction.y < 0.f) {
-//			newScissorBox.y = kWindowSize.y -
-//(this->penetrationPosition.y - GetArrowHeadDirection().y * this->size.y * (1 -
-// this->penetrationPosition.y)); 			newScissorBox.w =
-// GetArrowHeadDirection().y * this->size.y * (1 - this->penetrationPosition.y);
-//		}
-//
-//		glScissor(newScissorBox.x, newScissorBox.y, newScissorBox.z,
-// newScissorBox.w);
-//	}
-//
-//	GameObject::Draw(renderer);
-//
-//	if (this->isPenetrating) {
-//		// Disable scissor test
-//		glDisable(GL_SCISSOR_TEST);
-//	}
-// }

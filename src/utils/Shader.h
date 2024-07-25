@@ -12,9 +12,9 @@
 class Shader {
  public:
   // state
-  unsigned int ID;
+  unsigned int ID{0};
   // constructor
-  Shader() : ID(0) {}
+  Shader() = default;
   // sets the current shader as active
   Shader& Use();
   // compiles the shader from given source code
@@ -41,4 +41,10 @@ class Shader {
  private:
   // checks if compilation or linking failed and if so, print the error logs
   void checkCompileErrors(unsigned int object, std::string type);
+  // logs error.
+  void logError(const std::string& message, const std::string& type,
+                const char* infoLog) {
+    std::cerr << "| ERROR::SHADER:" << type << " error: \n"
+              << infoLog << std::endl;
+  }
 };

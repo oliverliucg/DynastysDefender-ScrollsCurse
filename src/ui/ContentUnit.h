@@ -24,7 +24,7 @@ class ContentUnit {
  protected:
   ContentUnit(ContentType type, float height, const std::string& name);
   ContentType type_;
-  float height_;
+  float height_{0.f};
   std::string name_;
 };
 
@@ -46,7 +46,7 @@ class TextUnit : public ContentUnit {
  private:
   std::shared_ptr<Text> text_;
   std::shared_ptr<TextRenderer> text_renderer_;
-  bool is_centered_;
+  bool is_centered_{false};
 };
 
 class ButtonUnit : public ContentUnit {
@@ -79,7 +79,7 @@ class ImageUnit : public ContentUnit {
             std::shared_ptr<SpriteRenderer> spriteRenderer,
             float rotation = 0.f,
             glm::vec2 rotationPivot = glm::vec2(0.5f, 0.5f),
-            glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+            glm::vec4 color = glm::vec4(1.f, 1.f, 1.f, 1.f),
             TextureRenderingMode mode = TextureRenderingMode::kNormal);
   void UpdateHeight() override;
   void SetPosition(glm::vec2 pos) override;
@@ -94,12 +94,12 @@ class ImageUnit : public ContentUnit {
 
  private:
   Texture2D sprite_;
-  glm::vec2 position_;
-  glm::vec2 size_;
-  float rotation_;
-  glm::vec2 rotation_pivot_;
-  glm::vec4 color_;
-  TextureRenderingMode mode_;
+  glm::vec2 position_{0.f, 0.f};
+  glm::vec2 size_{0.f, 0.f};
+  float rotation_{0.f};
+  glm::vec2 rotation_pivot_{0.5f, 0.5f};
+  glm::vec4 color_{1.f, 1.f, 1.f, 1.f};
+  TextureRenderingMode mode_{TextureRenderingMode::kNormal};
   std::shared_ptr<SpriteRenderer> sprite_renderer_;
 };
 
@@ -133,8 +133,8 @@ class OptionUnit : public ContentUnit {
  private:
   std::shared_ptr<ImageUnit> icon_;
   std::shared_ptr<TextUnit> text_;
-  float horizontal_spacing_;
-  OptionState state_;
-  bool image_on_left_;
-  bool text_on_center_;
+  float horizontal_spacing_{0.f};
+  OptionState state_{OptionState::kUnclickable};
+  bool image_on_left_{true};
+  bool text_on_center_{false};
 };

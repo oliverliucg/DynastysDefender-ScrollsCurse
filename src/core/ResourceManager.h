@@ -371,6 +371,9 @@ class ResourceManager {
   // Get maximum available unique ID
   int GetMaxAvailableID();
 
+  // Unloads a specific texture
+  void UnloadTexture(const std::string& name);
+
   // properly de-allocates all loaded resources
   void Clear();
 
@@ -379,15 +382,13 @@ class ResourceManager {
   std::unordered_map<std::string, Shader> Shaders;
   std::unordered_map<std::string, Texture2D> Textures;
   // text storage
-  nlohmann::json texts;
+  nlohmann::json texts{};
 
   // maximum ID
-  int maxID;
+  int maxID{100};
   // a static queue of all available unique IDs for GameObjects
   std::queue<int> availableIDs;
-  // Colors
 
-  std::mutex resourceMutex;  // Mutex for thread safety
   // loads and generates a shader from file
   Shader loadShaderFromFile(const char* vShaderFile, const char* fShaderFile,
                             const char* gShaderFile = nullptr);

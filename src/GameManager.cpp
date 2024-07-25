@@ -19,37 +19,12 @@
 #include "GameManager.h"
 
 GameManager::GameManager(unsigned int width, unsigned int height)
-    : state(GameState::INITIAL),
-      lastState(GameState::UNDEFINED),
-      targetState(GameState::UNDEFINED),
-      transitionState(TransitionState::START),
-      difficulty(ConfigManager::GetInstance().GetDifficulty()),
+    : difficulty(ConfigManager::GetInstance().GetDifficulty()),
       screenMode(ConfigManager::GetInstance().GetScreenMode()),
-      targetScreenMode(ScreenMode::UNDEFINED),
       language(ConfigManager::GetInstance().GetLanguage()),
       width(static_cast<float>(width)),
       height(static_cast<float>(height)),
-      level(1),
-      score(ConfigManager::GetInstance().GetScore()),
-      hideDefaultMouseCursor(false),
-      numOfScoreIncrementsReady(0),
-      activePage("") {
-  // Initialize all key states to false
-  memset(keys, false, sizeof(keys));
-  memset(keysLocked, false, sizeof(keysLocked));
-
-  // Set the scroll offset to 0
-  scrollYOffset = 0.f;
-  scrollSensitivity = 25.0f;
-
-  // Initailze the focus state
-  focused = true;
-  // Initialize the mouse states
-  leftMousePressed = false;
-  isReadyToDrag = true;
-  isDragging = false;
-  gameArenaShaking = false;
-}
+      score(ConfigManager::GetInstance().GetScore()) {}
 
 GameManager::~GameManager() {
   // Clear all resources
@@ -60,10 +35,9 @@ GameManager::~GameManager() {
 
 void GameManager::PreLoad() {
   this->SetState(GameState::PRELOAD);
-
   // load logo
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  resourceManager.LoadTexture("textures/oliverliulogo4k.png", false, "logo");
+  resourceManager.LoadTexture("textures/logo.png", false, "logo");
   resourceManager.LoadShader("shaders/sprite.vs", "shaders/sprite.fs", nullptr,
                              "sprite");
   glm::mat4 projection =
@@ -102,8 +76,6 @@ void GameManager::Init() {
     resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
     resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
   }
-  // resourceManager.GetShader("sprite").Use().SetInteger("image", 0);
-  // resourceManager.GetShader("sprite").SetMatrix4("projection", projection);
   resourceManager.GetShader("purecolor")
       .Use()
       .SetMatrix4("projection", projection);
@@ -936,31 +908,36 @@ void GameManager::LoadStreams() {
       /*isFighting=*/true);
 }
 
-void GameManager::Reload() {
+GameStateSnapshot GameManager::PrepareToReload() {
   // Memorize the current state
-  glm::vec2 scrollCenter = this->scroll->GetCenter();
-  auto gameBoardState = this->gameBoard->GetState();
-  auto screenMode = this->GetScreenMode();
-  bool isScollIconAllowed =
+  GameStateSnapshot snapshot;
+  snapshot.scrollCenter = this->scroll->GetCenter();
+  snapshot.gameBoardState = this->gameBoard->GetState();
+  snapshot.screenMode = this->GetScreenMode();
+  snapshot.isScrollIconAllowed =
       pages.at("story")->GetSection("storytextsection")->IsScrollIconAllowed();
-  float storyPageTextOffset =
+  snapshot.storyPageTextOffset =
       pages.at("story")->GetSection("storytextsection")->GetOffset();
   // First clear all resources
   this->ClearResources();
-  // Re-load all resources
-  this->Init();
-  // Set gameobjects to the correct state
-  scroll->SetCenter(scrollCenter);
-  gameBoard->SetState(gameBoardState);
-  this->SetScreenMode(screenMode);
-  pages.at("story")
-      ->GetSection("storytextsection")
-      ->SetOffset(storyPageTextOffset);
-  pages.at("story")
-      ->GetSection("storytextsection")
-      ->SetScrollIconAllowed(isScollIconAllowed);
-  pages.at("story")->GetSection("storytextsection")->ResetSrcollIconPosition();
+  this->state = GameState::UNDEFINED;
+  return snapshot;
+}
 
+void GameManager::Reload(const GameStateSnapshot& snapshot) {
+  // Re-init the game.
+  this->Init();
+  // Restore gameobjects to the correct state.
+  scroll->SetCenter(snapshot.scrollCenter);
+  gameBoard->SetState(snapshot.gameBoardState);
+  this->SetScreenMode(snapshot.screenMode);
+  pages.at("story")
+      ->GetSection("storytextsection")
+      ->SetOffset(snapshot.storyPageTextOffset);
+  pages.at("story")
+      ->GetSection("storytextsection")
+      ->SetScrollIconAllowed(snapshot.isScrollIconAllowed);
+  pages.at("story")->GetSection("storytextsection")->ResetSrcollIconPosition();
   // Set to display mode setting page.
   this->SetState(GameState::DISPLAY_SETTINGS);
   this->lastState = GameState::STORY;
@@ -1243,7 +1220,14 @@ void GameManager::ProcessInput(float dt) {
                     glm::vec2(0.0f, 10.0f * 9.8f * kBaseUnit));
                 // Reset the score to 0.
                 this->ResetScore(0);
-
+                // Gradually lower the volume of the background music
+                auto& soundEngine = SoundEngine::GetInstance();
+                std::string currentBackgroundMusic =
+                    soundEngine.GetPlayingBackgroundMusic();
+                if (soundEngine.IsStreamPlaying(currentBackgroundMusic)) {
+                  soundEngine.GraduallyChangeStreamVolume(
+                      currentBackgroundMusic, 0.f, 3.f);
+                }
               } else if (content == "exit") {
                 this->SetState(GameState::EXIT);
               } else if (content == "back") {
@@ -1301,6 +1285,14 @@ void GameManager::ProcessInput(float dt) {
 
                 // Reset the game level to 1.
                 this->level = 1;
+                // Gradually lower the volume of the background music
+                auto& soundEngine = SoundEngine::GetInstance();
+                std::string currentBackgroundMusic =
+                    soundEngine.GetPlayingBackgroundMusic();
+                if (soundEngine.IsStreamPlaying(currentBackgroundMusic)) {
+                  soundEngine.GraduallyChangeStreamVolume(
+                      currentBackgroundMusic, 0.f, 3.f);
+                }
               }
 
               // Set scroll state to be CLOSING
@@ -1494,6 +1486,8 @@ void GameManager::Update(float dt) {
         postProcessor->SetSampleOffsets(0.f);
         postProcessor->SetIntensity(1.f);
         this->SetState(GameState::INTRO);
+        // Unload the logo texture
+        ResourceManager::GetInstance().UnloadTexture("logo");
         SoundEngine& soundEngine = SoundEngine::GetInstance();
         // Stop splash screen sound.
         if (soundEngine.IsPlaying("splash_end")) {
@@ -1567,10 +1561,12 @@ void GameManager::Update(float dt) {
       }
     } else if (timer->HasEvent("introFadeOut") &&
                timer->IsEventTimerExpired("introFadeOut")) {
-      // Unload the key typing sound
-      SoundEngine& soundEngine = SoundEngine::GetInstance();
       this->SetState(GameState::INITIAL);
       this->GoToState(GameState::STORY);
+      // Unload the splash screen texture
+      ResourceManager::GetInstance().UnloadTexture("splash");
+      // Unload the key typing sound
+      SoundEngine& soundEngine = SoundEngine::GetInstance();
       soundEngine.UnloadSound("key_s");
       soundEngine.UnloadSound("keys_s_j");
       soundEngine.UnloadSound("key_enter");
@@ -2690,7 +2686,6 @@ void GameManager::Render() {
 
   // Background
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-
   postProcessor->BeginRender();
 
   spriteRenderer->DrawSprite(resourceManager.GetTexture("background"),
@@ -4869,7 +4864,7 @@ void GameManager::ResetScore(int64_t value) {
 }
 
 void GameManager::ClearResources() {
-  // Clear text characters textures
+  // Clear text characters texClearResources()tures
   for (auto textureID : TextRenderer::characterMap) {
     glDeleteTextures(1, &textureID.second[CharStyle::REGULAR].TextureID);
     glDeleteTextures(1, &textureID.second[CharStyle::BOLD].TextureID);
@@ -4904,7 +4899,4 @@ void GameManager::ClearResources() {
   this->shadowTrailSystem = nullptr;
   this->explosionSystem = nullptr;
   pages.clear();
-
-  //// Reset scissors parameters
-  // ScissorBoxHandler::GetInstance().Reset();
 }

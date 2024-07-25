@@ -40,19 +40,20 @@ class PostProcessor {
   // state
   Texture2D texture;
   Shader postProcessingShader;
-  unsigned int width, height;
+  unsigned int width{}, height{};
   // view port
   ViewPortInfo srcViewPort, dstViewPort;
 
   // options
-  bool confuse, chaos, shake, grayscale, blur;
+  bool confuse{false}, chaos{false}, shake{false}, grayscale{false},
+      blur{false};
   // paremeters
-  float shakingStrength, timeMultiplierForX, timeMultiplierForY, offset,
-      intensity;
-  unsigned int MSFBO, FBO;
-  unsigned int RBO;
-  unsigned int VAO;
-  bool hasBeganRender, hasEndedRender;
+  float shakingStrength{0.01f}, timeMultiplierForX{10.0f},
+      timeMultiplierForY{15.0f}, offset{1.0f / 300.0f}, intensity{1.0f};
+  unsigned int MSFBO{}, FBO{};
+  unsigned int RBO{};
+  unsigned int VAO{};
+  bool hasBeganRender{false}, hasEndedRender{false};
 
   void initRenderData();
 };

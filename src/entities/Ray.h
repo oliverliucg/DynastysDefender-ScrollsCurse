@@ -15,10 +15,10 @@
 class Ray {
  public:
   // Constructs a new Ray instance.
+  Ray() = default;
   Ray(glm::vec2 start, glm::vec2 dir, glm::vec4 color);
   Ray(glm::vec2 start, glm::vec2 dir);
-  Ray();
-  ~Ray();
+  ~Ray() = default;
 
   // Getters and setters
   glm::vec2 GetDirection() const;
@@ -38,9 +38,10 @@ class Ray {
   void Draw(std::shared_ptr<RayRenderer> RayRenderer);
 
  private:
-  glm::vec2 start, direction;
+  glm::vec2 start{0.f, 0.f};
+  glm::vec2 direction{0.f, 0.f};
   std::vector<glm::vec2> path;
-  glm::vec4 color;
+  glm::vec4 color{1.f, 1.f, 1.f, 1.f};
 
   // Get the point of collision between the ray and the wall.
   glm::vec2 GetWallCollisionPoint(glm::vec2 pos, glm::vec2 dir,

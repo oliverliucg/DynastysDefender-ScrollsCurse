@@ -23,8 +23,6 @@ ConfigManager& ConfigManager::GetInstance() {
   return instance;
 }
 
-ConfigManager::ConfigManager(){};
-
 void ConfigManager::SetConfigPath(const std::string& file_path) {
   config_path_ = file_path;
 }

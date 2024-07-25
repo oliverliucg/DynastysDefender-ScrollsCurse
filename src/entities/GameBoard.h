@@ -54,14 +54,14 @@ class GameBoard : public GameObject {
 
  private:
   // State of the game board
-  GameBoardState state;
+  GameBoardState state{GameBoardState::INACTIVE};
 
   // Boudaries of the game board.
-  glm::vec4 boundaries;
+  glm::vec4 boundaries = glm::vec4(0.f);
 
   // Position of valid playing area.
-  glm::vec2 validPosition;
+  glm::vec2 validPosition = glm::vec2(0.f);
 
   // Size of valid playing area.
-  glm::vec2 validSize;
+  glm::vec2 validSize = glm::vec2(0.f);
 };

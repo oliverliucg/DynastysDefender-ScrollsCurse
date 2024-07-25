@@ -12,7 +12,7 @@ class RayRenderer : public Renderer {
   // Constructor (inits shaders/shapes)
   RayRenderer(const Shader& shader);
   // Destructor
-  ~RayRenderer();
+  ~RayRenderer() = default;
   // Renders a defined quad textured with given color
   void DrawRay(const std::vector<glm::vec2>& path, glm::vec4 color);
 

@@ -30,13 +30,7 @@ GameCharacter::GameCharacter(
       state(state),
       positions(positions),
       sizes(sizes),
-      textures(textures),
-      targetPosition(glm::vec2(0.f)),
-      targetRoll(0.f),
-      faceLeft(true),
-      isMoving(false),
-      isRotating(false),
-      isStunned(false) {}
+      textures(textures) {}
 
 GameCharacter::GameCharacter(const GameCharacter& other) : GameObject(other) {
   name = other.name;

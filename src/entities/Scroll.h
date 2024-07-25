@@ -27,7 +27,7 @@ class Scroll : public GameObject {
  public:
   Scroll(glm::vec2 center, glm::vec2 rollerSize, glm::vec2 silkSize,
          Texture2D rollerTexture);
-  ~Scroll();
+  ~Scroll() = default;
 
   // Getters and setters
   glm::vec2 GetPosition() const override;
@@ -81,10 +81,6 @@ class Scroll : public GameObject {
   // Move the scroll based on its velocity
   void Move(float dt);
 
-  // Move the scoll based on its velocity and the target position
-
-  // Move the scoll based on
-
   // Narrow the scroll
   void Narrow(float dt, float targerSilkLen = 0.f);
 
@@ -115,35 +111,36 @@ class Scroll : public GameObject {
   static float GetSilkEdgeWidth() { return 0.1f * kBaseUnit; }
 
  private:
-  glm::vec2 center, rollerSize;
-  glm::vec2 silkSize;
+  glm::vec2 center{};
+  glm::vec2 rollerSize{};
+  glm::vec2 silkSize{};
   std::unique_ptr<GameObject> topRoller, bottomRoller;
-  std::unordered_map<std::string, glm::vec2> targetCenters;
+  std::unordered_map<std::string, glm::vec2> targetCenters{};
 
   // Scroll state
-  ScrollState state;
+  ScrollState state{ScrollState::OPENED};
 
   // target length when narrowing
-  float targetSilkLenForNarrowing;
+  float targetSilkLenForNarrowing{0.f};
   // cuurent length when narrowing
-  float currentSilkLenForNarrowing;
+  float currentSilkLenForNarrowing{0.f};
   // target length when closing
-  float targetSilkLenForClosing;
+  float targetSilkLenForClosing{0.f};
   // target length when opening
-  float targetSilkLenForOpening;
+  float targetSilkLenForOpening{0.f};
 
   // narrowing velocity, always positive
-  float velocityForNarrowing;
+  float velocityForNarrowing{kBaseUnit};
   // closing velocity, always positive
-  float velocityForClosing;
+  float velocityForClosing{48 * kBaseUnit};
   // opening velocity, always positive
-  float velocityForOpening;
+  float velocityForOpening{96 * kBaseUnit};
   // retracting/deloying/attacking/returning velocity, always positive
-  float velocityForRetracting;
+  float velocityForRetracting{24 * kBaseUnit};
 
-  glm::vec2 targetPositionForRetracting;
-  glm::vec2 targetPositionForDeploying;
-  glm::vec2 targetPositionForAttacking;
+  glm::vec2 targetPositionForRetracting{0.f, 0.f};
+  glm::vec2 targetPositionForDeploying{0.f, 0.f};
+  glm::vec2 targetPositionForAttacking{0.f, 0.f};
 
   // Users are not allowed to reset the position of the scroll via this
   // function.

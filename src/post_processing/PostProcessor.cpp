@@ -20,24 +20,7 @@
 
 PostProcessor::PostProcessor(Shader shader, unsigned int width,
                              unsigned int height)
-    : texture(),
-      postProcessingShader(shader),
-      width(width),
-      height(height),
-      srcViewPort(0, 0, width, height),
-      dstViewPort(0, 0, width, height),
-      confuse(false),
-      chaos(false),
-      shake(false),
-      grayscale(false),
-      blur(false),
-      hasBeganRender(false),
-      hasEndedRender(false),
-      shakingStrength(0.01f),
-      timeMultiplierForX(10.0f),
-      timeMultiplierForY(15.0f),
-      offset(offset),
-      intensity(1.0f) {
+    : texture(), postProcessingShader(shader), width(width), height(height) {
   // initialize renderbuffer/framebuffer object
   glGenFramebuffers(1, &this->MSFBO);
   glGenFramebuffers(1, &this->FBO);
@@ -68,8 +51,7 @@ PostProcessor::PostProcessor(Shader shader, unsigned int width,
   // initialize render data and uniforms
   this->initRenderData();
   this->postProcessingShader.SetInteger("scene", 0, true);
-  float offset = 1.0f / 300.0f;
-  SetSampleOffsets(offset);
+  SetSampleOffsets(this->offset);
   int edge_kernel[25] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 24,
                          -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
   glUniform1iv(

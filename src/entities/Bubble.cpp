@@ -18,14 +18,13 @@
 
 #include "Bubble.h"
 
-Bubble::Bubble() : GameObject() { radius = 0.0f; }
+Bubble::Bubble() : GameObject() {}
 
 Bubble::Bubble(glm::vec2 pos, float radius, glm::vec2 velocity, glm::vec4 color,
                Texture2D sprite)
     : GameObject(pos, glm::vec2(radius * 2.0f, radius * 2.0f), 0.0f,
                  glm::vec2(0.5f, 0.5f), velocity, color, sprite),
-      radius(radius),
-      state(BubbleState::kNormal) {}
+      radius(radius) {}
 
 Bubble::Bubble(const Bubble& other) : GameObject(other) {
   radius = other.radius;
@@ -50,8 +49,6 @@ Bubble& Bubble::operator=(const Bubble& other) {
   state = other.state;
   return *this;
 }
-
-Bubble::~Bubble() {}
 
 bool Bubble::Move(float deltaTime, glm::vec4 boundaries,
                   std::unordered_map<int, std::unique_ptr<Bubble> >& statics) {

@@ -45,8 +45,6 @@ Shooter::Shooter(glm::vec2 pos, glm::vec2 size, glm::vec2 rotationPivot,
             glm::vec4(1.f, 1.f, 1.f, 1.0f));
 }
 
-Shooter::~Shooter() {}
-
 void Shooter::RefreshCarriedBubbleColor(glm::vec3 color) {
   carriedBubble.SetColor(glm::vec4(color, carriedBubble.GetColor().a));
   //// Set the color for the ray

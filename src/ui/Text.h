@@ -117,7 +117,7 @@ class Text {
   glm::vec2 position, center;
   glm::vec4 boxBounds;
   glm::vec3 color;
-  float alpha;
+  float alpha{1.0f};
   float lineWidth, scale, lineSpacingFactor, additionalPadding;
   // target scales for the text to be scaled to.
   std::unordered_map<std::string, float> targetScales;

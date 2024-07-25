@@ -13,7 +13,7 @@ class CircleRenderer : public Renderer {
   // Constructor (inits shaders/shapes)
   CircleRenderer(const Shader& shader, float percentageOfCircle);
   // Destructor
-  ~CircleRenderer();
+  ~CircleRenderer() = default;
   // Renders a circle / triangle fan
   void DrawCircle(glm::vec2 position, float radius, float rotate = 0.0f,
                   glm::vec4 color = glm::vec4(1.0f));
@@ -23,11 +23,9 @@ class CircleRenderer : public Renderer {
 
  private:
   // percentage of circle
-  size_t percentageOfCircle;
+  float percentageOfCircle{1.f};
   // number of segments
-  size_t numSegments;
+  size_t numSegments{0};
   // Initializes and configures the quad's buffer and vertex attributes
   void initRenderData(float percentageOfCircle);
-  // only edge
-  bool onlyEdge;
 };

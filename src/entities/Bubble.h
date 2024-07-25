@@ -41,7 +41,6 @@ class Bubble : public GameObject {
   Bubble& operator=(const Bubble& other);
   // Move assignment operator
   Bubble& operator=(Bubble&& other) noexcept;
-  ~Bubble();
 
   // Move the bubble by the velocity vector. If it penetrates the left, right,
   // or bottom boundaries, it will bounce off. If it penetrates the top boundary
@@ -62,6 +61,6 @@ class Bubble : public GameObject {
   void ApplyGravity(float deltaTime);
 
  private:
-  float radius;
-  BubbleState state;
+  float radius{0.f};
+  BubbleState state{BubbleState::kNormal};
 };

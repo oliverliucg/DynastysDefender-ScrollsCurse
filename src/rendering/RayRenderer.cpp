@@ -22,8 +22,6 @@ RayRenderer::RayRenderer(const Shader& shader) : Renderer(shader) {
   this->initRenderData();
 }
 
-RayRenderer::~RayRenderer() {}
-
 void RayRenderer::DrawRay(const std::vector<glm::vec2>& path, glm::vec4 color) {
   // Check if the path is empty
   if (path.empty()) {

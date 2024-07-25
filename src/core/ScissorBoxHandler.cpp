@@ -20,13 +20,6 @@
 
 #include "ScissorBoxHandler.h"
 
-ScissorBoxHandler::ScissorBoxHandler()
-    : scissor_box_({0, 0, INT_MAX, INT_MAX}),
-      prev_scissor_box_({0, 0, INT_MAX, INT_MAX}),
-      scissor_test_enabled_(false) {}
-
-ScissorBoxHandler::~ScissorBoxHandler() {}
-
 void ScissorBoxHandler::SetScissorBox(GLint x, GLint y, GLsizei width,
                                       GLsizei height) {
   MemorizeScissorBox();

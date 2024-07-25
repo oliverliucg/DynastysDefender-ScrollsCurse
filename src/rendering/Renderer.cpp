@@ -44,3 +44,10 @@ SizePadding Renderer::GetExpectedWindowSizePadding() {
 SizePadding Renderer::GetActualWindowSizePadding() {
   return actual_window_size_padding_;
 }
+
+void Renderer::checkGlError(const char* operation) {
+  for (GLenum error; (error = glGetError()) != GL_NO_ERROR;) {
+    std::cerr << "OpenGL Error - " << operation << ": " << std::hex << error
+              << std::endl;
+  }
+}

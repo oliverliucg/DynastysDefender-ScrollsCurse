@@ -21,15 +21,7 @@
 Ray::Ray(glm::vec2 start, glm::vec2 dir, glm::vec4 color)
     : start(start), direction(dir), color(color) {}
 
-Ray::Ray(glm::vec2 start, glm::vec2 dir)
-    : start(start), direction(dir), color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {}
-
-Ray::Ray()
-    : start(glm::vec2(0.0f)),
-      direction(glm::vec2(0.0f)),
-      color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {}
-
-Ray::~Ray() {}
+Ray::Ray(glm::vec2 start, glm::vec2 dir) : start(start), direction(dir) {}
 
 void Ray::UpdatePath(
     glm::vec4 boundaries,

@@ -18,12 +18,6 @@
 
 #include "Timer.h"
 
-#include <iostream>
-
-Timer::Timer() {}
-
-Timer::~Timer() {}
-
 void Timer::SetEventTimer(std::string eventName, float time) {
   eventTimers[eventName] = time;
 }

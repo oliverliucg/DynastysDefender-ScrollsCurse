@@ -64,7 +64,7 @@ class PageSection {
 
  private:
   std::string name_;
-  glm::vec2 position_;
+  glm::vec2 position_{0.f, 0.f};
   std::unordered_map<std::string, std::shared_ptr<ContentUnit>> content_;
   std::vector<std::string> order_;
   // space between content units
@@ -73,24 +73,24 @@ class PageSection {
   // horizontal offset of the content units
   std::unordered_map<std::string, float> horizontal_offset_;
   // space between the top of the section and the first content unit
-  float top_spacing_;
+  float top_spacing_{0.f};
   // space between the bottom of the section and the last content unit
-  float bottom_spacing_;
+  float bottom_spacing_{0.f};
   // space between the left of the section and the content units
-  float left_spacing_;
+  float left_spacing_{0.f};
   // The maximum height of the section.
-  float max_height_;
+  float max_height_{kWindowSize.y};
   // The maximum width of the section.
-  float max_width_;
+  float max_width_{kWindowSize.x};
   // offset while rendering the components.
-  float offset_;
+  float offset_{0.f};
   // scroll icon is allowed or not.
-  bool is_scroll_icon_allowed_;
+  bool is_scroll_icon_allowed_{true};
   // The linear relationship between the center of the scroll icon and the
   // position of content in the section.
-  glm::vec3 scroll_relation_;
+  glm::vec3 scroll_relation_{0.f, 0.f, 0.f};
   // Scroll icon. a capsule with two semicircles and a rectangle.
-  std::unique_ptr<Capsule> scroll_icon_;
+  std::unique_ptr<Capsule> scroll_icon_{nullptr};
   // Lines to be drawn withing the section.
   std::vector<glm::vec2> lines_;
   // Renderers

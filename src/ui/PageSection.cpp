@@ -18,18 +18,7 @@
 
 #include "PageSection.h"
 
-PageSection::PageSection(const std::string& name)
-    : name_(name),
-      position_(glm::vec2(0.f)),
-      top_spacing_(0.0f),
-      bottom_spacing_(0.0f),
-      left_spacing_(0.0f),
-      max_height_(kWindowSize.y),
-      max_width_(kWindowSize.x),
-      offset_(0.f),
-      is_scroll_icon_allowed_(true),
-      scroll_relation_(glm::vec3(0.f)),
-      scroll_icon_(nullptr) {}
+PageSection::PageSection(const std::string& name) : name_(name) {}
 
 std::string PageSection::GetName() const { return name_; }
 

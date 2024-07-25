@@ -19,7 +19,7 @@ class Shooter : public GameObject {
   // object at it rotation center and nextBubble object at its tail.
   Shooter(glm::vec2 pos, glm::vec2 size, glm::vec2 rotationPivot,
           glm::vec2 tailPivot, Texture2D sprite);
-  ~Shooter();
+  ~Shooter() = default;
 
   void Draw(std::shared_ptr<Renderer> renderer);
 

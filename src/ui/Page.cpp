@@ -18,13 +18,7 @@
 
 #include "Page.h"
 
-Page::Page(const std::string& name)
-    : name_(name),
-      position_(glm::vec2(0.f)),
-      top_spacing_(0.f),
-      bottom_spacing_(0.f),
-      left_spacing_(0.f),
-      max_height_(std::numeric_limits<float>::max()) {}
+Page::Page(const std::string& name) : name_(name) {}
 
 std::string Page::GetName() const { return name_; }
 

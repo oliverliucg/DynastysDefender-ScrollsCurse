@@ -70,53 +70,62 @@ enum class TransitionState { START, TRANSITION, END };
 
 struct GameLevel {
   // Num of colors
-  int numColors;
+  int numColors{};
   // The number of bubbles that are generated at the beginning of the game
-  int numInitialBubbles;
+  int numInitialBubbles{};
   // The least distance between the bubble and the bottom of the game board
-  float minDistanceToBottom;
+  float minDistanceToBottom{};
   // The parameters for the ellipse centered at the shooter and the new bubble
   // should be generated outside of it.
-  float minHorizontalDistanceToShooter, minVerticalDistanceToShooter;
+  float minHorizontalDistanceToShooter{}, minVerticalDistanceToShooter{};
   // Probability that a new bubble is generated adjacent to the most recently
   // added bubble
-  float probabilityNewBubbleIsNeighborOfLastAdded;
+  float probabilityNewBubbleIsNeighborOfLastAdded{};
   // Probability that a new bubble is generated as a neighbor of an existing
   // bubble
-  float probabilityNewBubbleIsNeighborOfBubble;
+  float probabilityNewBubbleIsNeighborOfBubble{};
   // Probability that a new bubble is generated as a neighbor of an existing
   // bubble of the same color
-  float probabilityNewBubbleIsNeighborOfBubbleOfSameColor;
+  float probabilityNewBubbleIsNeighborOfBubbleOfSameColor{};
   // possibility that the new bubble is new color compared to the last bubble
-  float probabilityNewBubbleIsNewColor;
+  float probabilityNewBubbleIsNewColor{};
   // time interval for narrowing the game board vertically
-  float narrowingTimeInterval;
+  float narrowingTimeInterval{};
+};
+
+struct GameStateSnapshot {
+  glm::vec2 scrollCenter;
+  GameBoardState gameBoardState;
+  ScreenMode screenMode;
+  bool isScrollIconAllowed;
+  float storyPageTextOffset;
 };
 
 class GameManager {
  public:
-  GameState state, lastState, targetState;
-  TransitionState transitionState;
-  Difficulty difficulty;
-  ScreenMode screenMode, targetScreenMode;
-  Language language;
-  bool keys[1024];
-  bool keysLocked[1024];
-  bool focused;
-  bool leftMousePressed;
-  bool isReadyToDrag;
-  bool isDragging;
-  bool gameArenaShaking;
-  float scrollYOffset;
-  float scrollSensitivity;
-  float mouseX, mouseY, mouseLastX, mouseLastY;
+  GameState state{GameState::INITIAL}, lastState{GameState::UNDEFINED},
+      targetState{GameState::UNDEFINED};
+  TransitionState transitionState{TransitionState::START};
+  Difficulty difficulty{Difficulty::EASY};
+  ScreenMode screenMode{ScreenMode::WINDOWED};
+  ScreenMode targetScreenMode{ScreenMode::UNDEFINED};
+  Language language{Language::ENGLISH};
+  bool keys[1024] = {false};
+  bool keysLocked[1024] = {false};
+  bool focused{true};
+  bool leftMousePressed{false};
+  bool isReadyToDrag{true};
+  bool isDragging{false};
+  bool gameArenaShaking{false};
+  float scrollYOffset{0.f};
+  float scrollSensitivity{25.f};
+  float mouseX{0.f}, mouseY{0.f}, mouseLastX{0.f}, mouseLastY{0.f};
   float width, height;
-  int level;
+  int level{1};
   GameLevel gameLevel;
-  int64_t score;
-  bool hideDefaultMouseCursor;
+  int64_t score{0};
+  bool hideDefaultMouseCursor{false};
 
-  // std::mutex inputMutex;  // Mutex to protect input handling
   GameManager(unsigned int width, unsigned int height);
   ~GameManager();
   std::shared_ptr<PostProcessor> GetPostProcessor() { return postProcessor; }
@@ -130,8 +139,8 @@ class GameManager {
   void ProcessInput(float dt);
   void Update(float dt);
   void Render();
-
-  void Reload();
+  GameStateSnapshot PrepareToReload();
+  void Reload(const GameStateSnapshot& snapshot);
 
  private:
   std::shared_ptr<SpriteRenderer> spriteRenderer;
@@ -178,7 +187,7 @@ class GameManager {
   std::queue<int> scoreIncrements;
 
   // number of score increments to be reflected on the screen
-  int numOfScoreIncrementsReady;
+  int numOfScoreIncrementsReady{0};
 
   // Arrows
   std::vector<std::shared_ptr<Arrow>> arrows;
@@ -193,7 +202,7 @@ class GameManager {
   std::unordered_map<std::string, std::unique_ptr<Page>> pages;
 
   // Active page
-  std::string activePage;
+  std::string activePage{""};
 
   // Free slots on the game board.
   std::vector<glm::vec2> freeSlots;

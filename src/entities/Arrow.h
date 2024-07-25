@@ -38,13 +38,13 @@ class Arrow : public GameObject {
   //// Draw the arrow
   // void Draw(std::shared_ptr<Renderer> renderer);
  private:
-  bool isFired;
-  bool isStopped;
-  bool isPenetrating;
-  float speed;
-  float penetrationRatio;
-  glm::vec2 penetrationPosition;
-  glm::vec2 targetPosition;
+  bool isFired{false};
+  bool isStopped{false};
+  bool isPenetrating{false};
+  float speed{0.f};
+  float penetrationRatio{0.f};
+  glm::vec2 penetrationPosition{0.f, 0.f};
+  glm::vec2 targetPosition{0.f, 0.f};
 
   // Get the direction that the arrow points to
   glm::vec2 GetArrowHeadDirection();

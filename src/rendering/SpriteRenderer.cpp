@@ -30,6 +30,7 @@ void SpriteRenderer::DrawSprite(const Texture2D& texture, glm::vec2 position,
                                 TextureRenderingMode mode) {
   // Prepare transformations
   this->shader.Use();
+  checkGlError("shader.Use");
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, glm::vec3(position, 0.0f));
 
@@ -51,19 +52,21 @@ void SpriteRenderer::DrawSprite(const Texture2D& texture, glm::vec2 position,
   model = glm::scale(model, glm::vec3(size, 1.0f));
 
   this->shader.SetMatrix4("model", model);
-
+  checkGlError("SetMatrix4(model)");
   // Set the texture mode uniform
   this->shader.SetInteger("textureMode", static_cast<int>(mode));
-
+  checkGlError("SetInteger(textureMode)");
   // Render textured quad
   this->shader.SetVector4f("spriteColor", color);
-
+  checkGlError("SetVector4f(spriteColor)");
   glActiveTexture(GL_TEXTURE0);
   texture.Bind();
-
+  checkGlError("texture.Bind");
   glBindVertexArray(this->VAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
+  checkGlError("glDrawArrays");
   glBindVertexArray(0);
+  checkGlError("glBindVertexArray(0)");
 }
 
 void SpriteRenderer::initRenderData() {
@@ -86,7 +89,6 @@ void SpriteRenderer::initRenderData() {
 
   glGenVertexArrays(1, &this->VAO);
   glGenBuffers(1, &this->VBO);
-
   glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -102,6 +104,8 @@ void SpriteRenderer::initRenderData() {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
                         (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+  // Check for errors
+  checkGlError("After setting up vertex attributes");
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);

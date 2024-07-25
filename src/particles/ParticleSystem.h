@@ -12,21 +12,14 @@
 
 // Represents a single particle and its state
 struct Particle {
-  glm::vec2 position, velocity;
-  glm::vec4 color;
-  bool isDeepColor;
-  float lifespan;
-  float scale;
-  float fadeOutSpeed;
+  glm::vec2 position{0.0f, 0.0f}, velocity{0.0f, 0.0f};
+  glm::vec4 color{1.0f, 1.0f, 1.0f, 1.0f};
+  bool isDeepColor{false};
+  float lifespan{0.0f};
+  float scale{1.0f};
+  float fadeOutSpeed{1.0f};
   // default constructor
-  Particle()
-      : position(0.0f),
-        velocity(0.0f),
-        color(1.0f),
-        isDeepColor(false),
-        lifespan(0.0f),
-        scale(1.0f),
-        fadeOutSpeed(1.0f) {}
+  Particle() = default;
 };
 
 // ParticleSystem acts as a container for rendering a large number of
@@ -50,11 +43,11 @@ class ParticleSystem {
  protected:
   // state
   std::vector<Particle> particles;
-  unsigned int amount;
+  unsigned int amount{3000};
   // render state
   Shader shader;
   Texture2D texture;
-  unsigned int VAO;
+  unsigned int VAO{0};
   // initializes buffer and vertex attributes
   void init();
   // Slightly varies a color component

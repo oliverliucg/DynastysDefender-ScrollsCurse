@@ -502,9 +502,8 @@ ResourceManager& ResourceManager::GetInstance() {
   return instance;
 }
 
-ResourceManager::ResourceManager() {
-  // Initialize the queue with 100 consecutive integers
-  this->maxID = 100;
+ResourceManager::ResourceManager() : maxID(100) {
+  // Initialize the queue with 100 consecutive integers.
   for (int i = 0; i <= this->maxID; ++i) {
     availableIDs.emplace(i);
   }
@@ -513,9 +512,8 @@ ResourceManager::ResourceManager() {
 Shader ResourceManager::LoadShader(const char* vShaderFile,
                                    const char* fShaderFile,
                                    const char* gShaderFile, std::string name) {
-  // std::lock_guard<std::mutex> lock(resourceMutex);
   Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
-  return Shaders[name];
+  return Shaders.at(name);
 }
 
 bool ResourceManager::HasShader(std::string name) {
@@ -524,23 +522,22 @@ bool ResourceManager::HasShader(std::string name) {
 
 Shader ResourceManager::GetShader(std::string name) {
   assert(Shaders.count(name) > 0 && "The shader does not exist.");
-  return Shaders[name];
+  return Shaders.at(name);
 }
 
 Texture2D ResourceManager::LoadTexture(const char* file, bool alpha,
                                        std::string name) {
   /* std::lock_guard<std::mutex> lock(resourceMutex);*/
   Textures[name] = loadTextureFromFile(file, alpha);
-  return Textures[name];
+  return Textures.at(name);
 }
 
 Texture2D ResourceManager::GetTexture(std::string name) {
   assert(Textures.count(name) > 0 && "The texture does not exist.");
-  return Textures[name];
+  return Textures.at(name);
 }
 
 bool ResourceManager::LoadText(const char* jsonFile) {
-  std::lock_guard<std::mutex> lock(resourceMutex);
   std::ifstream text_file(jsonFile, std::ios::in | std::ios::binary);
   if (!text_file.is_open()) {
     std::cerr << "Failed to open texts file: " << jsonFile << std::endl;
@@ -549,6 +546,11 @@ bool ResourceManager::LoadText(const char* jsonFile) {
 
   text_file >> texts;
   return true;
+}
+
+void ResourceManager::UnloadTexture(const std::string& name) {
+  glDeleteTextures(1, &Textures.at(name).ID);
+  Textures.erase(name);
 }
 
 void ResourceManager::Clear() {
@@ -618,7 +620,6 @@ Texture2D ResourceManager::loadTextureFromFile(const char* file, bool alpha) {
 }
 
 int ResourceManager::GetAvailableID() {
-  std::lock_guard<std::mutex> lock(resourceMutex);
   if (availableIDs.empty()) {
     int oldMaxID = this->maxID;
     this->maxID += 100;
@@ -631,12 +632,6 @@ int ResourceManager::GetAvailableID() {
   return id;
 }
 
-void ResourceManager::ReturnID(int id) {
-  std::lock_guard<std::mutex> lock(resourceMutex);
-  availableIDs.emplace(id);
-}
+void ResourceManager::ReturnID(int id) { availableIDs.emplace(id); }
 
-int ResourceManager::GetMaxAvailableID() {
-  std::lock_guard<std::mutex> lock(resourceMutex);
-  return maxID;
-}
+int ResourceManager::GetMaxAvailableID() { return maxID; }

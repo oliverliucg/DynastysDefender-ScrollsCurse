@@ -34,15 +34,15 @@ class Page {
   void Draw();
 
  private:
-  std::string name_;
-  glm::vec2 position_;
+  std::string name_{""};
+  glm::vec2 position_{0.f, 0.f};
   std::unordered_map<std::string, std::shared_ptr<PageSection>> sections_;
   std::vector<std::string> order_;
   std::unordered_map<std::string, std::unordered_map<std::string, float>>
       inter_section_spacing_;
-  float top_spacing_;
-  float bottom_spacing_;
-  float left_spacing_;
-  float max_height_;
+  float top_spacing_{0.f};
+  float bottom_spacing_{0.f};
+  float left_spacing_{0.f};
+  float max_height_{std::numeric_limits<float>::max()};
   float GetLimitedSectionHeight(const std::string& section_name) const;
 };

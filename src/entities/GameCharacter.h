@@ -118,7 +118,7 @@ class GameCharacter : public GameObject {
 
  private:
   std::string name;
-  GameCharacterState state;
+  GameCharacterState state{};
   std::unique_ptr<Health> health;
   std::unordered_map<GameCharacterState, glm::vec2> positions;
   std::unordered_map<GameCharacterState, glm::vec2> sizes;
@@ -129,12 +129,12 @@ class GameCharacter : public GameObject {
   // the object id, value is the relative position ratio.
   std::unordered_map<int, std::unordered_map<GameCharacterState, glm::vec2>>
       relativeCenterRatios;
-  glm::vec2 targetPosition;
-  float targetRoll;
-  bool faceLeft;
-  bool isMoving;
-  bool isRotating;
-  bool isStunned;
+  glm::vec2 targetPosition{0.f, 0.f};
+  float targetRoll{0.f};
+  bool faceLeft{false};
+  bool isMoving{false};
+  bool isRotating{false};
+  bool isStunned{false};
 
   // Update the position of the carried objects based on the character's
   // position and the relative position ratio.

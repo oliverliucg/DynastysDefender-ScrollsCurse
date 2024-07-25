@@ -26,9 +26,11 @@ class Renderer {
  protected:
   // Render state
   Shader shader;
-  unsigned int VAO;
-  unsigned int VBO;
+  unsigned int VAO = 0;
+  unsigned int VBO = 0;
 
   static SizePadding expected_window_size_padding_;
   static SizePadding actual_window_size_padding_;
+
+  void checkGlError(const char* operation);
 };

@@ -226,10 +226,6 @@ int main() {
       windowShouldClose.store(true);  // Synchronize close signal with GLFW
     }
 
-    // Set the clear color
-    glClearColor(0.039216f, 0.043137f, 0.070588f, 1.0f);
-    // Clear the colorbuffer
-    glClear(GL_COLOR_BUFFER_BIT);
     // Process the input at fixed time step and update the game state.
     while (accumulator >= kTimeStep) {
       // Process input
@@ -275,7 +271,7 @@ int main() {
         isFromWindowedBorderlessMode = true;
       }
 
-      //// Update game state
+      // Update game state
       gameManager.Update(kTimeStep);
       accumulator -= kTimeStep;
     }
@@ -454,6 +450,8 @@ void focus_callback(GLFWwindow* window, int focused) {
 
 void RecreateWindow(GLFWwindow** window, int width, int height,
                     GameManager& gameManager) {
+  gameManager.SetToTargetScreenMode();
+  auto gameStateSnapshot = gameManager.PrepareToReload();
   // Destroy the current window
   glfwDestroyWindow(*window);  // Destroy the old window
   // Recreate the window
@@ -478,8 +476,7 @@ void RecreateWindow(GLFWwindow** window, int width, int height,
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  gameManager.SetToTargetScreenMode();
-  gameManager.Reload();
+  gameManager.Reload(gameStateSnapshot);
 
   if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
     hideTaskbar();

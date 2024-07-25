@@ -6,20 +6,20 @@
 class Health {
  public:
   // Default constructor, total health is set to 0.
-  Health();
+  Health() = default;
   // Constructs a new Health instance. Requires the total health of the
   // character.
-  Health(int totalHealth);
+  explicit Health(int totalHealth);
   // Copy constructor
   Health(const Health& other);
   // Move constructor
-  Health(Health&& other) noexcept;
+  Health(Health&& other) noexcept = default;
   // Assignment operator
   Health& operator=(const Health& other);
   // Move assignment operator
-  Health& operator=(Health&& other) noexcept;
+  Health& operator=(Health&& other) noexcept = default;
   // Destructor
-  ~Health();
+  ~Health() = default;
   // Getters and setters
   int GetTotalHealth() const;
   void SetTotalHealth(int totalHealth);
@@ -27,12 +27,8 @@ class Health {
   void SetCurrentHealth(int currentHealth);
   // Set the position, size and color of the total health bar.
   void SetTotalHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color);
-  //// Set the position, size and color of the current health bar.
-  // void SetCurrentHealthBar(glm::vec2 pos, glm::vec2 size, glm::vec4 color);
   //  Get the total health bar.
   Capsule& GetTotalHealthBar();
-  //// Get the current health bar.
-  // Capsule& GetCurrentHealthBar();
   //  Increase the current health by the given amount.
   void IncreaseHealth(int amount);
   // Derease the current health by the given amount.
@@ -51,30 +47,27 @@ class Health {
 
  private:
   // The total health of the character
-  int totalHealth;
+  int totalHealth{0};
   // The current health of the character
-  int currentHealth;
+  int currentHealth{0};
   // Capsule representing the total health
   std::unique_ptr<Capsule> totalHealthBar;
   // Color of the health bar, by default the edge is white and the fill is
   // green.
-  glm::vec4 healthBarEdgeColor;
-  glm::vec4 healthBarFillColor;
-  //// Capsule representing the current health
-  // Capsule currentHealthBar;
+  glm::vec4 healthBarEdgeColor{1.f, 1.f, 1.f, 1.f};
+  glm::vec4 healthBarFillColor{0.f, 1.f, 0.f, 1.f};
   //  Texts representing the amount of health being damaged.
   std::vector<Text> damageTexts;
   // The position where the damage text is initially created.
-  glm::vec2 damageTextInitialPosition;
+  glm::vec2 damageTextInitialPosition{0.f, 0.f};
   // The position where the damage text is moving towards and fading out.
-  glm::vec2 damageTextTargetPosition;
+  glm::vec2 damageTextTargetPosition{0.f, 0.f};
   // The position where the damage text is totally faded out.
-  glm::vec2 damageTextFadedPosition;
+  glm::vec2 damageTextFadedPosition{0.f, 0.f};
   // The pop out direction of the damage text.
-  bool damagePopOutToRight;
+  bool damagePopOutToRight{true};
   // The scale of the damage text.
-  float damageTextScale;
-
+  float damageTextScale{1.f};
   // Get the bounding box of the current health bar.
   glm::vec4 GetCurrentHealthBarBoundingBox();
 };

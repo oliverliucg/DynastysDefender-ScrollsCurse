@@ -21,21 +21,18 @@ enum class StreamState { NOT_READY, READY, Playing, ENDED };
 enum class BackgroundMusicState { Relaxing, Fighting, None };
 
 struct BackgroundMusicInfo {
-  BackgroundMusicState state;
-  std::string currentMusic;
-  std::string lastMusic;
-  float timerInterval;
-  const float expectedInterval = 6.f;
+  BackgroundMusicState state{BackgroundMusicState::None};
+  std::string currentMusic{};
+  std::string lastMusic{};
+  float timerInterval{0.f};
+  const float expectedInterval{ 6.f };
   // background music (fighting)
   std::vector<std::string> fightingMusic;
   // background music (relaxing)
   std::vector<std::string> relaxingMusic;
 
-  BackgroundMusicInfo()
-      : state(BackgroundMusicState::None),
-        currentMusic(""),
-        lastMusic(""),
-        timerInterval(0.0f) {}
+  BackgroundMusicInfo() = default;
+
   void Refresh();
 
   void Reset();
@@ -138,9 +135,9 @@ class SoundEngine {
   SoundEngine& operator=(const SoundEngine& other) = delete;
   ~SoundEngine();
 
-  ALCdevice* device_;
-  ALCcontext* context_;
-  bool is_cleared_ = false;
+  ALCdevice* device_{ nullptr };
+  ALCcontext* context_{ nullptr };
+  bool is_cleared_{false};
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
   std::unordered_map<std::string, std::unique_ptr<StreamPlayer>>
       streams_;  // Map of streams
@@ -164,7 +161,7 @@ class SoundEngine {
       gradually_changing_stream_volumes_;
 
   BackgroundMusicInfo background_music_info_;
-  ALCint refresh_rate_;
+  ALCint refresh_rate_{ 25 };
 
   // Checks if a source is looping
   bool IsLooping(ALuint source);

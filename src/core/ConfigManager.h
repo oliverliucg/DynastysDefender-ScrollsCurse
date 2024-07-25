@@ -147,10 +147,10 @@ class ConfigManager {
   std::string GetTextFilePath() const;
 
  private:
-  ConfigManager();
+  ConfigManager() = default;
   ConfigManager(const ConfigManager& other) = delete;
   ConfigManager& operator=(const ConfigManager& other) = delete;
 
-  std::string config_path_;
-  nlohmann::json config_;
+  std::string config_path_{};
+  nlohmann::json config_{};
 };

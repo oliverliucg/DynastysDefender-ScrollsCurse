@@ -30,8 +30,6 @@ class Button {
 
   // Getters and setters for the button.
   Text& GetText();
-  void SetDirection(int direction);
-  int GetDirection() const;
   void SetState(ButtonState state);
   ButtonState GetState() const;
   void SetPosition(glm::vec2 position);
@@ -53,9 +51,9 @@ class Button {
   static glm::vec3 buttonTextColor;
 
  private:
-  glm::vec2 position_, size_;
+  glm::vec2 position_{0.f, 0.f}, size_{1.f, 1.f};
   std::unique_ptr<Text> text_;
-  bool text_on_center_;
-  glm::vec4 color_;
-  ButtonState state_;
+  bool text_on_center_{true};
+  glm::vec4 color_{1.f, 1.f, 1.f, 1.f};
+  ButtonState state_{ButtonState::kInactive};
 };

@@ -11,12 +11,12 @@
 class ScissorBoxHandler {
  public:
   struct ScissorBox {
-    GLint x;
-    GLint y;
-    GLsizei width;
-    GLsizei height;
+    GLint x{0};
+    GLint y{0};
+    GLsizei width{INT_MAX};
+    GLsizei height{INT_MAX};
 
-    ScissorBox() : x(0), y(0), width(INT_MAX), height(INT_MAX) {}
+    ScissorBox() = default;
     ScissorBox(GLint x, GLint y, GLsizei width, GLsizei height)
         : x(x), y(y), width(width), height(height) {}
   };
@@ -50,8 +50,8 @@ class ScissorBoxHandler {
 
  private:
   // Private Constructor and Destructor
-  ScissorBoxHandler();
-  ~ScissorBoxHandler();
+  ScissorBoxHandler() = default;
+  ~ScissorBoxHandler() = default;
 
   // Non-copyable and non-movable
   ScissorBoxHandler(const ScissorBoxHandler&) = delete;
@@ -64,5 +64,5 @@ class ScissorBoxHandler {
 
   ScissorBox scissor_box_;
   ScissorBox prev_scissor_box_;
-  bool scissor_test_enabled_;
+  bool scissor_test_enabled_{false};
 };

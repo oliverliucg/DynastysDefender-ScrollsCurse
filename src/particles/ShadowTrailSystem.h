@@ -13,6 +13,4 @@ class ShadowTrailSystem : public ParticleSystem {
                         glm::vec2 velocity = glm::vec2(0.f),
                         glm::vec2 scaleRange = glm::vec2(10.f, 10.f),
                         glm::vec2 offset = glm::vec2(0.0f, 0.0f));
-
- private:
 };
