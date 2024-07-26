@@ -1851,10 +1851,10 @@ void GameManager::Update(float dt) {
       shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
 
       // Move the timer's text downwards by the offset.
-      // texts["time"]->SetPosition(texts["time"]->GetPosition() +
-      //                           glm::vec2(0.f, offsetY));
-      texts["time"]->SetCenter(texts["time"]->GetCenter() +
-                               glm::vec2(0.f, offsetY));
+      texts["time"]->SetPosition(texts["time"]->GetPosition() +
+                                 glm::vec2(0.f, offsetY));
+      // texts["time"]->SetCenter(texts["time"]->GetCenter() +
+      //                          glm::vec2(0.f, offsetY));
 
       if (this->scroll->GetState() == ScrollState::NARROWED) {
         // Reset the scroll state to OPENED.
@@ -2133,8 +2133,8 @@ void GameManager::Update(float dt) {
       gameBoard->SetValidPosition(gameBoard->GetPosition());
       gameBoard->SetValidSize(gameBoard->GetSize());
       // reset the time text position
-      // texts["time"]->SetPosition(texts["time"]->GetPosition() - halfOffset);
-      texts["time"]->SetCenter(texts["time"]->GetCenter() - halfOffset);
+      texts["time"]->SetPosition(texts["time"]->GetPosition() - halfOffset);
+      /*texts["time"]->SetCenter(texts["time"]->GetCenter() - halfOffset);*/
       // reset the position of the shooter
       shooter->SetPosition(shooter->GetPosition() + halfOffset);
       shooter->GetRay().UpdatePath(this->gameBoard->GetBoundaries(),
@@ -2542,38 +2542,35 @@ void GameManager::Update(float dt) {
       glm::vec3 color = this->texts.at("score")->GetColor();
       if (color != kScoreColorPink) {
         if (color.r < kScoreColorPink.r) {
-          color.r = std::min(kScoreColorPink.r, color.r + 0.1f);
+          color.r = std::min(kScoreColorPink.r, color.r + 0.06f);
         } else {
-          color.r = std::max(kScoreColorPink.r, color.r - 0.1f);
+          color.r = std::max(kScoreColorPink.r, color.r - 0.06f);
         }
         if (color.g < kScoreColorPink.g) {
-          color.g = std::min(kScoreColorPink.g, color.g + 0.1f);
+          color.g = std::min(kScoreColorPink.g, color.g + 0.06f);
         } else {
-          color.g = std::max(kScoreColorPink.g, color.g - 0.1f);
+          color.g = std::max(kScoreColorPink.g, color.g - 0.06f);
         }
         if (color.b < kScoreColorPink.b) {
-          color.b = std::min(kScoreColorPink.b, color.b + 0.1f);
+          color.b = std::min(kScoreColorPink.b, color.b + 0.06f);
         } else {
-          color.b = std::max(kScoreColorPink.b, color.b - 0.1f);
+          color.b = std::max(kScoreColorPink.b, color.b - 0.06f);
         }
         this->texts.at("score")->SetColor(color);
-      } else {
-        if (!this->timer->HasEvent("reduceflipvolume")) {
-          this->timer->SetEventTimer("reduceflipvolume",
-                                     1.5f + 0.01f * numOfScoreIncrementsReady);
-          this->timer->StartEventTimer("reduceflipvolume");
-        }
       }
-      float volume = 1.f;
-      if (this->timer->HasEvent("reduceflipvolume")) {
-        if (!this->timer->IsEventTimerExpired("reduceflipvolume")) {
-          volume =
-              glm::mix(0.f, 1.f,
-                       this->timer->GetEventRemainingTime("reduceflipvolume") /
-                           this->timer->GetEventTimer("reduceflipvolume"));
-        } else {
-          volume = 0.f;
-        }
+      if (!this->timer->HasEvent("reduceflipvolume")) {
+        this->timer->SetEventTimer("reduceflipvolume",
+                                   1.5f + 0.01f * numOfScoreIncrementsReady);
+        this->timer->StartEventTimer("reduceflipvolume");
+      }
+
+      float volume = 0.f;
+      if (this->timer->HasEvent("reduceflipvolume") &&
+          !this->timer->IsEventTimerExpired("reduceflipvolume")) {
+        volume =
+            glm::mix(0.f, 1.f,
+                     this->timer->GetEventRemainingTime("reduceflipvolume") /
+                         this->timer->GetEventTimer("reduceflipvolume"));
       }
       if (volume > 0.f) {
         SoundEngine::GetInstance().PlaySound("flip_paper", false, volume);
@@ -2586,17 +2583,19 @@ void GameManager::Update(float dt) {
     }
   } else if (this->timer->HasEvent("displayscore") &&
              this->timer->IsEventTimerExpired("displayscore")) {
-    // Decrease the opacity of the score text.
+    bool alphaChangeComplete = true;
+    // Decrease the opacity of the score text if it is not gamestate::WIN or
+    // LOSE.
     float alpha = this->texts.at("score")->GetAlpha();
-    if (alpha > kScoreAlpha) {
-      alpha -= 0.8f * dt;
+    if (this->state != GameState::WIN && this->state != GameState::LOSE &&
+        alpha != kScoreAlpha) {
+      alpha = std::max(kScoreAlpha, alpha - 0.8f * dt);
+      this->texts.at("score")->SetAlpha(alpha);
+      if (alpha != kScoreAlpha) {
+        alphaChangeComplete = false;
+      }
     }
-    if (alpha < kScoreAlpha) {
-      alpha = kScoreAlpha;
-    }
-    if (alpha == kScoreAlpha) {
-      this->timer->CleanEvent("displayscore");
-    }
+
     // Change color to orange gradually.
     glm::vec3 color = this->texts.at("score")->GetColor();
     if (color != kScoreColorOrange) {
@@ -2617,7 +2616,9 @@ void GameManager::Update(float dt) {
       }
       this->texts.at("score")->SetColor(color);
     }
-    this->texts.at("score")->SetAlpha(alpha);
+    if (alphaChangeComplete && color == kScoreColorOrange) {
+      this->timer->CleanEvent("displayscore");
+    }
   }
 }
 
@@ -2780,7 +2781,7 @@ void GameManager::Render() {
             originalPositionsForShaking[std::to_string(id)] =
                 bubble->GetPosition();
           }
-          originalPositionsForShaking["time"] = texts["time"]->GetCenter();
+          originalPositionsForShaking["time"] = texts["time"]->GetPosition();
 
           // start shake effect
           float shakingStrengthForX =
@@ -2820,10 +2821,8 @@ void GameManager::Render() {
                                 glm::vec2(shakeOffsetX, shakeOffsetY));
           }
           // shake the time text
-          // texts["time"]->SetPosition(texts["time"]->GetPosition() +
-          //                           glm::vec2(shakeOffsetX, shakeOffsetY));
-          texts["time"]->SetCenter(texts["time"]->GetCenter() +
-                                   glm::vec2(shakeOffsetX, shakeOffsetY));
+          texts["time"]->SetPosition(texts["time"]->GetPosition() +
+                                     glm::vec2(shakeOffsetX, shakeOffsetY));
         }
 
         scroll->Draw(spriteRenderer);
@@ -2882,7 +2881,8 @@ void GameManager::Render() {
 
         // Draw the time when the scroll is opened
         if (this->scroll->GetState() == ScrollState::OPENED) {
-          texts["time"]->Draw(textRenderer, true);
+          texts.at("time")->Draw(textRenderer, /*centerAligned=*/false,
+                                 /*rightAligned=*/true);
         }
 
         // Restore the original positions for each shaking object
@@ -2900,8 +2900,7 @@ void GameManager::Render() {
             bubble->SetPosition(
                 originalPositionsForShaking[std::to_string(id)]);
           }
-          // texts["time"]->SetPosition(originalPositionsForShaking["time"]);
-          texts["time"]->SetCenter(originalPositionsForShaking["time"]);
+          texts["time"]->SetPosition(originalPositionsForShaking["time"]);
         }
       }
     } else {
@@ -3375,8 +3374,6 @@ void GameManager::LoadTexts() {
         /*lineWidth=*/std::numeric_limits<float>::max());
     texts["score"]->AddParagraph(resourceManager.GetText("score"));
     texts["score"]->AddParagraph(U"{" + intToU32String(this->score) + U"}");
-    // Set the color of the score to purple.
-    /*texts["score"]->SetColor(glm::vec3(1.0f, 0.0f, 0.56471f));*/
     texts["score"]->SetColor(kScoreColorOrange);
     texts["score"]->SetAlpha(kScoreAlpha);
     texts["score"]->SetScale(0.05f / kFontScale);
@@ -3417,18 +3414,13 @@ void GameManager::LoadTexts() {
   if (texts.find("time") == texts.end()) {
     texts["time"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(
-            gameBoard->GetPosition().x + gameBoard->GetSize().x - 2 * kBaseUnit,
-            gameBoard->GetPosition().y - kBaseUnit),
+            gameBoard->GetPosition().x + gameBoard->GetSize().x -
+                0.7f * kBaseUnit,
+            gameBoard->GetPosition().y -
+                0.532f * this->scroll->GetTopRoller()->GetSize().y),
         /*lineWidth=*/gameBoard->GetSize().x);
     texts["time"]->AddParagraph(U"30");
     texts["time"]->SetScale(0.025f / kFontScale);
-    // Get the center of the text "time"
-    glm::vec2 centerTime;
-    centerTime.x =
-        gameBoard->GetPosition().x + gameBoard->GetSize().x - kBaseUnit;
-    centerTime.y = gameBoard->GetPosition().y -
-                   this->scroll->GetTopRoller()->GetSize().y * 0.37f;
-    texts["time"]->SetCenter(centerTime);
   }
 
   std::vector<std::string> clickableOptionNames = {
