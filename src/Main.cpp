@@ -46,7 +46,9 @@ std::atomic<bool> windowShouldClose(false);
 void showTaskbar();
 void hideTaskbar();
 
-void InitParametersForCurrentWindowSize(int width, int height);
+void setWindowIcon(GLFWwindow* window);
+
+void initParametersForCurrentWindowSize(int width, int height);
 void reconfigureWindowSize(GLFWwindow* window, int width, int height);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -58,7 +60,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void focus_callback(GLFWwindow* window, int focused);
 
-void RecreateWindow(GLFWwindow** window, int width, int height,
+void recreateWindow(GLFWwindow** window, int width, int height,
                     GameManager& gameManager);
 
 int main() {
@@ -102,7 +104,7 @@ int main() {
       kWindowedModeSizePadding.padLeft = kWindowedModeSizePadding.padRight = 0;
   kWindowedModeSize = glm::vec2(kWindowedModeSizePadding.width,
                                 kWindowedModeSizePadding.height);
-  InitParametersForCurrentWindowSize(kVirtualScreenSize.x,
+  initParametersForCurrentWindowSize(kVirtualScreenSize.x,
                                      kVirtualScreenSize.y);
   ScreenMode initialScreenMode = configManager.GetScreenMode();
 
@@ -111,31 +113,33 @@ int main() {
   int SCREEN_WIDTH = SCREEN_SIZE_PADDING.GetPaddedWidth(),
       SCREEN_HEIGHT = SCREEN_SIZE_PADDING.GetPaddedHeight();
   GLFWwindow* window;
+  const char* title = "Dynasty's Defender: The Scroll's Curse";
   if (initialScreenMode == ScreenMode::FULLSCREEN) {
     // Create the window
-    window =
-        glfwCreateWindow(mode->width, mode->height,
-                         "DynastysDefender-ScrollsCurse", primaryMonitor, NULL);
+    window = glfwCreateWindow(mode->width, mode->height, title, primaryMonitor,
+                              NULL);
   } else if (initialScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
     // Windowed borderless mode
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    window = glfwCreateWindow(mode->width - 1, mode->height,
-                              "DynastysDefender-ScrollsCurse", NULL, NULL);
+    window = glfwCreateWindow(mode->width - 1, mode->height, title, NULL, NULL);
   } else if (initialScreenMode == ScreenMode::WINDOWED) {
     SCREEN_SIZE_PADDING = kWindowedModeSizePadding;
     // No padding for windowed mode
     SCREEN_WIDTH = kWindowedModeSize.x;
     SCREEN_HEIGHT = kWindowedModeSize.y;
 
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT,
-                              "DynastysDefender-ScrollsCurse", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, title, NULL, NULL);
   }
   if (window == NULL) {
     std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return EXIT_FAILURE;
   }
+
+  // Set the app icon
+  setWindowIcon(window);
+
   // Set the position of window to the center of the screen
   int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
   int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
@@ -240,7 +244,7 @@ int main() {
           // Have decorations for windowed mode.
           glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
           glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-          RecreateWindow(&window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
+          recreateWindow(&window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
           isFromWindowedBorderlessMode = false;
         } else {
           int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
@@ -267,7 +271,7 @@ int main() {
         // No decorations for windowed borderless mode.
         glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        RecreateWindow(&window, mode->width - 1, mode->height, gameManager);
+        recreateWindow(&window, mode->width - 1, mode->height, gameManager);
         isFromWindowedBorderlessMode = true;
       }
 
@@ -317,7 +321,20 @@ void hideTaskbar() {
   }
 }
 
-void InitParametersForCurrentWindowSize(int width, int height) {
+void setWindowIcon(GLFWwindow* window) {
+  // Load the icon
+  GLFWimage icon;
+  icon.pixels =
+      stbi_load("icon/game_icon.png", &icon.width, &icon.height, 0, 4);
+  if (icon.pixels) {
+    glfwSetWindowIcon(window, 1, &icon);
+    stbi_image_free(icon.pixels);  // Free the image memory
+  } else {
+    std::cerr << "Failed to load icon: " << stbi_failure_reason() << std::endl;
+  }
+}
+
+void initParametersForCurrentWindowSize(int width, int height) {
   kWindowSize = glm::vec2(width, height);
   screenScale = width / kFullScreenSize.x;
   kBaseUnit = kWindowSize.y / 42.f;
@@ -448,7 +465,7 @@ void focus_callback(GLFWwindow* window, int focused) {
   }
 }
 
-void RecreateWindow(GLFWwindow** window, int width, int height,
+void recreateWindow(GLFWwindow** window, int width, int height,
                     GameManager& gameManager) {
   gameManager.SetToTargetScreenMode();
   auto gameStateSnapshot = gameManager.PrepareToReload();

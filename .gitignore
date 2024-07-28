@@ -4,6 +4,7 @@
 
 /.vs
 /out/build
+*.aps
 
 # Prerequisites
 *.d

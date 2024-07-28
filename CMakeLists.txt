@@ -40,6 +40,8 @@ set(TEXT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/text")
 set(TEXT_DEST_DIR "${CMAKE_BINARY_DIR}/text")
 set(TEXTURES_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/textures")
 set(TEXTURES_DEST_DIR "${CMAKE_BINARY_DIR}/textures")
+set(ICON_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/icon")
+set(ICON_DEST_DIR "${CMAKE_BINARY_DIR}/icon")
 set(AUDIO_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/audio")
 set(AUDIO_DEST_DIR "${CMAKE_BINARY_DIR}/audio")
 

@@ -16,14 +16,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "ResourceManager.h"
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 std::unordered_map<Color, glm::vec3> colorMap = {
     {Color::Red, glm::vec3(1.0f, 0.0f, 0.0f)},

@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include <boost/locale.hpp>
-#include <cmath>  // for std::abs
+#include <cmath>
 #include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -18,6 +18,8 @@
 
 #include "Shader.h"
 #include "Texture.h"
+
+#include "stb_image.h"
 
 enum class Color {
   Red,

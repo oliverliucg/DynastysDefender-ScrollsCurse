@@ -26,6 +26,7 @@ add_executable(DynastysDefender-ScrollsCurse
     "particles/ExplosionSystem.cpp"  
     "particles/ShadowTrailSystem.cpp" 
     "particles/ParticleSystem.cpp"
+    "icon.rc"
 )
 
 # Copy shaders to the build directory
@@ -91,6 +92,19 @@ if(COPY_TEXTURES STREQUAL "ON")
 	)
 else()
 	message(STATUS "COPY_TEXTURES is not ON, no copying will be done")
+endif()
+
+# Copy icon to the build directory
+if(COPY_ICON STREQUAL "ON")
+	message(STATUS "Copying icon images from ${ICON_SOURCE_DIR} to ${ICON_DEST_DIR}")
+	add_custom_command(
+		TARGET DynastysDefender-ScrollsCurse PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${ICON_SOURCE_DIR} ${ICON_DEST_DIR}
+		COMMENT "Copying icons to build directory"
+	)
+else()
+	message(STATUS "COPY_ICONS is not ON, no copying will be done")
 endif()
 
 # Copy audio to the build directory

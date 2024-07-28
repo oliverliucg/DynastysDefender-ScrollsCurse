@@ -15,6 +15,7 @@
               "COPY_SETTINGS": "OFF",
               "COPY_TEXT": "OFF",
               "COPY_TEXTURES": "OFF",
+              "COPY_ICON": "OFF",
               "COPY_AUDIO": "OFF"
             },
             "condition": {
@@ -38,6 +39,7 @@
             "COPY_SETTINGS": "OFF",
             "COPY_TEXT": "OFF",
             "COPY_TEXTURES": "OFF",
+            "COPY_ICON": "OFF",
             "COPY_AUDIO": "OFF"
           }
         },
@@ -52,6 +54,7 @@
             "COPY_SETTINGS": "OFF",
             "COPY_TEXT": "OFF",
             "COPY_TEXTURES": "OFF",
+            "COPY_ICON": "OFF",
             "COPY_AUDIO": "OFF"
           }
         },
