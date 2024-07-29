@@ -60,8 +60,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void focus_callback(GLFWwindow* window, int focused);
 
-void recreateWindow(GLFWwindow** window, int width, int height,
+void recreateWindow(GLFWwindow*& window, int width, int height,
                     GameManager& gameManager);
+
+void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
+                            bool& isFromWindowedBorderlessMode);
 
 int main() {
   // At exit, show the taskbar
@@ -235,44 +238,10 @@ int main() {
       // Process input
       gameManager.ProcessInput(kTimeStep);
 
-      if (gameManager.targetScreenMode == ScreenMode::WINDOWED) {
-        SCREEN_WIDTH = kWindowedModeSize.x;
-        SCREEN_HEIGHT = kWindowedModeSize.y;
-        if (isFromWindowedBorderlessMode) {
-          glfwSetWindowFocusCallback(window, NULL);
-          showTaskbar();
-          // Have decorations for windowed mode.
-          glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
-          glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-          recreateWindow(&window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
-          isFromWindowedBorderlessMode = false;
-        } else {
-          int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
-          int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
-          glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY,
-                               SCREEN_WIDTH, SCREEN_HEIGHT, GLFW_DONT_CARE);
-          gameManager.SetToTargetScreenMode();
-        }
-      } else if (gameManager.targetScreenMode == ScreenMode::FULLSCREEN) {
-        if (isFromWindowedBorderlessMode) {
-          glfwSetWindowFocusCallback(window, NULL);
-          showTaskbar();
-        }
-        SCREEN_WIDTH = kFullScreenSize.x + kFullScreenSizePadding.padLeft +
-                       kFullScreenSizePadding.padRight;
-        SCREEN_HEIGHT = kFullScreenSize.y + kFullScreenSizePadding.padTop +
-                        kFullScreenSizePadding.padBottom;
-        GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-        glfwSetWindowMonitor(window, primaryMonitor, 0, 0, SCREEN_WIDTH,
-                             SCREEN_HEIGHT, mode->refreshRate);
-        gameManager.SetToTargetScreenMode();
-      } else if (gameManager.targetScreenMode ==
-                 ScreenMode::WINDOWED_BORDERLESS) {
-        // No decorations for windowed borderless mode.
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        recreateWindow(&window, mode->width - 1, mode->height, gameManager);
-        isFromWindowedBorderlessMode = true;
+      // Update screen mode if needed
+      if (gameManager.targetScreenMode != ScreenMode::UNDEFINED) {
+        handleScreenModeChange(window, gameManager,
+                               isFromWindowedBorderlessMode);
       }
 
       // Update game state
@@ -465,17 +434,17 @@ void focus_callback(GLFWwindow* window, int focused) {
   }
 }
 
-void recreateWindow(GLFWwindow** window, int width, int height,
+void recreateWindow(GLFWwindow*& window, int width, int height,
                     GameManager& gameManager) {
   gameManager.SetToTargetScreenMode();
   auto gameStateSnapshot = gameManager.PrepareToReload();
   // Destroy the current window
-  glfwDestroyWindow(*window);  // Destroy the old window
+  glfwDestroyWindow(window);  // Destroy the old window
   // Recreate the window
-  *window = glfwCreateWindow(width, height, "DynastysDefender-ScrollsCurse",
-                             NULL, NULL);
+  window = glfwCreateWindow(width, height, "DynastysDefender-ScrollsCurse",
+                            NULL, NULL);
 
-  if (*window == NULL) {
+  if (window == NULL) {
     std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return;
@@ -485,9 +454,9 @@ void recreateWindow(GLFWwindow** window, int width, int height,
   const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
   int windowPosX = (mode->width - width) / 2;
   int windowPosY = (mode->height - height) / 2;
-  glfwSetWindowPos(*window, windowPosX, windowPosY);
+  glfwSetWindowPos(window, windowPosX, windowPosY);
   // Make the new window's context current
-  glfwMakeContextCurrent(*window);
+  glfwMakeContextCurrent(window);
 
   // OpenGL configuration
   glEnable(GL_BLEND);
@@ -499,17 +468,62 @@ void recreateWindow(GLFWwindow** window, int width, int height,
     hideTaskbar();
   }
 
-  glfwSetWindowUserPointer(*window, &gameManager);
+  glfwSetWindowUserPointer(window, &gameManager);
 
   int framebufferWidth, framebufferHeight;
-  glfwGetFramebufferSize(*window, &framebufferWidth, &framebufferHeight);
-  reconfigureWindowSize(*window, framebufferWidth, framebufferHeight);
-  glfwSetKeyCallback(*window, key_callback);
-  glfwSetScrollCallback(*window, scroll_callback);
-  glfwSetMouseButtonCallback(*window, mouse_button_callback);
-  glfwSetCursorPosCallback(*window, cursor_position_callback);
-  glfwSetFramebufferSizeCallback(*window, framebuffer_size_callback);
+  glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+  reconfigureWindowSize(window, framebufferWidth, framebufferHeight);
+  glfwSetKeyCallback(window, key_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    glfwSetWindowFocusCallback(*window, focus_callback);
+    glfwSetWindowFocusCallback(window, focus_callback);
+  }
+}
+
+void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
+                            bool& isFromWindowedBorderlessMode) {
+  int SCREEN_WIDTH, SCREEN_HEIGHT;
+  GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+  if (gameManager.targetScreenMode == ScreenMode::WINDOWED) {
+    SCREEN_WIDTH = kWindowedModeSize.x;
+    SCREEN_HEIGHT = kWindowedModeSize.y;
+    if (isFromWindowedBorderlessMode) {
+      glfwSetWindowFocusCallback(window, NULL);
+      showTaskbar();
+      // Have decorations for windowed mode.
+      glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+      glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+      recreateWindow(window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
+      isFromWindowedBorderlessMode = false;
+    } else {
+      int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
+      int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
+      glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, SCREEN_WIDTH,
+                           SCREEN_HEIGHT, GLFW_DONT_CARE);
+      gameManager.SetToTargetScreenMode();
+    }
+  } else if (gameManager.targetScreenMode == ScreenMode::FULLSCREEN) {
+    if (isFromWindowedBorderlessMode) {
+      glfwSetWindowFocusCallback(window, NULL);
+      showTaskbar();
+    }
+    SCREEN_WIDTH = kFullScreenSize.x + kFullScreenSizePadding.padLeft +
+                   kFullScreenSizePadding.padRight;
+    SCREEN_HEIGHT = kFullScreenSize.y + kFullScreenSizePadding.padTop +
+                    kFullScreenSizePadding.padBottom;
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    glfwSetWindowMonitor(window, primaryMonitor, 0, 0, SCREEN_WIDTH,
+                         SCREEN_HEIGHT, mode->refreshRate);
+    gameManager.SetToTargetScreenMode();
+  } else if (gameManager.targetScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
+    // No decorations for windowed borderless mode.
+    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    recreateWindow(window, mode->width - 1, mode->height, gameManager);
+    isFromWindowedBorderlessMode = true;
   }
 }

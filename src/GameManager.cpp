@@ -1786,23 +1786,18 @@ void GameManager::Update(float dt) {
   gameCharacters["guojie"]->GetHealth().UpdateDamageTexts(dt);
   gameCharacters["weiqing"]->GetHealth().UpdateDamageTexts(dt);
 
-  // Update the transparency of the score text.
+  // Update the transparency and color of the score text.
   if (this->state != GameState::ACTIVE && this->state != GameState::PREPARING &&
       this->state != GameState::WIN && this->state != GameState::LOSE &&
       this->lastState != GameState::ACTIVE) {
     float scoreAlpha = texts.at("score")->GetAlpha();
-    if (scoreAlpha > kScoreAlpha) {
-      scoreAlpha -= 0.8f * dt;
-      if (scoreAlpha < kScoreAlpha) {
-        scoreAlpha = kScoreAlpha;
-      }
-    } else if (scoreAlpha < kScoreAlpha) {
-      scoreAlpha += 0.8f * dt;
-      if (scoreAlpha > kScoreAlpha) {
-        scoreAlpha = kScoreAlpha;
+    glm::vec3 scoreColor = texts.at("score")->GetColor();
+    if (scoreAlpha != kScoreAlpha || scoreColor != kScoreColorOrange) {
+      if (!this->timer->HasEvent("displayscore")) {
+        this->timer->SetEventTimer("displayscore", 1.f);
+        this->timer->StartEventTimer("displayscore");
       }
     }
-    texts.at("score")->SetAlpha(scoreAlpha);
   }
 
   if (this->state == GameState::ACTIVE) {
@@ -2583,9 +2578,9 @@ void GameManager::Update(float dt) {
     }
   } else if (this->timer->HasEvent("displayscore") &&
              this->timer->IsEventTimerExpired("displayscore")) {
-    bool alphaChangeComplete = true;
     // Decrease the opacity of the score text if it is not gamestate::WIN or
     // LOSE.
+    bool alphaChangeComplete = true;
     float alpha = this->texts.at("score")->GetAlpha();
     if (this->state != GameState::WIN && this->state != GameState::LOSE &&
         alpha != kScoreAlpha) {
@@ -2596,27 +2591,31 @@ void GameManager::Update(float dt) {
       }
     }
 
-    // Change color to orange gradually.
-    glm::vec3 color = this->texts.at("score")->GetColor();
-    if (color != kScoreColorOrange) {
-      if (color.r < kScoreColorOrange.r) {
-        color.r = std::min(kScoreColorOrange.r, color.r + 1.2f * dt);
-      } else {
-        color.r = std::max(kScoreColorOrange.r, color.r - 1.2f * dt);
+    // Change color to orange gradually if the state is not WIN.
+    bool colorChangeComplete = true;
+    if (this->state != GameState::WIN) {
+      glm::vec3 color = this->texts.at("score")->GetColor();
+      if (color != kScoreColorOrange) {
+        colorChangeComplete = false;
+        if (color.r < kScoreColorOrange.r) {
+          color.r = std::min(kScoreColorOrange.r, color.r + 1.2f * dt);
+        } else {
+          color.r = std::max(kScoreColorOrange.r, color.r - 1.2f * dt);
+        }
+        if (color.g < kScoreColorOrange.g) {
+          color.g = std::min(kScoreColorOrange.g, color.g + 1.2f * dt);
+        } else {
+          color.g = std::max(kScoreColorOrange.g, color.g - 1.2f * dt);
+        }
+        if (color.b < kScoreColorOrange.b) {
+          color.b = std::min(kScoreColorOrange.b, color.b + 1.2f * dt);
+        } else {
+          color.b = std::max(kScoreColorOrange.b, color.b - 1.2f * dt);
+        }
+        this->texts.at("score")->SetColor(color);
       }
-      if (color.g < kScoreColorOrange.g) {
-        color.g = std::min(kScoreColorOrange.g, color.g + 1.2f * dt);
-      } else {
-        color.g = std::max(kScoreColorOrange.g, color.g - 1.2f * dt);
-      }
-      if (color.b < kScoreColorOrange.b) {
-        color.b = std::min(kScoreColorOrange.b, color.b + 1.2f * dt);
-      } else {
-        color.b = std::max(kScoreColorOrange.b, color.b - 1.2f * dt);
-      }
-      this->texts.at("score")->SetColor(color);
     }
-    if (alphaChangeComplete && color == kScoreColorOrange) {
+    if (alphaChangeComplete && colorChangeComplete) {
       this->timer->CleanEvent("displayscore");
     }
   }
@@ -3004,14 +3003,6 @@ void GameManager::Render() {
   }
 
   // Draw the score on the top right corner of the screen.
-  // if (this->state == GameState::PREPARING || this->state == GameState::ACTIVE
-  // || this->state == GameState::WIN || this->state == GameState::LOSE ||
-  //    (this->state == GameState::CONTROL &&
-  //     this->lastState == GameState::ACTIVE)) {
-  //
-  //  texts.at("score")->Draw(textRenderer, /*centerAligned=*/false,
-  //                          /*rightAligned=*/true);
-  //}
   texts.at("score")->Draw(textRenderer, /*centerAligned=*/false,
                           /*rightAligned=*/true);
 
