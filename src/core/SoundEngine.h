@@ -13,6 +13,9 @@
 #include "StreamPlayer.h"
 #include "ThreadHandler.h"
 
+// Declare the external pointer variable
+extern LPALCREOPENDEVICESOFT alcReopenDeviceSOFT;
+
 enum FormatType { Int16, Float, IMA4, MSADPCM };
 
 enum class StreamState { NOT_READY, READY, Playing, ENDED };
@@ -25,7 +28,7 @@ struct BackgroundMusicInfo {
   std::string currentMusic{};
   std::string lastMusic{};
   float timerInterval{0.f};
-  const float expectedInterval{ 6.f };
+  const float expectedInterval{6.f};
   // background music (fighting)
   std::vector<std::string> fightingMusic;
   // background music (relaxing)
@@ -128,6 +131,12 @@ class SoundEngine {
   // all.
   void CleanUpSources(bool force = false);
 
+  // Handle audio device change.
+  void HandleAudioDeviceChange();
+
+  // Update the sound engine.
+  void Update(float dt);
+
  private:
   SoundEngine();
   // Delete copy constructor and assignment operator to prevent copying
@@ -135,8 +144,9 @@ class SoundEngine {
   SoundEngine& operator=(const SoundEngine& other) = delete;
   ~SoundEngine();
 
-  ALCdevice* device_{ nullptr };
-  ALCcontext* context_{ nullptr };
+  ALCdevice* device_{nullptr};
+  ALCcontext* context_{nullptr};
+  std::string current_device_name_{""};
   bool is_cleared_{false};
   std::unordered_map<std::string, ALuint> buffers_;  // Map of sound buffers
   std::unordered_map<std::string, std::unique_ptr<StreamPlayer>>
@@ -161,7 +171,9 @@ class SoundEngine {
       gradually_changing_stream_volumes_;
 
   BackgroundMusicInfo background_music_info_;
-  ALCint refresh_rate_{ 25 };
+  ALCint refresh_rate_{25};
+
+  std::string GetFirstDeviceNameFromList();
 
   // Checks if a source is looping
   bool IsLooping(ALuint source);

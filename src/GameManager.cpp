@@ -1412,14 +1412,8 @@ void GameManager::ProcessInput(float dt) {
 
 void GameManager::Update(float dt) {
   auto& soundEngine = SoundEngine::GetInstance();
-  // Update sound sources' volume.
-  soundEngine.UpdateSourcesVolume(dt);
-  // Update stream sources' volume.
-  soundEngine.UpdateStreamsVolume(dt);
-  // Clean up the sound sources that are not playing.
-  soundEngine.CleanUpSources();
-  // Refresh the background music if needed.
-  soundEngine.RefreshBackgroundMusic(dt);
+  soundEngine.Update(dt);
+
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
       postProcessor->SetChaos(true);

@@ -22,6 +22,7 @@
 #include <alstring.h>
 
 LPALBUFFERCALLBACKSOFT alBufferCallbackSOFT = nullptr;
+LPALCREOPENDEVICESOFT alcReopenDeviceSOFT = nullptr;
 
 void BackgroundMusicInfo::Refresh() {
   if (state == BackgroundMusicState::None) {
@@ -68,11 +69,17 @@ SoundEngine& SoundEngine::GetInstance() {
 }
 
 SoundEngine::SoundEngine() {
-  device_ = alcOpenDevice(nullptr);
+  current_device_name_ = this->GetFirstDeviceNameFromList();
+  if (current_device_name_.empty()) {
+    current_device_name_ = alcGetString(nullptr, ALC_DEFAULT_DEVICE_SPECIFIER);
+  }
+  device_ = alcOpenDevice(current_device_name_.c_str());
   if (device_ == nullptr) {
     std::cerr << "Error opening OpenAL device" << std::endl;
   }
+
   context_ = alcCreateContext(device_, nullptr);
+
   if (context_ == nullptr) {
     std::cerr << "Error creating OpenAL context" << std::endl;
   }
@@ -86,6 +93,8 @@ SoundEngine::SoundEngine() {
 
   alBufferCallbackSOFT = reinterpret_cast<LPALBUFFERCALLBACKSOFT>(
       alGetProcAddress("alBufferCallbackSOFT"));
+  alcReopenDeviceSOFT = reinterpret_cast<LPALCREOPENDEVICESOFT>(
+      alGetProcAddress("alcReopenDeviceSOFT"));
 
   alcGetIntegerv(alcGetContextsDevice(alcGetCurrentContext()), ALC_REFRESH, 1,
                  &refresh_rate_);
@@ -107,8 +116,7 @@ SoundEngine::~SoundEngine() { Clear(); }
 void SoundEngine::CleanUpSources(bool force) {
   std::vector<std::string> sourceNamesToDelete;
   std::unordered_set<ALuint> sourcesVisited;
-  for (auto& source :
-       sources_) {  // Assuming activeSources is a list of source IDs
+  for (auto& source : sources_) {
     ALint state;
     std::unordered_set<ALint> sourcesToDelete;
     for (const auto& sourceID : source.second) {
@@ -165,6 +173,31 @@ void SoundEngine::Clear() {
   alcDestroyContext(context_);
   alcCloseDevice(device_);
   is_cleared_ = true;
+}
+
+void SoundEngine::HandleAudioDeviceChange() {
+  std::string newDeviceName = this->GetFirstDeviceNameFromList();
+  if (newDeviceName != current_device_name_) {
+    if (alcReopenDeviceSOFT(device_, newDeviceName.c_str(), nullptr)) {
+      current_device_name_ = newDeviceName;
+    } else {
+      std::cerr << "Failed to switch audio device to " << newDeviceName
+                << std::endl;
+    }
+  }
+}
+
+void SoundEngine::Update(float dt) {
+  // Handle default audio device switching.
+  HandleAudioDeviceChange();
+  // Update sound sources' volume.
+  UpdateSourcesVolume(dt);
+  // Update stream sources' volume.
+  UpdateStreamsVolume(dt);
+  // Clean up the sound sources that are not playing.
+  CleanUpSources();
+  // Refresh the background music if needed.
+  RefreshBackgroundMusic(dt);
 }
 
 ALuint SoundEngine::LoadSound(const std::string& name,
@@ -671,6 +704,15 @@ float SoundEngine::GetPlaybackPosition(const std::string& sourceName) {
 float SoundEngine::GetRemainingTime(const std::string& sourceName,
                                     float totalDuration) {
   return GetRemainingTime(sources_.at(sourceName).back(), totalDuration);
+}
+
+std::string SoundEngine::GetFirstDeviceNameFromList() {
+  const ALCchar* deviceList = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
+  if (deviceList && *deviceList != '\0') {
+    // Retrieve the first device name from the list
+    return std::string(deviceList);
+  }
+  return "";
 }
 
 bool SoundEngine::IsLooping(ALuint source) {
