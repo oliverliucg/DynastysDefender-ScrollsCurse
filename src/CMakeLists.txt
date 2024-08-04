@@ -4,7 +4,7 @@
 message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
 message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
-# Access the paths set in CMakePresets.json
+# Access the libraries' path from the environment variables.
 set(OPENGL_LIB_PATH $ENV{OPENGL_LIB_PATH} CACHE PATH "Path to OpenGL related libraries")
 message(STATUS "OPENGL_LIB_PATH: ${OPENGL_LIB_PATH}")
 

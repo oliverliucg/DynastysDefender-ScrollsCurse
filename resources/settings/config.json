@@ -1,116 +1,116 @@
 {
-    "difficulty": "easy",
-    "language": {
-        "de": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/de.json"
-        },
-        "en": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/en.json"
-        },
-        "es": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/es.json"
-        },
-        "fr": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/fr.json"
-        },
-        "it": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/it.json"
-        },
-        "ja": {
-            "font": {
-                "bold": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-Bold.ttf",
-                "boldItalic": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-ExtraBold.ttf",
-                "italic": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-Thin.ttf",
-                "regular": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-Regular.ttf"
-            },
-            "text": "text/ja.json"
-        },
-        "ko": {
-            "font": {
-                "bold": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-Bold.ttf",
-                "boldItalic": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-ExtraBold.ttf",
-                "italic": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-Thin.ttf",
-                "regular": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-Regular.ttf"
-            },
-            "text": "text/ko.json"
-        },
-        "preference": "en",
-        "pt-BR": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/pt-BR.json"
-        },
-        "pt-PT": {
-            "font": {
-                "bold": "fonts/Latin/Prompt-Bold.TTF",
-                "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
-                "italic": "fonts/Latin/Prompt-Italic.TTF",
-                "regular": "fonts/Latin/Prompt-Regular.TTF"
-            },
-            "text": "text/pt-PT.json"
-        },
-        "ru": {
-            "font": {
-                "bold": "fonts/Cyrillic/Roboto-Bold.ttf",
-                "boldItalic": "fonts/Cyrillic/Roboto-BoldItalic.ttf",
-                "italic": "fonts/Cyrillic/Roboto-Italic.ttf",
-                "regular": "fonts/Cyrillic/Roboto-Regular.ttf"
-            },
-            "text": "text/ru.json"
-        },
-        "zh-Hans": {
-            "font": {
-                "bold": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-Bold.ttf",
-                "boldItalic": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-ExtraBold.ttf",
-                "italic": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-Thin.ttf",
-                "regular": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-Regular.ttf"
-            },
-            "text": "text/zh-Hans.json"
-        },
-        "zh-Hant": {
-            "font": {
-                "bold": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-Bold.ttf",
-                "boldItalic": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-ExtraBold.ttf",
-                "italic": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-Thin.ttf",
-                "regular": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-Regular.ttf"
-            },
-            "text": "text/zh-Hant.json"
-        }
+  "difficulty": "easy",
+  "language": {
+    "de": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/de.json"
     },
-    "score": 27653,
-    "screenMode": "windowed"
+    "en": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/en.json"
+    },
+    "es": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/es.json"
+    },
+    "fr": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/fr.json"
+    },
+    "it": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/it.json"
+    },
+    "ja": {
+      "font": {
+        "bold": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-Bold.ttf",
+        "boldItalic": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-ExtraBold.ttf",
+        "italic": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-Thin.ttf",
+        "regular": "fonts/CJK/Noto_Sans_JP/static/NotoSansJP-Regular.ttf"
+      },
+      "text": "text/ja.json"
+    },
+    "ko": {
+      "font": {
+        "bold": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-Bold.ttf",
+        "boldItalic": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-ExtraBold.ttf",
+        "italic": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-Thin.ttf",
+        "regular": "fonts/CJK/Noto_Sans_KR/static/NotoSansKR-Regular.ttf"
+      },
+      "text": "text/ko.json"
+    },
+    "preference": "en",
+    "pt-BR": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/pt-BR.json"
+    },
+    "pt-PT": {
+      "font": {
+        "bold": "fonts/Latin/Prompt-Bold.TTF",
+        "boldItalic": "fonts/Latin/Prompt-BoldItalic.TTF",
+        "italic": "fonts/Latin/Prompt-Italic.TTF",
+        "regular": "fonts/Latin/Prompt-Regular.TTF"
+      },
+      "text": "text/pt-PT.json"
+    },
+    "ru": {
+      "font": {
+        "bold": "fonts/Cyrillic/Roboto-Bold.ttf",
+        "boldItalic": "fonts/Cyrillic/Roboto-BoldItalic.ttf",
+        "italic": "fonts/Cyrillic/Roboto-Italic.ttf",
+        "regular": "fonts/Cyrillic/Roboto-Regular.ttf"
+      },
+      "text": "text/ru.json"
+    },
+    "zh-Hans": {
+      "font": {
+        "bold": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-Bold.ttf",
+        "boldItalic": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-ExtraBold.ttf",
+        "italic": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-Thin.ttf",
+        "regular": "fonts/CJK/Noto_Sans_SC/static/NotoSansSC-Regular.ttf"
+      },
+      "text": "text/zh-Hans.json"
+    },
+    "zh-Hant": {
+      "font": {
+        "bold": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-Bold.ttf",
+        "boldItalic": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-ExtraBold.ttf",
+        "italic": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-Thin.ttf",
+        "regular": "fonts/CJK/Noto_Sans_TC/static/NotoSansTC-Regular.ttf"
+      },
+      "text": "text/zh-Hant.json"
+    }
+  },
+  "score": 0,
+  "screenMode": "windowedborderless"
 }
