@@ -855,13 +855,13 @@ void GameManager::LoadSounds() {
 
   // Game Play sound
   soundEngine.LoadSound("wood_collide", "audio/gameplay/wood_collide.wav",
-                        0.8f);
+                        0.65f);
   soundEngine.LoadSound("earthquake", "audio/gameplay/earthquake.wav");
   soundEngine.LoadSound("bubble_pop", "audio/gameplay/bubble_pop.wav", 0.4f);
   soundEngine.LoadSound("bubble_explode", "audio/gameplay/bubble_explode5.wav",
-                        0.8f);
-  soundEngine.LoadSound("arrow_shoot", "audio/gameplay/bubble_shoot.wav");
-  soundEngine.LoadSound("arrow_hit", "audio/gameplay/arrow_hit1.wav");
+                        0.4f);
+  soundEngine.LoadSound("arrow_shoot", "audio/gameplay/bubble_shoot.wav", 0.7f);
+  soundEngine.LoadSound("arrow_hit", "audio/gameplay/arrow_hit1.wav", 0.7f);
   soundEngine.LoadSound("scroll_open", "audio/gameplay/scroll_open3.wav");
   soundEngine.LoadSound("scroll_close", "audio/gameplay/scroll_close3.wav");
   soundEngine.LoadSound("scroll_closed", "audio/gameplay/scroll_closed1.wav",
@@ -879,7 +879,8 @@ void GameManager::LoadSounds() {
   soundEngine.LoadSound("defeated", "audio/background/defeated.wav", 1.f);
 
   // Interaction
-  soundEngine.LoadSound("button_click", "audio/interaction/button_click1.wav");
+  soundEngine.LoadSound("button_click", "audio/interaction/button_click1.wav",
+                        0.65f);
 }
 
 void GameManager::LoadStreams() {
@@ -887,22 +888,22 @@ void GameManager::LoadStreams() {
   // background music
   soundEngine.LoadStream("background_relax0",
                          "audio/background/background_music_relaxing.wav",
-                         0.3f);
+                         0.2f);
   soundEngine.LoadStream("background_relax1",
                          "audio/background/background_music_relaxing1.wav",
-                         0.3f);
+                         0.2f);
   soundEngine.SetBackgroundMusicNames(
       {"background_relax0", "background_relax1"},
       /*isFighting=*/false);
   soundEngine.LoadStream("background_fight0",
                          "audio/background/background_music_fighting0.wav",
-                         0.2f);
+                         0.15f);
   soundEngine.LoadStream("background_fight1",
                          "audio/background/background_music_fighting1.wav",
-                         0.2f);
+                         0.15f);
   soundEngine.LoadStream("background_fight2",
                          "audio/background/background_music_fighting2.wav",
-                         0.2f);
+                         0.15f);
   soundEngine.SetBackgroundMusicNames(
       {"background_fight0", "background_fight1", "background_fight2"},
       /*isFighting=*/true);
@@ -1978,27 +1979,10 @@ void GameManager::Update(float dt) {
                           gameCharacters["guojie"]->GetSize().x / 2.0f,
                       gameCharacters["guojie"]->GetPosition().y +
                           gameCharacters["guojie"]->GetSize().y * 0.53f);
-        // Randomly add offset to the target position within a circle of
-        // kBaseUnit.
-        float angle = static_cast<float>(rand()) /
-                      static_cast<float>(RAND_MAX) * 2 * glm::pi<float>();
-        float radius = static_cast<float>(rand()) /
-                       static_cast<float>(RAND_MAX) * kBaseUnit * 0.65f;
-        glm::vec2 offset =
-            glm::vec2(radius * std::cos(angle), radius * std::sin(angle));
-        targetPostion += offset;
 
-        arrows.emplace_back(std::make_shared<Arrow>(
-            glm::vec2(
-                gameCharacters["weiqing"]->GetPosition().x - 2 * kBaseUnit,
-                gameCharacters["weiqing"]->GetPosition().y + 5.5 * kBaseUnit),
-            glm::vec2(this->width / 13.6708861f, this->height / 70.f),
-            ResourceManager::GetInstance().GetTexture("arrow3")));
-        /*arrows.emplace_back(glm::vec2(gameCharacters["guojie"]->GetPosition().x
-         * + 3 * kBubbleRadius, gameCharacters["guojie"]->GetPosition().y + 5.5
-         * * kBubbleRadius), glm::vec2(this->width / 13.6708861f, this->height
-         * / 70.f), ResourceManager::GetInstance().GetTexture("arrow3"));*/
-        arrows.back()->Fire(targetPostion, 65.0f * kBaseUnit);
+        // Ready to fire an arrow.
+        this->timer->SetEventTimer("firearrow", 0.1f);
+        this->timer->StartEventTimer("firearrow");
 
         this->GoToState(GameState::PREPARING);
         numOfScoreIncrementsReady += scoreIncrements.size();
@@ -2261,7 +2245,6 @@ void GameManager::Update(float dt) {
           }
         }
       }
-    } else if (this->transitionState == TransitionState::TRANSITION) {
     }
   } else if (this->state == GameState::STORY) {
     auto textSection = this->pages.at("story")->GetSection("storytextsection");
@@ -2749,6 +2732,37 @@ void GameManager::Render() {
           spriteRenderer, colorRenderer, circleRenderer, textRenderer);
     }
 
+    if (this->timer->HasEvent("firearrow") &&
+        this->timer->IsEventTimerExpired("firearrow")) {
+      this->timer->CleanEvent("firearrow");
+      // Initialize an arrow firing by Weiqing towards Guojie.
+      // Get target position on the charactor guojie.
+      glm::vec2 targetPostion =
+          glm::vec2(gameCharacters["guojie"]->GetPosition().x +
+                        gameCharacters["guojie"]->GetSize().x / 2.0f,
+                    gameCharacters["guojie"]->GetPosition().y +
+                        gameCharacters["guojie"]->GetSize().y * 0.53f);
+      // Randomly add offset to the target position within a circle of
+      // kBaseUnit.
+      float angle = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) *
+                    2 * glm::pi<float>();
+      float radius = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) *
+                     kBaseUnit * 0.65f;
+      glm::vec2 offset =
+          glm::vec2(radius * std::cos(angle), radius * std::sin(angle));
+      targetPostion += offset;
+      arrows.emplace_back(std::make_shared<Arrow>(
+          glm::vec2(
+              gameCharacters["weiqing"]->GetPosition().x - 2 * kBaseUnit,
+              gameCharacters["weiqing"]->GetPosition().y + 5.5 * kBaseUnit),
+          glm::vec2(this->width / 13.6708861f, this->height / 70.f),
+          ResourceManager::GetInstance().GetTexture("arrow3")));
+      /*arrows.emplace_back(glm::vec2(gameCharacters["guojie"]->GetPosition().x
+       * + 3 * kBubbleRadius, gameCharacters["guojie"]->GetPosition().y + 5.5
+       * * kBubbleRadius), glm::vec2(this->width / 13.6708861f, this->height
+       * / 70.f), ResourceManager::GetInstance().GetTexture("arrow3"));*/
+      arrows.back()->Fire(targetPostion, 65.0f * kBaseUnit);
+    }
     for (auto& arrow : arrows) {
       if (arrow->IsPenetrating() || arrow->IsStopped()) {
         arrow->Draw(spriteDynamicRenderer, arrow->GetTextureCoords());
