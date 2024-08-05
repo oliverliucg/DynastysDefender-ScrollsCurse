@@ -481,9 +481,7 @@ void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
     SCREEN_HEIGHT = kWindowedModeSize.y;
     if (isFromWindowedBorderlessMode) {
       isFromWindowedBorderlessMode = false;
-      int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
-      int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
-      // Add the styles back to have title bar, resize, and system menu
+      // Add the styles back to have title bar, resize, and system menu.
       HWND hwnd = glfwGetWin32Window(window);
       LONG style = GetWindowLong(hwnd, GWL_STYLE);
       style |= (WS_CAPTION | WS_THICKFRAME | WS_SYSMENU);
@@ -491,16 +489,12 @@ void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
       if (IsIconic(hwnd)) {
         ShowWindow(hwnd, SW_RESTORE);
       }
-      glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, SCREEN_WIDTH,
-                           SCREEN_HEIGHT, GLFW_DONT_CARE);
-      gameManager.SetToTargetScreenMode();
-    } else {
-      int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
-      int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
-      glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, SCREEN_WIDTH,
-                           SCREEN_HEIGHT, GLFW_DONT_CARE);
-      gameManager.SetToTargetScreenMode();
     }
+    int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
+    int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
+    glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, SCREEN_WIDTH,
+                         SCREEN_HEIGHT, GLFW_DONT_CARE);
+    gameManager.SetToTargetScreenMode();
   } else if (gameManager.targetScreenMode == ScreenMode::FULLSCREEN) {
     SCREEN_WIDTH = kFullScreenSize.x + kFullScreenSizePadding.padLeft +
                    kFullScreenSizePadding.padRight;
