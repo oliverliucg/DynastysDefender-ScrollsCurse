@@ -43,8 +43,8 @@ glm::vec2 kWindowSize = glm::vec2(3840, 2160);
 
 std::atomic<bool> windowShouldClose(false);
 
-void showTaskbar();
-void hideTaskbar();
+// void showTaskbar();
+// void hideTaskbar();
 
 void setWindowIcon(GLFWwindow* window);
 
@@ -58,7 +58,7 @@ void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action,
                            int mods);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-void focus_callback(GLFWwindow* window, int focused);
+// void focus_callback(GLFWwindow* window, int focused);
 
 void recreateWindow(GLFWwindow*& window, int width, int height,
                     GameManager& gameManager);
@@ -67,10 +67,7 @@ void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
                             bool& isFromWindowedBorderlessMode);
 
 int main() {
-  // At exit, show the taskbar
-  atexit(showTaskbar);
-
-  // load configurations
+  // Load configurations
   ConfigManager& configManager = ConfigManager::GetInstance();
   configManager.SetConfigPath("settings/config.json");
   if (!configManager.LoadConfig()) {
@@ -118,20 +115,18 @@ int main() {
   GLFWwindow* window;
   const char* title = "Dynasty's Defender: The Scroll's Curse";
   if (initialScreenMode == ScreenMode::FULLSCREEN) {
-    // Create the window
+    // Full screen mode
     window = glfwCreateWindow(mode->width, mode->height, title, primaryMonitor,
                               NULL);
   } else if (initialScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
     // Windowed borderless mode
-    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    window = glfwCreateWindow(mode->width - 1, mode->height, title, NULL, NULL);
+    window = glfwCreateWindow(mode->width, mode->height, title, NULL, NULL);
   } else if (initialScreenMode == ScreenMode::WINDOWED) {
     SCREEN_SIZE_PADDING = kWindowedModeSizePadding;
     // No padding for windowed mode
     SCREEN_WIDTH = kWindowedModeSize.x;
     SCREEN_HEIGHT = kWindowedModeSize.y;
-
+    // Windowed mode
     window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, title, NULL, NULL);
   }
   if (window == NULL) {
@@ -148,9 +143,6 @@ int main() {
   int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
   glfwSetWindowPos(window, windowPosX, windowPosY);
   glfwMakeContextCurrent(window);
-  if (initialScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    hideTaskbar();
-  }
 
   // Use GLAD to load OpenGL functions
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -173,6 +165,10 @@ int main() {
   GameManager gameManager(GAME_AREA_WIDTH, GAME_AREA_HEIGHT);
   gameManager.PreLoad();
 
+  if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
+    gameManager.targetScreenMode = ScreenMode::WINDOWED_BORDERLESS;
+  }
+
   glfwSetWindowUserPointer(window, &gameManager);
 
   int framebufferWidth, framebufferHeight;
@@ -183,9 +179,6 @@ int main() {
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  if (initialScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    glfwSetWindowFocusCallback(window, focus_callback);
-  }
 
   // check if it is set to windowed borderless mode previously before setting
   // to windowed mode.
@@ -194,10 +187,8 @@ int main() {
 
   // fixed time step
   const float kTimeStep = 1.f / 240.f;
-  float accumulator = 0.f;
 
-  // deltaTime variables
-  // -------------------
+  float accumulator = 0.f;
   float deltaTime = 0.0f;
   float lastFrame = static_cast<float>(glfwGetTime());
   float startFrame = static_cast<float>(glfwGetTime());
@@ -276,19 +267,19 @@ int main() {
   return EXIT_SUCCESS;
 }
 
-void showTaskbar() {
-  HWND taskbar = FindWindow("Shell_TrayWnd", NULL);
-  if (taskbar) {
-    SetWindowPos(taskbar, 0, 0, 0, 0, 0, SWP_SHOWWINDOW);
-  }
-}
+// void showTaskbar() {
+//   HWND taskbar = FindWindow("Shell_TrayWnd", NULL);
+//   if (taskbar) {
+//     SetWindowPos(taskbar, 0, 0, 0, 0, 0, SWP_SHOWWINDOW);
+//   }
+// }
 
-void hideTaskbar() {
-  HWND taskbar = FindWindow("Shell_TrayWnd", NULL);
-  if (taskbar) {
-    SetWindowPos(taskbar, 0, 0, 0, 0, 0, SWP_HIDEWINDOW);
-  }
-}
+// void hideTaskbar() {
+//   HWND taskbar = FindWindow("Shell_TrayWnd", NULL);
+//   if (taskbar) {
+//     SetWindowPos(taskbar, 0, 0, 0, 0, 0, SWP_HIDEWINDOW);
+//   }
+// }
 
 void setWindowIcon(GLFWwindow* window) {
   // Load the icon
@@ -419,20 +410,20 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
   gameManager->mouseY = virtualMouseY;
 }
 
-void focus_callback(GLFWwindow* window, int focused) {
-  // Retrieve the pointer to gamemanager
-  GameManager* gameManager =
-      static_cast<GameManager*>(glfwGetWindowUserPointer(window));
-  if (!focused && gameManager->focused) {
-    // Show the taskbar again
-    showTaskbar();
-    gameManager->focused = false;
-  } else if (focused && !gameManager->focused) {
-    // Hide the taskbar
-    hideTaskbar();
-    gameManager->focused = true;
-  }
-}
+// void focus_callback(GLFWwindow* window, int focused) {
+//   // Retrieve the pointer to gamemanager
+//   GameManager* gameManager =
+//       static_cast<GameManager*>(glfwGetWindowUserPointer(window));
+//   if (!focused && gameManager->focused) {
+//     // Show the taskbar again
+//     showTaskbar();
+//     gameManager->focused = false;
+//   } else if (focused && !gameManager->focused) {
+//     // Hide the taskbar
+//     hideTaskbar();
+//     gameManager->focused = true;
+//   }
+// }
 
 void recreateWindow(GLFWwindow*& window, int width, int height,
                     GameManager& gameManager) {
@@ -464,9 +455,9 @@ void recreateWindow(GLFWwindow*& window, int width, int height,
 
   gameManager.Reload(gameStateSnapshot);
 
-  if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    hideTaskbar();
-  }
+  // if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
+  //   hideTaskbar();
+  // }
 
   glfwSetWindowUserPointer(window, &gameManager);
 
@@ -478,9 +469,6 @@ void recreateWindow(GLFWwindow*& window, int width, int height,
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  if (gameManager.screenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    glfwSetWindowFocusCallback(window, focus_callback);
-  }
 }
 
 void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
@@ -492,13 +480,20 @@ void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
     SCREEN_WIDTH = kWindowedModeSize.x;
     SCREEN_HEIGHT = kWindowedModeSize.y;
     if (isFromWindowedBorderlessMode) {
-      glfwSetWindowFocusCallback(window, NULL);
-      showTaskbar();
-      // Have decorations for windowed mode.
-      glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
-      glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-      recreateWindow(window, SCREEN_WIDTH, SCREEN_HEIGHT, gameManager);
       isFromWindowedBorderlessMode = false;
+      int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
+      int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
+      // Add the styles back to have title bar, resize, and system menu
+      HWND hwnd = glfwGetWin32Window(window);
+      LONG style = GetWindowLong(hwnd, GWL_STYLE);
+      style |= (WS_CAPTION | WS_THICKFRAME | WS_SYSMENU);
+      SetWindowLong(hwnd, GWL_STYLE, style);
+      if (IsIconic(hwnd)) {
+        ShowWindow(hwnd, SW_RESTORE);
+      }
+      glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, SCREEN_WIDTH,
+                           SCREEN_HEIGHT, GLFW_DONT_CARE);
+      gameManager.SetToTargetScreenMode();
     } else {
       int windowPosX = (mode->width - SCREEN_WIDTH) / 2;
       int windowPosY = (mode->height - SCREEN_HEIGHT) / 2;
@@ -507,10 +502,6 @@ void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
       gameManager.SetToTargetScreenMode();
     }
   } else if (gameManager.targetScreenMode == ScreenMode::FULLSCREEN) {
-    if (isFromWindowedBorderlessMode) {
-      glfwSetWindowFocusCallback(window, NULL);
-      showTaskbar();
-    }
     SCREEN_WIDTH = kFullScreenSize.x + kFullScreenSizePadding.padLeft +
                    kFullScreenSizePadding.padRight;
     SCREEN_HEIGHT = kFullScreenSize.y + kFullScreenSizePadding.padTop +
@@ -520,10 +511,17 @@ void handleScreenModeChange(GLFWwindow*& window, GameManager& gameManager,
                          SCREEN_HEIGHT, mode->refreshRate);
     gameManager.SetToTargetScreenMode();
   } else if (gameManager.targetScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
-    // No decorations for windowed borderless mode.
-    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    recreateWindow(window, mode->width - 1, mode->height, gameManager);
+    if (gameManager.screenMode == ScreenMode::FULLSCREEN) {
+      glfwSetWindowMonitor(window, NULL, 0, 0, mode->width, mode->height,
+                           GLFW_DONT_CARE);
+    }
+    HWND hwnd = glfwGetWin32Window(window);
+    LONG style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~(WS_CAPTION | WS_THICKFRAME | WS_SYSMENU);
+    SetWindowLong(hwnd, GWL_STYLE, style);
+    SetWindowPos(hwnd, HWND_TOP, 0, 0, mode->width, mode->height,
+                 SWP_FRAMECHANGED);
+    gameManager.SetToTargetScreenMode();
     isFromWindowedBorderlessMode = true;
   }
 }
