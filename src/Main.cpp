@@ -48,6 +48,10 @@ std::atomic<bool> windowShouldClose(false);
 
 void setWindowIcon(GLFWwindow* window);
 
+std::string getSystemLanguage();
+
+std::string getGameTitleBasedOnSystemLanguage();
+
 void initParametersForCurrentWindowSize(int width, int height);
 void reconfigureWindowSize(GLFWwindow* window, int width, int height);
 
@@ -74,7 +78,11 @@ int main() {
     std::cerr << "Failed to load configurations." << std::endl;
     return EXIT_FAILURE;
   }
-
+  // Set the default locale based on the system language if it is the first run
+  // of the game.
+  if (configManager.IsFirstRun()) {
+    configManager.SetLanguage(language_enum_map.at(getSystemLanguage()));
+  }
   // Initialize GLFW
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -113,21 +121,23 @@ int main() {
   int SCREEN_WIDTH = SCREEN_SIZE_PADDING.GetPaddedWidth(),
       SCREEN_HEIGHT = SCREEN_SIZE_PADDING.GetPaddedHeight();
   GLFWwindow* window;
-  const char* title = "Dynasty's Defender: The Scroll's Curse";
+  std::string title = getGameTitleBasedOnSystemLanguage();
   if (initialScreenMode == ScreenMode::FULLSCREEN) {
     // Full screen mode
-    window = glfwCreateWindow(mode->width, mode->height, title, primaryMonitor,
-                              NULL);
+    window = glfwCreateWindow(mode->width, mode->height, title.c_str(),
+                              primaryMonitor, NULL);
   } else if (initialScreenMode == ScreenMode::WINDOWED_BORDERLESS) {
     // Windowed borderless mode
-    window = glfwCreateWindow(mode->width, mode->height, title, NULL, NULL);
+    window =
+        glfwCreateWindow(mode->width, mode->height, title.c_str(), NULL, NULL);
   } else if (initialScreenMode == ScreenMode::WINDOWED) {
     SCREEN_SIZE_PADDING = kWindowedModeSizePadding;
     // No padding for windowed mode
     SCREEN_WIDTH = kWindowedModeSize.x;
     SCREEN_HEIGHT = kWindowedModeSize.y;
     // Windowed mode
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, title, NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, title.c_str(), NULL,
+                              NULL);
   }
   if (window == NULL) {
     std::cerr << "Failed to create GLFW window" << std::endl;
@@ -292,6 +302,52 @@ void setWindowIcon(GLFWwindow* window) {
   } else {
     std::cerr << "Failed to load icon: " << stbi_failure_reason() << std::endl;
   }
+}
+
+std::string getSystemLanguage() {
+  WCHAR locale[LOCALE_NAME_MAX_LENGTH];
+  std::string name = "en-US";
+  std::string abbr = "en";
+  if (GetUserDefaultLocaleName(locale, LOCALE_NAME_MAX_LENGTH) > 0) {
+    name = std::string(locale, locale + wcslen(locale));
+  }
+  if (name == "pt-BR" || name == "pt-PT") {
+    abbr = name;
+  } else {
+    size_t dashPos = name.find('-');
+    if (dashPos != std::string::npos) {
+      // language code.
+      abbr = name.substr(0, dashPos);
+      if (abbr == "zh") {
+        // region code.
+        std::string region = name.substr(dashPos + 1);
+        if (region == "CN") {
+          abbr = "zh-Hans";
+        } else {
+          abbr = "zh-Hant";
+        }
+      }
+    } else {
+      abbr = name;
+    }
+  }
+  if (abbr != "de" && abbr != "en" && abbr != "es" && abbr != "fr" &&
+      abbr != "it" && abbr != "ja" && abbr != "ko" && abbr != "pt-BR" &&
+      abbr != "pt-PT" && abbr != "ru" && abbr != "zh-Hans" &&
+      abbr != "zh-Hant") {
+    abbr = "en";
+  }
+  return abbr;
+}
+
+std::string getGameTitleBasedOnSystemLanguage() {
+  std::string locale = getSystemLanguage();
+  // Load the text for the game title.
+  ResourceManager& resourceManager = ResourceManager::GetInstance();
+  resourceManager.LoadText(
+      ConfigManager::GetInstance().GetSystemTextFilePath(locale).c_str());
+  std::string gameTitle = resourceManager.GetTextUTF8("title");
+  return gameTitle;
 }
 
 void initParametersForCurrentWindowSize(int width, int height) {

@@ -361,9 +361,20 @@ class ResourceManager {
     assert(res.is_string() && "Value is not a string");
     // Get the string from json (UTF-8 string)
     std::string utf8_str = res.get<std::string>();
-
     return stringToU32String(utf8_str);
-    stringToU32String(utf8_str);
+  }
+
+  template <typename... Strings>
+  std::string GetTextUTF8(Strings... keys) const {
+    std::vector<std::string> keyVec = {keys...};  // Convert arguments to vector
+    nlohmann::json res = texts;
+    for (const auto& key : keyVec) {
+      assert(res.count(key) > 0 && "Key not found in texts");
+      res = res.at(key);
+    }
+    assert(res.is_string() && "Value is not a string");
+    // Get the string from json (UTF-8 string)
+    return res.get<std::string>();
   }
 
   int GetAvailableID();

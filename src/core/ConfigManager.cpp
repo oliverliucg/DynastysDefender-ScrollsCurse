@@ -40,6 +40,12 @@ bool ConfigManager::LoadConfig() {
   return true;
 }
 
+bool ConfigManager::IsFirstRun() const {
+  std::string str = config_.at("language").at("preference");
+  bool isFirstRun = str.empty();
+  return isFirstRun;
+}
+
 void ConfigManager::SetScreenMode(ScreenMode screen_mode) {
   // Set the screen mode in the JSON object
   switch (screen_mode) {
@@ -238,4 +244,9 @@ std::string ConfigManager::GetFontFilePath(CharStyle style) const {
 std::string ConfigManager::GetTextFilePath() const {
   std::string preference = config_.at("language").at("preference");
   return config_.at("language").at(preference).at("text");
+}
+
+std::string ConfigManager::GetSystemTextFilePath(
+    const std::string& locale) const {
+  return config_.at("language").at(locale).at("text");
 }

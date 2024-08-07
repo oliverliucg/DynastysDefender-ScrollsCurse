@@ -122,6 +122,8 @@ class ConfigManager {
   void SetConfigPath(const std::string& file_path);
   // Load the config file
   bool LoadConfig();
+  // Check if it is the first time the game is run
+  bool IsFirstRun() const;
   // Set the screen mode
   void SetScreenMode(ScreenMode screen_mode);
   // Get the screen mode
@@ -145,6 +147,8 @@ class ConfigManager {
   std::string GetFontFilePath(CharStyle style) const;
   // Get path to text file for the given language
   std::string GetTextFilePath() const;
+  // Get path to text file for the system language
+  std::string GetSystemTextFilePath(const std::string& locale) const;
 
  private:
   ConfigManager() = default;

@@ -64,7 +64,7 @@
       },
       "text": "text/ko.json"
     },
-    "preference": "en",
+    "preference": "",
     "pt-BR": {
       "font": {
         "bold": "fonts/Latin/Prompt-Bold.TTF",
