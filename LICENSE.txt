@@ -11,7 +11,7 @@ A copy of the GPL v3.0 is included in this project under 'GPLv3.txt'. The full l
 
 2. Asset License
 ----------------
-Assets including audio files, text content, textures and icons located in the "resources/audio", "resources/text", "resources/textures" and "resources/icon" directories are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+Assets including audio files, text content, images and icons are licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
 
 Details and the full text of this license are provided in 'CC_BY_NC_4_0.txt' and can also be viewed at: https://creativecommons.org/licenses/by-nc/4.0/
 
