@@ -6,6 +6,7 @@
 
 - **OpenGL 4.6**
 - **Visual Studio 2022**
+- **C++20**
 
 ## Game Overview
 
