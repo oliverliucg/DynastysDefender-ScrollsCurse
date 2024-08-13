@@ -18,7 +18,7 @@ if(Boost_FOUND)
 endif()
 
 # Add source to this project's executable.
-add_executable(DynastysDefender-ScrollsCurse 
+add_executable(DynastysDefender-ScrollsCurse
     "Main.cpp" 
     "GameManager.cpp"      
     "post_processing/PostProcessor.cpp" 
@@ -28,6 +28,17 @@ add_executable(DynastysDefender-ScrollsCurse
     "particles/ParticleSystem.cpp"
     "icon.rc"
 )
+
+if(MSVC)
+    # Set Debug configuration to use the Console subsystem
+    set_target_properties(DynastysDefender-ScrollsCurse PROPERTIES
+        LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
+    )
+    # Set Release configuration to use the Windows subsystem without a console window
+    set_target_properties(DynastysDefender-ScrollsCurse PROPERTIES
+        LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+    )
+endif()
 
 # Copy shaders to the build directory
 if(COPY_SHADERS STREQUAL "ON")
