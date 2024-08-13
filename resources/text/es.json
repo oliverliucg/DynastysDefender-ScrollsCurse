@@ -10,7 +10,7 @@
     "1": "{Disparar Burbuja}: Presiona la {Barra Espaciadora} para disparar una burbuja.",
     "2": "{Apuntar con el Lanzador}:\n\t• {Rotación Izquierda}: Mantén presionada la {Tecla de Flecha Izquierda} para rotar el lanzador en sentido antihorario.\n\t• {Rotación Derecha}: Mantén presionada la {Tecla de Flecha Derecha} para rotar el lanzador en sentido horario.",
     "3": "{Apuntado Preciso}: Mantén presionada la {Tecla Ctrl} para disminuir la velocidad de rotación del lanzador, permitiendo ajustes direccionales precisos.",
-    "4": "{Pause du Jeu}: Appuyez sur la {Touche ESC} pour mettre le jeu en pause. Cela affichera un menu avec les options suivantes:\n\t• {Reprendre}: Continuer votre session de jeu actuelle.\n\t• {Redémarrer}: Commencer le jeu depuis le début.\n\t• {Arrêter}: Quitter le jeu actuel et retourner au menu principal."
+    "4": "{Pause du Jeu}: Appuyez sur la {Touche Esc} pour mettre le jeu en pause. Cela affichera un menu avec les options suivantes:\n\t• {Reprendre}: Continuer votre session de jeu actuelle.\n\t• {Redémarrer}: Commencer le jeu depuis le début.\n\t• {Arrêter}: Quitter le jeu actuel et retourner au menu principal."
   },
   "characterintro": {
     "liuche": "{Liu Che}: Emperador Wu de Han, uno de los emperadores más influyentes de la historia china. Durante su reinado, inició numerosas reformas importantes y acciones militares que tuvieron un profundo impacto en la historia de China. En un banquete en la mansión de la princesa, fue repentinamente atacado por el asesino Guo Jie y sometido.",
