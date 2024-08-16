@@ -4414,7 +4414,7 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
   }
   std::vector<glm::vec3> colorPool;
   for (int i = 0; i < gameLevel.numColors; ++i) {
-    int randomIndex = rand() % colorSet.size();
+    int randomIndex = generateRandomInt<int>(0, colorSet.size() - 1);
     colorPool.push_back(colorMap[static_cast<Color>(colorSet[randomIndex])]);
     colorSet.erase(colorSet.begin() + randomIndex);
   }

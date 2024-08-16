@@ -77,6 +77,9 @@ struct ViewPortInfo {
 
 extern std::unordered_map<Color, glm::vec3> colorMap;
 
+// Engine for generating random numbers.
+extern std::mt19937 eng;
+
 constexpr glm::vec3 kScoreColorPink = glm::vec3(1.0f, 0.0f, 0.56471f);
 constexpr glm::vec3 kScoreColorOrange = glm::vec3(1.0f, 0.65f, 0.0f);
 constexpr float kScoreAlpha = 0.5f;
@@ -189,8 +192,6 @@ T generateRandom(T min, T max) {
   } else if (min > max) {
     std::swap(min, max);
   }
-  std::random_device rd;   // Obtain a random number from hardware
-  std::mt19937 eng(rd());  // Seed the generator
   std::uniform_real_distribution<T> distr(min, max);  // Define the range
   return distr(eng);
 }
@@ -203,8 +204,6 @@ T generateRandomInt(T min, T max) {
   } else if (min > max) {
     std::swap(min, max);
   }
-  std::random_device rd;   // Obtain a random number from hardware
-  std::mt19937 eng(rd());  // Seed the generator
   std::uniform_int_distribution<T> distr(min, max);  // Define the range
   return distr(eng);
 }

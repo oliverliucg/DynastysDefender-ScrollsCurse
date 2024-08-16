@@ -38,10 +38,7 @@ std::unordered_map<Color, glm::vec3> colorMap = {
     {Color::JadeGreen, glm::vec3(0.0, 0.6588, 0.4196)},
 };
 
-// const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-// const int SCREEN_WIDTH = (mode->width * 27) / 32;
-// const int SCREEN_HEIGHT = (mode->height * 7) / 8;
-// const glm::vec2 kWindowSize = glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+std::mt19937 eng(std::random_device{}());
 
 float screenScale = 1.0f;
 float kBaseUnit = kWindowSize.y / 42.f;
@@ -119,14 +116,12 @@ int getSignOfCrossProduct(glm::vec2 a, glm::vec2 b) {
 }
 
 double generateGaussianRandom(double min, double max, double mean) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
   if (mean == std::numeric_limits<double>::infinity()) {
     mean = (min + max) / 2.0;
   }
   double stddev = (max - min) / 6.0;
   std::normal_distribution<> distr(mean, stddev);
-  double value = distr(gen);  // Generate a Gaussian-distributed value
+  double value = distr(eng);  // Generate a Gaussian-distributed value
   value = std::max(min, std::min(value, max));  // Clip the value to the range
   return value;
 }
