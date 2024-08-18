@@ -226,8 +226,11 @@ class GameManager {
   std::map<std::string, std::pair<std::shared_ptr<GameObject>, float>>
       graduallyOpaqueObjects;
 
-  // total number of game levels
+  // Get total number of game levels.
   int GetNumGameLevels();
+
+  // Get bubble number for each level range.
+  int GetBubbleNumForLevel();
 
   // Get the page name for a given game state.
   std::string GetPageName(GameState gameState);

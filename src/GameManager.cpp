@@ -3076,6 +3076,18 @@ int GameManager::GetNumGameLevels() {
   }
 }
 
+int GameManager::GetBubbleNumForLevel() {
+  if (this->level <= 10) {
+    return 10 + this->level * 5;
+  } else if (this->level <= 20) {
+    return 60 + (this->level - 10) * 4;
+  } else if (this->level <= 30) {
+    return 100 + (this->level - 20) * 3;
+  } else {
+    return 130 + (this->level - 30) * 3;
+  }
+}
+
 std::string GameManager::GetPageName(GameState gameState) {
   switch (gameState) {
     case GameState::STORY:
@@ -4557,7 +4569,7 @@ void GameManager::GenerateRandomStaticBubbles() {
   // Update the game level
   gameLevel.numColors =
       level < colorMap.size() ? std::sqrt(level * 4.f - 3.f) : colorMap.size();
-  gameLevel.numInitialBubbles = 10 + level * 5;
+  gameLevel.numInitialBubbles = GetBubbleNumForLevel();
   gameLevel.minDistanceToBottom = 4 * kBaseUnit + kBubbleRadius;
   gameLevel.minHorizontalDistanceToShooter = 3 * kBaseUnit + kBubbleRadius;
   gameLevel.minVerticalDistanceToShooter = 6 * kBaseUnit;
