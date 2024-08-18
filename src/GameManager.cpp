@@ -1902,6 +1902,7 @@ void GameManager::Update(float dt) {
       // Add the bubble to the static bubbles
       statics[id] = std::move(bubble);
       ++colorCount[statics[id]->GetColorEnum()];
+
       // Remove the bubble from the moving bubbles
       moves[id] = nullptr;
       moves.erase(id);
@@ -1911,6 +1912,8 @@ void GameManager::Update(float dt) {
       // remove them.
       std::vector<int> connectedBubbleIds = FindConnectedBubblesOfSameColor(id);
       if (connectedBubbleIds.size() > 2) {
+        // Reset the weight of the current bubble's color
+        colorWeight.at(statics[id]->GetColorEnum()) = 1.f;
         // Remove the connected bubbles from the static bubbles and push them
         // into explodings.
         for (int connectedBubbleId : connectedBubbleIds) {
@@ -1929,6 +1932,8 @@ void GameManager::Update(float dt) {
         // Remove the falling bubbles from the static bubbles and push them into
         // falling.
         for (int fallingId : fallingIds) {
+          // Reset the weight of the falling bubble's color
+          colorWeight.at(statics[fallingId]->GetColorEnum()) = 1.f;
           // the falling bubble should be in the statics.
           assert(statics.count(fallingId) > 0 &&
                  "Failed to find the bubble by ID.");
@@ -1964,11 +1969,35 @@ void GameManager::Update(float dt) {
         explosionSystem->CreateExplosions(explosionInfo);
         SoundEngine::GetInstance().PlaySound("bubble_explode", false);
         explodings.clear();
+      } else if (connectedBubbleIds.size() == 2) {
+        // Triple the weight of the current bubble's color when the number of
+        // static bubbles are greater than 3.
+        if (statics.size() > 3) {
+          colorWeight.at(statics[id]->GetColorEnum()) *= 3.f;
+          // Further triple the weight of the current bubble's color if the
+          // distance to the shooter's center is within the ellipse.
+          Ellipse ellipse(shooter->GetCenter(), 6.f * kBaseUnit,
+                          10.f * kBaseUnit);
+          if (ellipse.isWithin(statics[id]->GetCenter())) {
+            colorWeight.at(statics[id]->GetColorEnum()) *= 3.f;
+          }
+        } else {
+          colorWeight.at(statics[id]->GetColorEnum()) = 1.f;
+        }
+      } else if (connectedBubbleIds.size() < 2) {
+        // Halve the weight of the current bubble's color
+        colorWeight.at(statics[id]->GetColorEnum()) /= 3.f;
       }
 
       // If all statuc bubbles are removed, we set the GameState to PREPAREING
       // and switch to the next level.
       if (statics.empty()) {
+        for (const auto& [color, weight] : colorWeight) {
+          assert(weight == 1.f &&
+                 "The weight of each color should be 1.f when succeeding the "
+                 "current level.");
+        }
+
         // Clear all the moving bubbles.
         moves.clear();
 
@@ -2033,7 +2062,7 @@ void GameManager::Update(float dt) {
         // Narrow the scroll
         this->scroll->SetState(ScrollState::NARROWING);
         this->scroll->SetTargetSilkLenForNarrowing(gameBoardSize.y -
-                                                   2 * kBaseUnit);
+                                                   2 * kBubbleRadius);
         // Restart the event timer for narrowing the scroll.
         this->timer->StartEventTimer("beforenarrowing");
         // Pause the event timer for narrowing the scroll.
@@ -2079,6 +2108,10 @@ void GameManager::Update(float dt) {
       }
       statics.clear();
       colorCount.clear();
+      // Reset the color weight of all colors to be 1.
+      for (auto it = colorMap.begin(); it != colorMap.end(); ++it) {
+        colorWeight[it->first] = 1.f;
+      }
     } else if (this->scroll->GetState() == ScrollState::DEPLOYED ||
                this->scroll->GetState() == ScrollState::RETURNED) {
       if (this->targetState != GameState::LOSE) {
@@ -4528,16 +4561,16 @@ void GameManager::GenerateRandomStaticBubbles() {
   gameLevel.minDistanceToBottom = 4 * kBaseUnit + kBubbleRadius;
   gameLevel.minHorizontalDistanceToShooter = 3 * kBaseUnit + kBubbleRadius;
   gameLevel.minVerticalDistanceToShooter = 6 * kBaseUnit;
-  float difficultyScalingFactor = 0.8f;
+  float difficultyScalingFactor = 0.75f;
   switch (this->difficulty) {
     case Difficulty::MEDIUM:
-      difficultyScalingFactor += 0.02f;
+      difficultyScalingFactor += 0.03f;
       break;
     case Difficulty::HARD:
-      difficultyScalingFactor += 0.04f;
+      difficultyScalingFactor += 0.06f;
       break;
     case Difficulty::EXPERT:
-      difficultyScalingFactor += 0.06f;
+      difficultyScalingFactor += 0.09f;
       break;
     default:
       break;
@@ -4552,20 +4585,19 @@ void GameManager::GenerateRandomStaticBubbles() {
   float baseTime = 9.f, initialTime = 18.f;
   switch (this->difficulty) {
     case Difficulty::MEDIUM:
-      baseTime -= 1.f;
       initialTime -= 1.f;
       break;
     case Difficulty::HARD:
-      baseTime -= 2.f;
+      baseTime -= 1.f;
       initialTime -= 2.f;
       break;
     case Difficulty::EXPERT:
-      baseTime -= 3.f;
+      baseTime -= 2.f;
       initialTime -= 3.f;
       break;
   }
   gameLevel.narrowingTimeInterval =
-      glm::mix(initialTime, baseTime, level * 1.f / GetNumGameLevels());
+      glm::mix(initialTime, baseTime, (level - 1) * 1.f / GetNumGameLevels());
 
   // Get the boundaries of the game board (left, upper, right, lower)
   glm::vec4 boundaries =
@@ -4637,14 +4669,9 @@ glm::vec4 GameManager::GetNextBubbleColor() {
   // If statics is empty, then we randomly select a color from the color map.
   if (statics.empty()) {
     // Get a random color from Color predefined in the resource manager
-    static std::random_device rd;   // Initialize a random device
-    static std::mt19937 gen(rd());  // Seed the generator
-    static std::uniform_int_distribution<> dis(
-        0,
-        static_cast<int>(colorMap.size()) - 1);  // Distribution for enum values
-
-    Color randomColor =
-        static_cast<Color>(dis(gen));  // Get a random color enum value
+    int randomColorIdx =
+        generateRandomInt<int>(0, static_cast<int>(colorMap.size()) - 1);
+    Color randomColor = static_cast<Color>(randomColorIdx);
     // Set the color
     return glm::vec4(colorMap[randomColor], 0.8);
   }
@@ -4658,7 +4685,7 @@ glm::vec4 GameManager::GetNextBubbleColor() {
       sum += count;
       assert(count >= 0 && "Color count should be non-negative.");
       colors.emplace_back(color);
-      weights.emplace_back(static_cast<float>(count));
+      weights.emplace_back(static_cast<float>(count) * colorWeight.at(color));
     }
     // Determine the new color based on the counts of bubbles of each color
     // using random weighted selection.

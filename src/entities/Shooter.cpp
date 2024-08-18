@@ -133,14 +133,9 @@ glm::vec2 Shooter::GetShootingDirection() {
 
 glm::vec4 Shooter::GetNewBubbleColor() {
   // Get a random color from Color predefined in the resource manager
-  static std::random_device rd;   // Initialize a random device
-  static std::mt19937 gen(rd());  // Seed the generator
-  static std::uniform_int_distribution<> dis(
-      0,
-      static_cast<int>(colorMap.size()) - 1);  // Distribution for enum values
-
-  Color randomColor =
-      static_cast<Color>(dis(gen));  // Get a random color enum value
+  int randomColorIdx =
+      generateRandomInt<int>(0, static_cast<int>(colorMap.size()) - 1);
+  Color randomColor = static_cast<Color>(randomColorIdx);
   // Set the color
   return glm::vec4(colorMap[randomColor], nextBubble.GetColor().a);
 }

@@ -210,6 +210,9 @@ class GameManager {
   // Count of bubbles of each color.
   std::unordered_map<Color, int> colorCount;
 
+  // Weight of bubbles of each color.
+  std::unordered_map<Color, float> colorWeight;
+
   // original positions for shaking.
   std::unordered_map<std::string, glm::vec2> originalPositionsForShaking;
 
