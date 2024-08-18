@@ -3078,13 +3078,31 @@ int GameManager::GetNumGameLevels() {
 
 int GameManager::GetBubbleNumForLevel() {
   if (this->level <= 10) {
-    return 10 + this->level * 5;
+    int base = 10;
+    if (this->difficulty == Difficulty::MEDIUM) {
+      base += 5;
+    } else if (this->difficulty == Difficulty::HARD) {
+      base += 10;
+    } else if (this->difficulty == Difficulty::EXPERT) {
+      base += 15;
+    }
+    return base + this->level * 5;
   } else if (this->level <= 20) {
-    return 60 + (this->level - 10) * 4;
+    int base = 40;
+    if (this->difficulty == Difficulty::HARD) {
+      base += 10;
+    } else if (this->difficulty == Difficulty::EXPERT) {
+      base += 15;
+    }
+    return base + (this->level - 10) * 5;
   } else if (this->level <= 30) {
-    return 100 + (this->level - 20) * 3;
+    int base = 75;
+    if (this->difficulty != Difficulty::HARD) {
+      base += 15;
+    }
+    return base + (this->level - 20) * 5;
   } else {
-    return 130 + (this->level - 30) * 3;
+    return 115 + (this->level - 30) * 5;
   }
 }
 
