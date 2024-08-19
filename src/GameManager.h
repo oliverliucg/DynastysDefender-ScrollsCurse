@@ -186,8 +186,11 @@ class GameManager {
   // Stores individual scores gained during game play
   std::queue<int> scoreIncrements;
 
-  // number of score increments to be reflected on the screen
+  // Number of score increments to be reflected on the screen
   int numOfScoreIncrementsReady{0};
+
+  // Scale of the score increment.
+  int scoreIncrementScale{1};
 
   // Arrows
   std::vector<std::shared_ptr<Arrow>> arrows;
@@ -455,10 +458,10 @@ class GameManager {
                      float timeUsed);
 
   // Increase the score by the given value.
-  void IncreaseScore(int64_t value);
+  void IncreaseScore(const int64_t value);
 
   // Decrease the score by the given value.
-  void DecreaseScore(int64_t value);
+  void DecreaseScore(const int64_t value);
 
   // Reset the score to zero or the given value.
   void ResetScore(int64_t value = 0);

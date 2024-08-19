@@ -2017,6 +2017,22 @@ void GameManager::Update(float dt) {
         numOfScoreIncrementsReady += scoreIncrements.size();
         this->timer->SetEventTimer("refreshscore", 0.05f);
         this->timer->StartEventTimer("refreshscore");
+        // If it is on the final level, then we double the score increment if
+        // the player has two lives left, or triple the score increment if the
+        // player has three lives left.
+        if (this->level == this->GetNumGameLevels()) {
+          if (gameCharacters["weiqing"]->GetHealth().GetCurrentHealth() == 2) {
+            scoreIncrementScale = 2;
+          } else if (gameCharacters["weiqing"]
+                         ->GetHealth()
+                         .GetCurrentHealth() == 3) {
+            scoreIncrementScale = 3;
+          } else {
+            scoreIncrementScale = 1;
+          }
+        } else {
+          scoreIncrementScale = 1;
+        }
         this->scroll->SetState(ScrollState::CLOSING);
         ++(this->level);
         if (this->level > this->GetNumGameLevels()) {
@@ -2533,6 +2549,9 @@ void GameManager::Update(float dt) {
     int increment = this->scoreIncrements.front();
     this->scoreIncrements.pop();
     --numOfScoreIncrementsReady;
+    if (scoreIncrementScale > 1) {
+      increment *= scoreIncrementScale;
+    }
     this->IncreaseScore(increment);
     if (numOfScoreIncrementsReady > 0) {
       this->timer->SetEventTimer("refreshscore", 0.05f);
@@ -4888,7 +4907,7 @@ int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
   return totalIncrement;
 }
 
-void GameManager::IncreaseScore(int64_t score) {
+void GameManager::IncreaseScore(const int64_t score) {
   this->score += score;
   // Set the score text
   texts.at("score")->SetParagraph(1, U"{" + intToU32String(this->score) + U"}");
