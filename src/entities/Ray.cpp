@@ -49,14 +49,31 @@ void Ray::UpdatePath(
       return;
     }
     // Get the new direction of the ray after it bounces off the wall.
+    glm::vec2 offsetPoint = collisionWithWall;
     if (areFloatsEqual(collisionWithWall.x, boundaries.x) ||
         areFloatsEqual(collisionWithWall.x, boundaries.z)) {
+      // When the bubble (treated as a ray for simulation) collides with a wall,
+      // it doesn't follow the exact reflection rule of a ray due to its area
+      // size. To more accurately depict this interaction, an offset (yOffset)
+      // is applied based on the bubble's radius and the direction of movement.
+      float yOffset =
+          -2.f * kBubbleRadius / std::abs(currentDir.x) * currentDir.y;
+      offsetPoint =
+          glm::vec2(collisionWithWall.x, collisionWithWall.y + yOffset);
+      path.emplace_back(offsetPoint);
       currentDir.x = -currentDir.x;
     }
     if (areFloatsEqual(collisionWithWall.y, boundaries.w)) {
+      // To more accurately depict this interaction, an offset (xOffset)
+      //  is applied based on the bubble's radius and the direction of movement.
+      float xOffset =
+          -2.f * kBubbleRadius / std::abs(currentDir.y) * currentDir.x;
+      offsetPoint =
+          glm::vec2(collisionWithWall.x + xOffset, collisionWithWall.y);
+      path.emplace_back(offsetPoint);
       currentDir.y = -currentDir.y;
     }
-    currentPos = collisionWithWall;
+    currentPos = offsetPoint;
     collisionWithBubble =
         GetBubbleCollisionPoint(currentPos, currentDir, statics);
   }
