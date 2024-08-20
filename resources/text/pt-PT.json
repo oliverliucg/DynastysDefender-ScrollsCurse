@@ -8,9 +8,10 @@
   },
   "controls": {
     "1": "{Disparar Bolha}: Prima a {Barra de Espaço} para disparar uma bolha.",
-    "2": "{Ajustar Lançador}:\n\t• {Rotação à Esquerda}: Mantenha premida a {Tecla de Seta para Esquerda} para girar o lançador no sentido anti-horário.\n\t• {Rotação à Direita}: Mantenha premida a {Tecla de Seta para Direita} para girar o lançador no sentido horário.",
-    "3": "{Mira de Precisão}: Mantenha premida a {Tecla Ctrl} para reduzir a velocidade de rotação do lançador, permitindo ajustes direcionais precisos.",
-    "4": "{Pausar Jogo}: Prima a {Tecla Esc} para pausar o jogo. Será exibido um menu com as seguintes opções:\n\t• {Continuar}: Continue a sua sessão de jogo atual.\n\t• {Reiniciar}: Comece o jogo desde o início.\n\t• {Parar}: Saia do jogo atual e retorne ao menu principal."
+    "2": "{Trocar Cores}: Pressione a {Tecla Shift} para trocar a cor da bolha atual pela seguinte.",
+    "3": "{Ajustar Lançador}:\n\t• {Rotação à Esquerda}: Mantenha premida a {Tecla de Seta para Esquerda} para girar o lançador no sentido anti-horário.\n\t• {Rotação à Direita}: Mantenha premida a {Tecla de Seta para Direita} para girar o lançador no sentido horário.",
+    "4": "{Mira de Precisão}: Mantenha premida a {Tecla Ctrl} para reduzir a velocidade de rotação do lançador, permitindo ajustes direcionais precisos.",
+    "5": "{Pausar Jogo}: Prima a {Tecla Esc} para pausar o jogo. Será exibido um menu com as seguintes opções:\n\t• {Continuar}: Continue a sua sessão de jogo atual.\n\t• {Reiniciar}: Comece o jogo desde o início.\n\t• {Parar}: Saia do jogo atual e retorne ao menu principal."
   },
   "characterintro": {
     "liuche": "{Liu Che}: Imperador Wu de Han, um dos imperadores mais influentes da história chinesa. Durante o seu reinado, iniciou numerosas reformas significativas e ações militares que tiveram um profundo impacto na história da China. Num banquete na mansão da princesa, foi subitamente atacado pelo assassino Guo Jie e subjugado.",

@@ -180,6 +180,17 @@ void Shooter::UpdateCarriedBubbleRadius(float radius) {
   carriedBubble.SetRadius(kBubbleRadius);
 }
 
+void Shooter::SwapCarriedBubbleAndNextBubble() {
+  glm::vec3 nextBubbleColor = nextBubble.GetColorWithoutAlpha();
+  glm::vec3 carriedBubbleColor = carriedBubble.GetColorWithoutAlpha();
+  if (nextBubbleColor == carriedBubbleColor) {
+    return;
+  }
+  carriedBubble.SetColorWithoutAlpha(nextBubbleColor);
+  nextBubble.SetColorWithoutAlpha(carriedBubbleColor);
+  SoundEngine::GetInstance().PlaySound("color_switch", false);
+}
+
 void Shooter::Draw(std::shared_ptr<Renderer> renderer) {
   // Draw the shooter
   GameObject::Draw(renderer);

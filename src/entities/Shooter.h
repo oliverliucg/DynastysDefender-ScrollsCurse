@@ -58,6 +58,9 @@ class Shooter : public GameObject {
   // Update carriedBubble radius.
   void UpdateCarriedBubbleRadius(float radius);
 
+  // Swap the carried bubble and the next bubble.
+  void SwapCarriedBubbleAndNextBubble();
+
  private:
   // The bubble that the shooter is carrying.
   Bubble carriedBubble;

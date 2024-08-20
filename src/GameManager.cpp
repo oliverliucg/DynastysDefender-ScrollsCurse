@@ -860,6 +860,7 @@ void GameManager::LoadSounds() {
   soundEngine.LoadSound("bubble_pop", "audio/gameplay/bubble_pop.wav", 0.4f);
   soundEngine.LoadSound("bubble_explode", "audio/gameplay/bubble_explode5.wav",
                         0.4f);
+  soundEngine.LoadSound("color_switch", "audio/gameplay/color_switch.wav", 1.f);
   soundEngine.LoadSound("arrow_shoot", "audio/gameplay/bubble_shoot.wav", 0.7f);
   soundEngine.LoadSound("arrow_hit", "audio/gameplay/arrow_hit1.wav", 0.7f);
   soundEngine.LoadSound("scroll_open", "audio/gameplay/scroll_open3.wav");
@@ -979,6 +980,11 @@ void GameManager::ProcessInput(float dt) {
       }
       shooter->GetRay().UpdatePath(this->gameBoard->GetValidBoundaries(),
                                    this->statics);
+    } else if (this->keys[GLFW_KEY_LEFT_SHIFT] &&
+               this->keysLocked[GLFW_KEY_LEFT_SHIFT] == false) {
+      // Swap the current bubble with the next bubble color.
+      this->keysLocked[GLFW_KEY_LEFT_SHIFT] = true;
+      shooter->SwapCarriedBubbleAndNextBubble();
     } else if (this->keys[GLFW_KEY_ESCAPE] &&
                this->keysLocked[GLFW_KEY_ESCAPE] == false) {
       this->keysLocked[GLFW_KEY_ESCAPE] = true;
@@ -2140,13 +2146,10 @@ void GameManager::Update(float dt) {
       // Generate random static bubbles
       GenerateRandomStaticBubbles();
       // refresh the color of the carried bubble and the next bubble based the
-      // existing colors of all static bubbles if it is the first level.
-      if (this->level == 1) {
-        shooter->RefreshCarriedBubbleColor(GetNextBubbleColor());
-        shooter->RefreshNextBubbleColor(GetNextBubbleColor());
-        //// update the gameboard color based on the color of the ray.
-        // gameBoard->UpdateColor(shooter->GetRay().GetColorWithoutAlpha());
-      }
+      // existing colors of all static bubbles.
+      shooter->RefreshCarriedBubbleColor(GetNextBubbleColor());
+      shooter->RefreshNextBubbleColor(GetNextBubbleColor());
+
       // Get half total offset of the scroll narrowing
       glm::vec2 halfOffset =
           gameBoard->GetValidPosition() - gameBoard->GetPosition();

@@ -8,9 +8,10 @@
   },
   "controls": {
     "1": "{Blase schießen}: Drücken Sie die {Leertaste}, um eine Blase abzufeuern.",
-    "2": "{Ausrichtung des Abschussgeräts}:\n\t• {Linksdrehung}: Halten Sie die {Pfeiltaste Links}, um das Abschussgerät gegen den Uhrzeigersinn zu drehen.\n\t• {Rechtsdrehung}: Halten Sie die {Pfeiltaste Rechts}, um das Abschussgerät im Uhrzeigersinn zu drehen.",
-    "3": "{Präzisionszielung}: Halten Sie die {Strg-Taste}, um die Drehung des Abschussgeräts zu verlangsamen, was präzise Richtungsanpassungen ermöglicht.",
-    "4": "{Spiel pausieren}: Drücken Sie die {Esc-Taste}, um das Spiel zu pausieren. Es wird ein Menü mit folgenden Optionen angezeigt:\n\t• {Neustart}: Das Spiel von Anfang an neu starten.\n\t• {Fortsetzen}: Ihre aktuelle Spielsitzung fortsetzen.\n\t• {Stopp}: Das aktuelle Spiel beenden und zum Hauptmenü zurückkehren."
+    "2": "{Farben wechseln}: Drücken Sie die {Umschalttaste}, um die aktuelle Blasenfarbe mit der nächsten zu tauschen.",
+    "3": "{Ausrichtung des Abschussgeräts}:\n\t• {Linksdrehung}: Halten Sie die {Pfeiltaste Links}, um das Abschussgerät gegen den Uhrzeigersinn zu drehen.\n\t• {Rechtsdrehung}: Halten Sie die {Pfeiltaste Rechts}, um das Abschussgerät im Uhrzeigersinn zu drehen.",
+    "4": "{Präzisionszielung}: Halten Sie die {Strg-Taste}, um die Drehung des Abschussgeräts zu verlangsamen, was präzise Richtungsanpassungen ermöglicht.",
+    "5": "{Spiel pausieren}: Drücken Sie die {Esc-Taste}, um das Spiel zu pausieren. Es wird ein Menü mit folgenden Optionen angezeigt:\n\t• {Neustart}: Das Spiel von Anfang an neu starten.\n\t• {Fortsetzen}: Ihre aktuelle Spielsitzung fortsetzen.\n\t• {Stopp}: Das aktuelle Spiel beenden und zum Hauptmenü zurückkehren."
   },
   "characterintro": {
     "liuche": "{Liu Che}: Han Wudi, einer der einflussreichsten Kaiser in der Geschichte Chinas. Während seiner Regentschaft führte er viele wichtige Reformen und militärische Aktionen durch, die tiefgreifende Auswirkungen auf die chinesische Geschichte hatten. Bei einem Bankett im Palast der Prinzessin wurde er von dem Attentäter Guo Jie überraschend angegriffen und überwältigt.",
