@@ -39,8 +39,8 @@ void BackgroundMusicInfo::Refresh() {
     } else if (targetMusicVec.size() == 2) {
       if (targetMusicVec[nextMusicIdx] == currentMusic) {
         nextMusicIdx = (nextMusicIdx + 1) % targetMusicVec.size();
-        break;
       }
+      break;
     } else {
       nextMusicIdx = (nextMusicIdx + 1) % targetMusicVec.size();
     }

@@ -41,7 +41,7 @@ void Ray::UpdatePath(
     collisionWithWall =
         GetWallCollisionPoint(currentPos, currentDir, boundaries);
     path.emplace_back(collisionWithWall);
-    if (++count == 5) {
+    if (++count == 6) {
       return;
     }
     // If the ray hits the upper wall, then the path ends.
