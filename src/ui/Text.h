@@ -108,6 +108,8 @@ class Text {
   bool UpdateTypingEffect(float dt);
   void SetLineSpacingFactor(float factor);
   void SetAdditionalPadding(float padding);
+  bool fadeOut(float dt, glm::vec2 direction = glm::vec2(0.f, -1.f),
+               float movingSpeed = 4.f * kBaseUnit, float fadingSpeed = 0.8f);
   void Draw(std::shared_ptr<TextRenderer> textRenderer,
             bool textCenteringEnabled = false, bool textRightAligned = false);
 

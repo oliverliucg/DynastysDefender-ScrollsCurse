@@ -133,13 +133,16 @@ bool Bubble::Move(float deltaTime, glm::vec4 boundaries,
     }
   }
   if (isPenetrating) {
-    // Set the velocity to 0
+    // Set the velocity to 0.
     velocity = glm::vec2(0.0f, 0.0f);
   }
+  this->SetPosition(position);
   return isPenetrating;
 }
 
-void Bubble::Move(float deltaTime) { position += velocity * deltaTime; }
+void Bubble::Move(float deltaTime) {
+  this->SetPosition(position + velocity * deltaTime);
+}
 
 void Bubble::SetRadius(float radius) {
   glm::vec2 center = GetCenter();

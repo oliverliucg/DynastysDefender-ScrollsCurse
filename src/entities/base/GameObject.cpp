@@ -154,6 +154,7 @@ glm::vec3 GameObject::GetColorWithoutAlpha() const {
   return glm::vec3(color.r, color.g, color.b);
 }
 float GameObject::GetAlpha() const { return color.a; }
+Texture2D GameObject::GetTexture() const { return sprite; }
 Color GameObject::GetColorEnum() const {
   return colorToEnum(glm::vec3(color.r, color.g, color.b));
 }

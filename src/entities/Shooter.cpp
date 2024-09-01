@@ -24,20 +24,20 @@ Shooter::Shooter(glm::vec2 pos, glm::vec2 size, glm::vec2 rotationPivot,
                  glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), sprite) {
   glm::vec2 rotationCenter(position + rotationPivot * size);
   glm::vec2 tail(position + tailPivot * size);
-  carriedBubble = Bubble(glm::vec2(rotationCenter.x - kBubbleRadius,
-                                   rotationCenter.y - kBubbleRadius),
-                         kBubbleRadius, glm::vec2(0.0f, 0.0f),
-                         glm::vec4(0.0f, 1.0f, 0.0f, 0.8f),
-                         ResourceManager::GetInstance().GetTexture("bubble"));
-  nextBubble = Bubble(glm::vec2(tail.x - kBaseUnit / 2, tail.y - kBaseUnit / 2),
-                      kBaseUnit / 2, glm::vec2(0.0f, 0.0f),
-                      glm::vec4(0.0f, 0.0f, 1.0f, 0.7f),
-                      ResourceManager::GetInstance().GetTexture("bubble"));
+  carriedBubble = std::make_unique<Bubble>(
+      glm::vec2(rotationCenter.x - kBubbleRadius,
+                rotationCenter.y - kBubbleRadius),
+      kBubbleRadius, glm::vec2(0.0f, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.8f),
+      ResourceManager::GetInstance().GetTexture("bubble"));
+  nextBubble = std::make_unique<Bubble>(
+      glm::vec2(tail.x - kBaseUnit / 2, tail.y - kBaseUnit / 2), kBaseUnit / 2,
+      glm::vec2(0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 1.0f, 0.7f),
+      ResourceManager::GetInstance().GetTexture("bubble"));
   // Calculate the rotation pivot for the next bubble. This rotation pivot is
   // the point that the next bubble rotates around.
-  glm::vec2 distance = rotationCenter - nextBubble.GetPosition();
-  glm::vec2 rotationPivotForNextBubble(distance / nextBubble.GetSize());
-  nextBubble.SetRotationPivot(rotationPivotForNextBubble);
+  glm::vec2 distance = rotationCenter - nextBubble->GetPosition();
+  glm::vec2 rotationPivotForNextBubble(distance / nextBubble->GetSize());
+  nextBubble->SetRotationPivot(rotationPivotForNextBubble);
   // Initialize the ray
   // ray = Ray(rotationCenter, GetShootingDirection(),
   //          glm::vec4(0.24314, 0.08627, 0.00392, 1.0f));
@@ -46,46 +46,62 @@ Shooter::Shooter(glm::vec2 pos, glm::vec2 size, glm::vec2 rotationPivot,
 }
 
 void Shooter::RefreshCarriedBubbleColor(glm::vec3 color) {
-  carriedBubble.SetColor(glm::vec4(color, carriedBubble.GetColor().a));
+  carriedBubble->SetColor(glm::vec4(color, carriedBubble->GetColor().a));
   //// Set the color for the ray
-  // ray.SetColor(glm::vec4(glm::vec3(carriedBubble.GetColorWithoutAlpha()), 1.0f));
+  // ray.SetColor(glm::vec4(glm::vec3(carriedBubble->GetColorWithoutAlpha()), 1.0f));
 }
 
 void Shooter::RefreshNextBubbleColor(glm::vec3 color) {
-  nextBubble.SetColor(glm::vec4(color, nextBubble.GetColor().a));
+  nextBubble->SetColor(glm::vec4(color, nextBubble->GetColor().a));
 }
 
-std::unique_ptr<Bubble> Shooter::ShootBubble() {
-  std::unique_ptr<Bubble> copiedBubble =
-      std::make_unique<Bubble>(carriedBubble);
-  copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *
-                            kVelocityUnit);
-  // RGB
-  glm::vec3 rgb(nextBubble.GetColor().r, nextBubble.GetColor().g,
-                nextBubble.GetColor().b);
-  carriedBubble.SetColor(glm::vec4(rgb, carriedBubble.GetColor().a));
-  // Create a new color for the next bubble
-  nextBubble.SetColor(GetNewBubbleColor());
-  //// Set the color for the ray
-  // ray.SetColor(glm::vec4(glm::vec3(carriedBubble.GetColorWithoutAlpha()), 1.0f));
-  return copiedBubble;
+void Shooter::EquipPowerUp(std::unique_ptr<PowerUp> powerUp) {
+  // Set the radius for the power up to be the same as the carried bubble
+  powerUp->SetRadius(this->carriedBubble->GetRadius());
+  // Set the position for the power up to be the same as the carried bubble
+  powerUp->SetPosition(this->carriedBubble->GetPosition());
+  // Increase the rotation speed of dagger(s).
+  powerUp->SetDaggerRotationSpeed(0.8f);
+  // Equip the power up to the shooter
+  this->carriedBubble = std::move(powerUp);
 }
+
+// std::unique_ptr<Bubble> Shooter::ShootBubble() {
+//   std::unique_ptr<Bubble> copiedBubble =
+//       std::make_unique<Bubble>(carriedBubble);
+//   copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *
+//                             kVelocityUnit);
+//   // RGB
+//   glm::vec3 rgb(nextBubble->GetColor().r, nextBubble->GetColor().g,
+//                 nextBubble->GetColor().b);
+//   carriedBubble->SetColor(glm::vec4(rgb, carriedBubble->GetColor().a));
+//   // Create a new color for the next bubble
+//   nextBubble->SetColor(GetNewBubbleColor());
+//   //// Set the color for the ray
+//   //
+//   ray.SetColor(glm::vec4(glm::vec3(carriedBubble->GetColorWithoutAlpha()), 1.0f));
+//   return copiedBubble;
+// }
 
 std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
   // Play the sound effect for shooting a bubble
   SoundEngine::GetInstance().PlaySound("bubble_pop", false);
-  std::unique_ptr<Bubble> copiedBubble =
-      std::make_unique<Bubble>(carriedBubble);
+
+  std::unique_ptr<Bubble> copiedBubble = std::move(carriedBubble);
   copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *
                             kVelocityUnit);
+  carriedBubble = std::make_unique<Bubble>(*copiedBubble);
+  carriedBubble->SetAlpha(0.8f);
+  carriedBubble->SetTexture(nextBubble->GetTexture());
+
   // RGB
-  glm::vec3 rgb(nextBubble.GetColor().r, nextBubble.GetColor().g,
-                nextBubble.GetColor().b);
-  carriedBubble.SetColor(glm::vec4(rgb, carriedBubble.GetColor().a));
+  glm::vec3 rgb(nextBubble->GetColor().r, nextBubble->GetColor().g,
+                nextBubble->GetColor().b);
+  carriedBubble->SetColor(glm::vec4(rgb, carriedBubble->GetColor().a));
   // Create a new color for the next bubble
-  nextBubble.SetColor(nextBubbleColor);
+  nextBubble->SetColor(nextBubbleColor);
   //// Set the color for the ray
-  // ray.SetColor(glm::vec4(glm::vec3(carriedBubble.GetColorWithoutAlpha()), 1.0f));
+  // ray.SetColor(glm::vec4(glm::vec3(carriedBubble->GetColorWithoutAlpha()), 1.0f));
   return copiedBubble;
 }
 
@@ -105,7 +121,7 @@ void Shooter::SetRoll(float roll) {
   // Set the roll for the shooter
   GameObject::SetRoll(roll);
   // Set the roll for the next bubble
-  nextBubble.SetRoll(roll);
+  nextBubble->SetRoll(roll);
   // Set the direction for the ray
   ray.SetDirection(GetShootingDirection());
 }
@@ -116,28 +132,40 @@ void Shooter::SetPosition(glm::vec2 position) {
   // Set the position for the carried bubble
   glm::vec2 rotationCenter(position + rotationPivot * size);
   // Get the position offset between the nextBubble and the carriedBubble
-  glm::vec2 offset = nextBubble.GetPosition() - carriedBubble.GetPosition();
-  carriedBubble.SetPosition(glm::vec2(rotationCenter.x - kBubbleRadius,
-                                      rotationCenter.y - kBubbleRadius));
+  glm::vec2 offset = nextBubble->GetPosition() - carriedBubble->GetPosition();
+  carriedBubble->SetPosition(glm::vec2(rotationCenter.x - kBubbleRadius,
+                                       rotationCenter.y - kBubbleRadius));
   // Set the position for the next bubble based on its offset from the carried
   // bubble
-  nextBubble.SetPosition(carriedBubble.GetPosition() + offset);
+  nextBubble->SetPosition(carriedBubble->GetPosition() + offset);
   // Set the position for the ray
   ray.SetPosition(rotationCenter);
 }
 
-glm::vec2 Shooter::GetShootingDirection() {
+bool Shooter::HasPowerUp() const {
+  return dynamic_cast<PowerUp*>(carriedBubble.get()) != nullptr;
+}
+
+void Shooter::UpdatePowerUp(float dt) {
+  assert(HasPowerUp() && "The carried bubble is not a power up.");
+  // Cast the carried bubble to a power up
+  PowerUp* powerUp = dynamic_cast<PowerUp*>(carriedBubble.get());
+  // Update the power up
+  powerUp->Update(dt);
+}
+
+glm::vec2 Shooter::GetShootingDirection() const {
   float radians = roll - glm::pi<float>() / 2;
   return glm::vec2(glm::cos(radians), glm::sin(radians));
 }
 
-glm::vec4 Shooter::GetNewBubbleColor() {
+glm::vec4 Shooter::GetNewBubbleColor() const {
   // Get a random color from Color predefined in the resource manager
   int randomColorIdx =
       generateRandomInt<int>(0, static_cast<int>(colorMap.size()) - 1);
   Color randomColor = static_cast<Color>(randomColorIdx);
   // Set the color
-  return glm::vec4(colorMap[randomColor], nextBubble.GetColor().a);
+  return glm::vec4(colorMap[randomColor], nextBubble->GetColor().a);
 }
 
 glm::vec4 Shooter::GetNewBubbleColor(
@@ -167,27 +195,29 @@ glm::vec4 Shooter::GetNewBubbleColor(
   for (auto color : colorProbalibity) {
     sum += color.second;
     if (random <= sum) {
-      return glm::vec4(colorMap[color.first], nextBubble.GetColor().a);
+      return glm::vec4(colorMap[color.first], nextBubble->GetColor().a);
     }
   }
-  return glm::vec4(colorMap[Color::White], nextBubble.GetColor().a);
+  return glm::vec4(colorMap[Color::White], nextBubble->GetColor().a);
 }
 
-const Bubble& Shooter::GetCarriedBubble() const { return carriedBubble; }
+const Bubble& Shooter::GetCarriedBubble() const { return *carriedBubble; }
+
+const Bubble& Shooter::GetNextBubble() const { return *nextBubble; }
 
 void Shooter::UpdateCarriedBubbleRadius(float radius) {
   // Update the radius for the carried bubble
-  carriedBubble.SetRadius(kBubbleRadius);
+  carriedBubble->SetRadius(kBubbleRadius);
 }
 
 void Shooter::SwapCarriedBubbleAndNextBubble() {
-  glm::vec3 nextBubbleColor = nextBubble.GetColorWithoutAlpha();
-  glm::vec3 carriedBubbleColor = carriedBubble.GetColorWithoutAlpha();
+  glm::vec3 nextBubbleColor = nextBubble->GetColorWithoutAlpha();
+  glm::vec3 carriedBubbleColor = carriedBubble->GetColorWithoutAlpha();
   if (nextBubbleColor == carriedBubbleColor) {
     return;
   }
-  carriedBubble.SetColorWithoutAlpha(nextBubbleColor);
-  nextBubble.SetColorWithoutAlpha(carriedBubbleColor);
+  carriedBubble->SetColorWithoutAlpha(nextBubbleColor);
+  nextBubble->SetColorWithoutAlpha(carriedBubbleColor);
   SoundEngine::GetInstance().PlaySound("color_switch", false);
 }
 
@@ -195,9 +225,9 @@ void Shooter::Draw(std::shared_ptr<Renderer> renderer) {
   // Draw the shooter
   GameObject::Draw(renderer);
   // Draw the bubble that the shooter is carrying
-  carriedBubble.Draw(renderer);
+  carriedBubble->Draw(renderer);
   // Draw the next bubble
-  nextBubble.Draw(renderer);
+  nextBubble->Draw(renderer);
 }
 
 Ray& Shooter::GetRay() { return ray; }

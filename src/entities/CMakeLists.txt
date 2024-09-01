@@ -8,7 +8,7 @@ add_library(entities_lib STATIC
 	Ray.cpp
 	Arrow.cpp
 	Bubble.cpp
-)
+	PowerUp.cpp)
 
 # Link the entities library with the required libraries
 target_link_libraries(entities_lib

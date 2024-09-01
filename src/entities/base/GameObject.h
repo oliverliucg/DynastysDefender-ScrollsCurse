@@ -48,6 +48,7 @@ class GameObject {
   glm::vec4 GetColor() const;
   glm::vec3 GetColorWithoutAlpha() const;
   float GetAlpha() const;
+  Texture2D GetTexture() const;
   Color GetColorEnum() const;
   int GetID() const;
 

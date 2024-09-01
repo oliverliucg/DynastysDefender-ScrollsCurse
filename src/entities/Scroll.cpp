@@ -287,14 +287,13 @@ void Scroll::Close(float dt, float targetSilkLen) {
   float diff = this->GetSilkLen() - targetSilkLen;
   // closing distance based on the velocity
   float distance = velocityForClosing * dt;
-  if (diff > 0.f) {
-    if (diff <= distance) {
-      this->AddSilkLen(-diff);
-      this->SetState(ScrollState::CLOSED);
-      SoundEngine::GetInstance().PlaySound("scroll_closed", false);
-    } else {
-      this->AddSilkLen(-distance);
-    }
+  assert(!areFloatsLess(diff, 0.f) && "The difference should be non-negative.");
+  if (diff <= distance) {
+    this->AddSilkLen(-diff);
+    this->SetState(ScrollState::CLOSED);
+    SoundEngine::GetInstance().PlaySound("scroll_closed", false);
+  } else {
+    this->AddSilkLen(-distance);
   }
   if (!SoundEngine::GetInstance().IsPlaying("scroll_close") &&
       this->state == ScrollState::CLOSING) {

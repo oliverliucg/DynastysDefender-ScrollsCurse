@@ -132,6 +132,9 @@ void GameManager::Init() {
   resourceManager.LoadTexture("textures/scroll_paper1.png", true,
                               "scrollpaper");
   resourceManager.LoadTexture("textures/scroll_upper.png", true, "scrollupper");
+  resourceManager.LoadTexture("textures/stone_plate_1.png", true, "stoneplate");
+  resourceManager.LoadTexture("textures/bronze_ware_1.png", true, "spindle");
+  resourceManager.LoadTexture("textures/dagger.png", true, "dagger");
 
   // Create game board
   gameBoard = std::make_unique<GameBoard>(
@@ -298,6 +301,13 @@ void GameManager::Init() {
   shooter->SetPosition(glm::vec2(
       this->width / 2 - shooter->GetCarriedBubble().GetRadius(),
       gameBoard->GetPosition().y + gameBoard->GetSize().y * 0.800117578f));
+
+  // Initialize powerup
+  powerUp = std::make_unique<PowerUp>(
+      glm::vec2(this->width * 0.6901f, this->height * 0.1852f),
+      this->height * 0.2083f, resourceManager.GetTexture("stoneplate"),
+      resourceManager.GetTexture("spindle"),
+      resourceManager.GetTexture("dagger"), 0);
 
   // Initialize particles
   shadowTrailSystem = std::make_unique<ShadowTrailSystem>(
@@ -1040,10 +1050,25 @@ void GameManager::ProcessInput(float dt) {
       if (this->targetState == GameState::UNDEFINED) {
         std::unique_ptr<Bubble> bubble =
             shooter->ShootBubble(GetNextBubbleColor());
+        // If the bubble is a poewrup, then we increase the daggers' rotation
+        // speed.
+        if (auto* powerUpBubble = dynamic_cast<PowerUp*>(bubble.get())) {
+          powerUpBubble->SetDaggerRotationSpeed(20.f);
+        }
         moves.emplace(bubble->GetID(), std::move(bubble));
       }
       //// update the gameboard color based on the color of the ray.
       // gameBoard->UpdateColor(shooter->GetRay().GetColorWithoutAlpha());
+    } else if (this->keys[GLFW_KEY_LEFT_ALT] &&
+               this->keysLocked[GLFW_KEY_LEFT_ALT] == false) {
+      this->keysLocked[GLFW_KEY_LEFT_ALT] = true;
+      // Equip the powerup
+      if (powerUp->GetPowerUpState() == PowerUpState::kActive) {
+        auto clonedPowerUp = std::make_unique<PowerUp>(*powerUp);
+        this->shooter->EquipPowerUp(std::move(clonedPowerUp));
+        // Reset the powerup
+        powerUp->Reset();
+      }
     }
   } else if (this->state == GameState::STORY) {
   } else if (this->state == GameState::CONTROL) {
@@ -1423,12 +1448,14 @@ void GameManager::Update(float dt) {
 
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
-      postProcessor->SetChaos(true);
-      postProcessor->SetSampleOffsets(1.f / 20000.f);
+      // postProcessor->SetChaos(true);
+      // postProcessor->SetSampleOffsets(1.f / 20000.f);
       this->SetToTargetState();
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
+    this->SetState(GameState::INITIAL);
+    this->GoToState(GameState::STORY);
     SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (soundEngine.IsPlaying("white_noise") &&
         soundEngine.GetPlaybackPosition("white_noise") > 0.45f) {
@@ -1868,136 +1895,233 @@ void GameManager::Update(float dt) {
     auto it = moves.begin();
     while (it != moves.end()) {
       auto& [id_ref, bubble] = *it++;
+
+      // Check if the moving bubble is a powerup.
+      if (auto* movingPowerUp = dynamic_cast<PowerUp*>(bubble.get())) {
+        movingPowerUp->Update(dt);
+      }
+
       int id = id_ref;
       bool isPenetrating = bubble->Move(dt, gameBoardBoundaries, statics);
       if (!isPenetrating) {
         continue;
       }
-
-      // We would like to adjust the postion of the bubble to make it have at
-      // least two static neighbors if possible.
-      std::vector<int> candidateIds;
-      std::vector<int> neighborIds = GetNeighborIds(bubble);
-
-      bool funeTuneDone = false;
-
-      // If the new bubble only has 1 neighbor, then we try to adjust the
-      // position of the bubble to make it have more neighbors.
-      if (neighborIds.size() == 1) {
-        // Fine tuning the position of the collidef moving bubbles to the best
-        // free slot.
-        int staticBubbleId = neighborIds[0];
-        funeTuneDone = FineTuneToNeighbor(id, staticBubbleId);
-        if (!funeTuneDone) {
-          funeTuneDone = FineTuneToClose(id, staticBubbleId);
-        }
-      } else if (neighborIds.size() == 0) {
-        // If the bubble has no neighbor, it must be at the top of the game
-        // board.
-        assert(IsAtUpperBoundary(bubble->GetPosition()) &&
-               "The bubble should be at the top of the game board.");
-        // Fine tuning the position of the collidef moving bubbles to the best
-        // free slot at the upper boundary of the game board.
-        funeTuneDone = FineTuneToCloseUpper(id);
-      }
-
-      if (!funeTuneDone) {
-        FineTuneToCorrectPosition(id);
-      }
-
-      // Add the bubble to the static bubbles
-      statics[id] = std::move(bubble);
-      ++colorCount[statics[id]->GetColorEnum()];
-
-      // Remove the bubble from the moving bubbles
-      moves[id] = nullptr;
-      moves.erase(id);
-      shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
-      // Check if the bubble connect to a group of bubbles of the same color.
-      // And if they together form a group of more than 2 bubbles, then we
-      // remove them.
-      std::vector<int> connectedBubbleIds = FindConnectedBubblesOfSameColor(id);
-      if (connectedBubbleIds.size() > 2) {
-        // Reset the weight of the current bubble's color
-        colorWeight.at(statics[id]->GetColorEnum()) = 1.f;
-        // Remove the connected bubbles from the static bubbles and push them
-        // into explodings.
-        for (int connectedBubbleId : connectedBubbleIds) {
-          --colorCount[statics[connectedBubbleId]->GetColorEnum()];
-          explodings[connectedBubbleId] = std::move(statics[connectedBubbleId]);
-          statics[connectedBubbleId] = nullptr;
-          statics.erase(connectedBubbleId);
-          shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
-        }
-
-        // Find all the bubbles that are falling after the explosion. A bubble
-        // is falling if it is not connected to the top wall or the static
-        // bubbles.
-        std::vector<int> fallingIds = FindAllFallingBubbles();
-
-        // Remove the falling bubbles from the static bubbles and push them into
-        // falling.
-        for (int fallingId : fallingIds) {
-          // Reset the weight of the falling bubble's color
-          colorWeight.at(statics[fallingId]->GetColorEnum()) = 1.f;
-          // the falling bubble should be in the statics.
-          assert(statics.count(fallingId) > 0 &&
+      if (auto* movingPowerUp = dynamic_cast<PowerUp*>(bubble.get())) {
+        for (auto& toBeDestroyedId : movingPowerUp->GetBubblesToBeDestroyed()) {
+          assert(statics.count(toBeDestroyedId) > 0 &&
                  "Failed to find the bubble by ID.");
-          --colorCount[statics[fallingId]->GetColorEnum()];
-          fallings.emplace(fallingId, std::move(statics[fallingId]));
-          // Remove the falling bubble from the static bubbles.
-          statics[fallingId] = nullptr;
-          statics.erase(fallingId);
+          --colorCount[statics[toBeDestroyedId]->GetColorEnum()];
+          explodings[toBeDestroyedId] = std::move(statics[toBeDestroyedId]);
+          // Reset the weight of the exploding bubble's color to 1.
+          colorWeight.at(explodings[toBeDestroyedId]->GetColorEnum()) = 1.f;
+          statics.erase(toBeDestroyedId);
+        }
+        if (!movingPowerUp->GetBubblesToBeDestroyed().empty()) {
+          // Find all the bubbles that are falling after the explosion. A bubble
+          // is falling if it is not connected to the top wall or the static
+          // bubbles.
+          std::vector<int> fallingIds = FindAllFallingBubbles();
+          // Remove the falling bubbles from the static bubbles and push them
+          // into falling.
+          for (int fallingId : fallingIds) {
+            // Reset the weight of the falling bubble's color
+            colorWeight.at(statics[fallingId]->GetColorEnum()) = 1.f;
+            // the falling bubble should be in the statics.
+            assert(statics.count(fallingId) > 0 &&
+                   "Failed to find the bubble by ID.");
+            --colorCount[statics[fallingId]->GetColorEnum()];
+            fallings.emplace(fallingId, std::move(statics[fallingId]));
+            // Remove the falling bubble from the static bubbles.
+            statics[fallingId] = nullptr;
+            statics.erase(fallingId);
+          }
+          // Calculate the score based on the number of bubbles exploded or
+          // falling
+          int totalScoreIncrement = 0;
+          if (!explodings.empty()) {
+            totalScoreIncrement += this->CalculateScore(
+                explodings.size(), explodings.begin()->second->GetRadius(),
+                BubbleState::Exploding,
+                this->timer->GetEventUsedTime("playtime"));
+          }
+          if (!fallings.empty()) {
+            totalScoreIncrement += this->CalculateScore(
+                fallings.size(), fallings.begin()->second->GetRadius(),
+                BubbleState::Falling,
+                this->timer->GetEventUsedTime("playtime"));
+          }
+          if (totalScoreIncrement > 0) {
+            // Retrieve the exploding bubble that is closest to the stoneplate.
+            int closestExplodingBubbleID =
+                movingPowerUp->GetBubblesToBeDestroyed().front();
+            // Create a score text to show the score increment.
+            AddScoreIncrementText(
+                totalScoreIncrement,
+                explodings.at(closestExplodingBubbleID)->GetPosition());
+          }
+
+          // clear all the exploding bubbles.
+          std::vector<ExplosionInfo> explosionInfo;
+          for (auto& [id, bubble] : explodings) {
+            explosionInfo.emplace_back(bubble->GetCenter(), bubble->GetColor(),
+                                       isDeepColor(bubble->GetColor()), 150,
+                                       bubble->GetRadius() * 0.6f);
+          }
+          explosionSystem->CreateExplosions(explosionInfo);
+          SoundEngine::GetInstance().PlaySound("bubble_explode", false);
+          explodings.clear();
+          // Destroy the powerup when running out of daggers.
+          if (movingPowerUp->GetNumOfDaggers() == 0) {
+            moves[id] = nullptr;
+            moves.erase(id);
+          }
           shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
         }
+      } else {
+        // We would like to adjust the postion of the bubble to make it have at
+        // least two static neighbors if possible.
+        std::vector<int> neighborIds = GetNeighborIds(bubble);
 
-        // Calculate the score based on the number of bubbles exploded or
-        // falling
-        if (!explodings.empty()) {
-          this->CalculateScore(explodings.size(),
-                               explodings.begin()->second->GetRadius(),
-                               BubbleState::Exploding,
-                               this->timer->GetEventUsedTime("playtime"));
-        }
-        if (!fallings.empty()) {
-          this->CalculateScore(
-              fallings.size(), fallings.begin()->second->GetRadius(),
-              BubbleState::Falling, this->timer->GetEventUsedTime("playtime"));
-        }
+        bool funeTuneDone = false;
 
-        // clear all the exploding bubbles.
-        std::vector<ExplosionInfo> explosionInfo;
-        for (auto& [id, bubble] : explodings) {
-          explosionInfo.emplace_back(bubble->GetCenter(), bubble->GetColor(),
-                                     isDeepColor(bubble->GetColor()), 150,
-                                     bubble->GetRadius() * 0.6f);
-        }
-        explosionSystem->CreateExplosions(explosionInfo);
-        SoundEngine::GetInstance().PlaySound("bubble_explode", false);
-        explodings.clear();
-      } else if (connectedBubbleIds.size() == 2) {
-        // Triple the weight of the current bubble's color when the number of
-        // static bubbles are greater than 3.
-        if (statics.size() > 3) {
-          colorWeight.at(statics[id]->GetColorEnum()) *= 3.f;
-          // Further triple the weight of the current bubble's color if the
-          // distance to the shooter's center is within the ellipse.
-          Ellipse ellipse(shooter->GetCenter(), 6.f * kBaseUnit,
-                          10.f * kBaseUnit);
-          if (ellipse.isWithin(statics[id]->GetCenter())) {
-            colorWeight.at(statics[id]->GetColorEnum()) *= 3.f;
+        // If the new bubble only has 1 neighbor, then we try to adjust the
+        // position of the bubble to make it have more neighbors.
+        if (neighborIds.size() == 1) {
+          // Fine tuning the position of the collidef moving bubbles to the best
+          // free slot.
+          int staticBubbleId = neighborIds[0];
+          funeTuneDone = FineTuneToNeighbor(id, staticBubbleId);
+          if (!funeTuneDone) {
+            funeTuneDone = FineTuneToClose(id, staticBubbleId);
           }
-        } else {
-          colorWeight.at(statics[id]->GetColorEnum()) = 1.f;
+        } else if (neighborIds.size() == 0) {
+          // If the bubble has no neighbor, it must be at the top of the game
+          // board.
+          assert(IsAtUpperBoundary(bubble->GetPosition()) &&
+                 "The bubble should be at the top of the game board.");
+          // Fine tuning the position of the collidef moving bubbles to the best
+          // free slot at the upper boundary of the game board.
+          funeTuneDone = FineTuneToCloseUpper(id);
         }
-      } else if (connectedBubbleIds.size() < 2) {
-        // Halve the weight of the current bubble's color
-        colorWeight.at(statics[id]->GetColorEnum()) /= 3.f;
-      }
 
+        if (!funeTuneDone) {
+          FineTuneToCorrectPosition(id);
+        }
+
+        // Add the bubble to the static bubbles
+        statics[id] = std::move(bubble);
+        ++colorCount[statics[id]->GetColorEnum()];
+
+        // Remove the bubble from the moving bubbles
+        moves[id] = nullptr;
+        moves.erase(id);
+        shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
+        // Check if the bubble connect to a group of bubbles of the same color.
+        // And if they together form a group of more than 2 bubbles, then we
+        // remove them.
+        std::vector<int> connectedBubbleIds =
+            FindConnectedBubblesOfSameColor(id);
+        if (connectedBubbleIds.size() > 2) {
+          // Reset the weight of the current bubble's color
+          colorWeight.at(statics[id]->GetColorEnum()) = 1.f;
+          // Remove the connected bubbles from the static bubbles and push them
+          // into explodings.
+          for (int connectedBubbleId : connectedBubbleIds) {
+            --colorCount[statics[connectedBubbleId]->GetColorEnum()];
+            explodings[connectedBubbleId] =
+                std::move(statics[connectedBubbleId]);
+            statics[connectedBubbleId] = nullptr;
+            statics.erase(connectedBubbleId);
+            shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
+          }
+
+          // Find all the bubbles that are falling after the explosion. A bubble
+          // is falling if it is not connected to the top wall or the static
+          // bubbles.
+          std::vector<int> fallingIds = FindAllFallingBubbles();
+
+          // Remove the falling bubbles from the static bubbles and push them
+          // into falling.
+          for (int fallingId : fallingIds) {
+            // Reset the weight of the falling bubble's color
+            colorWeight.at(statics[fallingId]->GetColorEnum()) = 1.f;
+            // the falling bubble should be in the statics.
+            assert(statics.count(fallingId) > 0 &&
+                   "Failed to find the bubble by ID.");
+            --colorCount[statics[fallingId]->GetColorEnum()];
+            fallings.emplace(fallingId, std::move(statics[fallingId]));
+            // Remove the falling bubble from the static bubbles.
+            statics[fallingId] = nullptr;
+            statics.erase(fallingId);
+            shooter->GetRay().UpdatePath(gameBoardBoundaries, this->statics);
+          }
+
+          // Calculate the score based on the number of bubbles exploded or
+          // falling
+          int totalScoreIncrement = 0;
+          if (!explodings.empty()) {
+            totalScoreIncrement += this->CalculateScore(
+                explodings.size(), explodings.begin()->second->GetRadius(),
+                BubbleState::Exploding,
+                this->timer->GetEventUsedTime("playtime"));
+          }
+          if (!fallings.empty()) {
+            totalScoreIncrement += this->CalculateScore(
+                fallings.size(), fallings.begin()->second->GetRadius(),
+                BubbleState::Falling,
+                this->timer->GetEventUsedTime("playtime"));
+          }
+          if (totalScoreIncrement > 0) {
+            // Create a score text to show the score increment.
+            AddScoreIncrementText(totalScoreIncrement,
+                                  explodings.begin()->second->GetPosition());
+          }
+
+          // clear all the exploding bubbles.
+          std::vector<ExplosionInfo> explosionInfo;
+          for (auto& [id, bubble] : explodings) {
+            explosionInfo.emplace_back(bubble->GetCenter(), bubble->GetColor(),
+                                       isDeepColor(bubble->GetColor()), 150,
+                                       bubble->GetRadius() * 0.6f);
+          }
+          explosionSystem->CreateExplosions(explosionInfo);
+          SoundEngine::GetInstance().PlaySound("bubble_explode", false);
+          explodings.clear();
+          // Insert dagger into the stone plate.
+          powerUp->InsertDagger();
+        } else if (connectedBubbleIds.size() == 2) {
+          // Triple the weight of the current bubble's color when the number of
+          // static bubbles are greater than 3.
+          if (statics.size() > 3) {
+            colorWeight.at(statics[id]->GetColorEnum()) *= 3.f;
+            // Further triple the weight of the current bubble's color if the
+            // distance to the shooter's center is within the ellipse.
+            Ellipse ellipse(shooter->GetCenter(), 6.f * kBaseUnit,
+                            10.f * kBaseUnit);
+            if (ellipse.isWithin(statics[id]->GetCenter())) {
+              colorWeight.at(statics[id]->GetColorEnum()) *= 3.f;
+            }
+          } else {
+            colorWeight.at(statics[id]->GetColorEnum()) = 1.f;
+          }
+          // If the color of the two connected bubbles are not the same, then we
+          // reset the power up.
+          if (!isSameColor(
+                  statics[connectedBubbleIds[0]]->GetColorWithoutAlpha(),
+                  statics[connectedBubbleIds[1]]->GetColorWithoutAlpha())) {
+            powerUp->Reset();
+          }
+
+        } else if (connectedBubbleIds.size() < 2) {
+          // Halve the weight of the current bubble's color
+          colorWeight.at(statics[id]->GetColorEnum()) /= 3.f;
+          // Reset the power up.
+          powerUp->Reset();
+        }
+      }
       // If all statuc bubbles are removed, we set the GameState to PREPAREING
       // and switch to the next level.
-      if (statics.empty()) {
+      if (statics.empty() && this->isLevelFailed == false) {
         for (const auto& [color, weight] : colorWeight) {
           assert(weight == 1.f &&
                  "The weight of each color should be 1.f when succeeding the "
@@ -2057,7 +2181,7 @@ void GameManager::Update(float dt) {
     }
 
     // Check if the current level is failed.
-    if (this->IsLevelFailed()) {
+    if (!this->isLevelFailed && this->IsLevelFailed()) {
       // If the current level is failed, then we restart the current level.
       this->GoToState(GameState::PREPARING);
       this->scroll->SetState(ScrollState::CLOSING);
@@ -2114,6 +2238,16 @@ void GameManager::Update(float dt) {
         SetScrollState(ScrollState::OPENING);
       }
     }
+
+    // Update the next bubble color of the shooter if the color does not exist
+    // within the statics.
+    if (!statics.empty()) {
+      auto colorEnum = this->shooter->GetNextBubble().GetColorEnum();
+      if (colorCount.find(colorEnum) == colorCount.end() ||
+          colorCount.at(colorEnum) == 0) {
+        this->shooter->RefreshNextBubbleColor(GetNextBubbleColor());
+      }
+    }
   } else if (this->state == GameState::PREPARING) {
     this->scroll->SetTargetSilkLenForNarrowing(
         this->scroll->GetTargetSilkLenForOpening());
@@ -2123,7 +2257,7 @@ void GameManager::Update(float dt) {
       moves.clear();
       // If the static bubbles are empty, then retract the scroll, else the
       // scroll would be attacking the player.
-      if (statics.empty()) {
+      if (statics.empty() && !isLevelFailed) {
         this->scroll->SetState(ScrollState::RETRACTING);
       } else {
         this->scroll->SetState(ScrollState::ATTACKING);
@@ -2145,9 +2279,13 @@ void GameManager::Update(float dt) {
     if (statics.empty()) {
       // Generate random static bubbles
       GenerateRandomStaticBubbles();
+      // Reset the level failed flag.
+      this->isLevelFailed = false;
       // refresh the color of the carried bubble and the next bubble based the
       // existing colors of all static bubbles.
-      shooter->RefreshCarriedBubbleColor(GetNextBubbleColor());
+      if (!shooter->HasPowerUp()) {
+        shooter->RefreshCarriedBubbleColor(GetNextBubbleColor());
+      }
       shooter->RefreshNextBubbleColor(GetNextBubbleColor());
 
       // Get half total offset of the scroll narrowing
@@ -2651,6 +2789,25 @@ void GameManager::Update(float dt) {
       this->timer->CleanEvent("displayscore");
     }
   }
+
+  // Update powerup
+  if (gameCharacters["weiqing"]->GetState() == GameCharacterState::FIGHTING) {
+    powerUp->Update(dt);
+    if (this->shooter->HasPowerUp()) {
+      this->shooter->UpdatePowerUp(dt);
+    }
+  }
+
+  // Fading out the score increment texts if any.
+  if (!scoreIncrementTexts.empty()) {
+    std::vector<std::shared_ptr<Text>> scoreIncrementTextsTemp;
+    for (auto& scoreIncrementText : scoreIncrementTexts) {
+      if (!scoreIncrementText->fadeOut(dt)) {
+        scoreIncrementTextsTemp.emplace_back(scoreIncrementText);
+      }
+    }
+    std::swap(scoreIncrementTexts, scoreIncrementTextsTemp);
+  }
 }
 
 void GameManager::Render() {
@@ -2719,12 +2876,11 @@ void GameManager::Render() {
   // Background
   ResourceManager& resourceManager = ResourceManager::GetInstance();
   postProcessor->BeginRender();
-
   spriteRenderer->DrawSprite(resourceManager.GetTexture("background"),
                              glm::vec2(0, 0),
                              glm::vec2(this->width, this->height), 0.0f,
                              glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
+  powerUp->Draw(spriteRenderer);
   auto textRenderer = textRenderers.at(language);
 
   // Draw shadow particles
@@ -2940,6 +3096,11 @@ void GameManager::Render() {
         // Disable scissor test
         /*glDisable(GL_SCISSOR_TEST);*/
         handler.DisableScissorTest();
+
+        // Draw the score increment texts
+        for (const auto& scoreIncrementText : scoreIncrementTexts) {
+          scoreIncrementText->Draw(textRenderer);
+        }
 
         // Draw the time when the scroll is opened
         if (this->scroll->GetState() == ScrollState::OPENED) {
@@ -3200,6 +3361,9 @@ void GameManager::SetState(GameState newState) {
     configManager.SetScore(tempScore);
   } else if (this->state == GameState::INITIAL ||
              this->state == GameState::STORY) {
+    if (powerUp->GetPowerUpState() != PowerUpState::kInactive) {
+      powerUp->Reset();
+    }
     // Reset the background music to the main theme.
     SoundEngine& soundEngine = SoundEngine::GetInstance();
     /*std::string currentMusic = soundEngine.GetPlayingBackgroundMusic();
@@ -3501,7 +3665,7 @@ void GameManager::LoadTexts() {
             gameBoard->GetPosition().x + gameBoard->GetSize().x -
                 0.7f * kBaseUnit,
             gameBoard->GetPosition().y -
-                0.532f * this->scroll->GetTopRoller()->GetSize().y),
+                0.54f * this->scroll->GetTopRoller()->GetSize().y),
         /*lineWidth=*/gameBoard->GetSize().x);
     texts["time"]->AddParagraph(U"30");
     texts["time"]->SetScale(0.025f / kFontScale);
@@ -4771,6 +4935,9 @@ void GameManager::AdjustButtonsHorizontalPosition(
 }
 
 bool GameManager::IsLevelFailed() {
+  if (isLevelFailed) {
+    return true;
+  }
   if (this->state != GameState::ACTIVE ||
       this->targetState != GameState::UNDEFINED) {
     return false;
@@ -4783,14 +4950,14 @@ bool GameManager::IsLevelFailed() {
   // If part of the carried bubble is outside the actual upper boundary of the
   // game board, then the current level is failed.
   if (areFloatsLess(center.y - radius, gameBoard->GetValidPosition().y)) {
-    return true;
+    return isLevelFailed = true;
   }
   // If the carried bubble is overlapping with the static bubbles, then the
   // current level is failed.
   for (auto& [id, bubble] : statics) {
     if (glm::distance(center, bubble->GetCenter()) <
         radius + bubble->GetRadius()) {
-      return true;
+      return isLevelFailed = true;
     }
   }
   return false;
@@ -4881,9 +5048,6 @@ void GameManager::ResetGameCharacters() {
 
 int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
                                 BubbleState bubbleType, float timeUsed) {
-  if (numBubbles < 3) {
-    return 0;
-  }
   float score = 40.f - 0.5f * bubbleRadius +
                 0.5f * this->level * std::sqrt(this->level) -
                 timeUsed / std::sqrt(this->gameLevel.numInitialBubbles);
@@ -4898,7 +5062,7 @@ int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
     score *= 1.5f;
   }
   int totalIncrement = 0;
-  for (int i = 2; i < numBubbles; ++i) {
+  for (int i = 0; i < numBubbles; ++i) {
     if (i > 2) {
       score *= 1.2f;
     }
@@ -4908,6 +5072,20 @@ int GameManager::CalculateScore(int numBubbles, float bubbleRadius,
   // score *= numBubbles + 0.1f * (numBubbles - 2) * (numBubbles - 3);
   // scoreIncrements.push_back(static_cast<int>(std::ceil(score)));
   return totalIncrement;
+}
+
+void GameManager::AddScoreIncrementText(int scoreIncrement,
+                                        glm::vec2 scorePosition) {
+  // Create a score text to show the score increment.
+  std::shared_ptr<Text> scoreIncrementText = std::make_shared<Text>(
+      /*pos=*/scorePosition,
+      /*lineWidth=*/std::numeric_limits<float>::max());
+  scoreIncrementText->AddParagraph(U"{+" + intToU32String(scoreIncrement) +
+                                   U"}");
+  scoreIncrementText->SetScale(0.03f / kFontScale);
+  scoreIncrementText->SetColor(glm::vec3(1.0f, 0.0f, 0.847f));
+  scoreIncrementText->SetAlpha(1.0f);
+  this->scoreIncrementTexts.emplace_back(scoreIncrementText);
 }
 
 void GameManager::IncreaseScore(const int64_t score) {

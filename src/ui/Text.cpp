@@ -323,3 +323,21 @@ void Text::DisableTypingEffect() {
 
 void Text::SetLineSpacingFactor(float factor) { lineSpacingFactor = factor; }
 void Text::SetAdditionalPadding(float padding) { additionalPadding = padding; }
+
+bool Text::fadeOut(float dt, glm::vec2 direction, float movingSpeed,
+                   float fadingSpeed) {
+  assert(this->GetAlpha() > 0.f && "Text is already invisible");
+  // Move the text towards the target direction.
+  glm::vec2 newPosition = position + direction * movingSpeed * dt;
+  // Fade out the text.
+  float alpha = this->GetAlpha() - fadingSpeed * dt;
+  if (alpha < 0.f) {
+    alpha = 0.f;
+  }
+  this->SetPosition(newPosition);
+  this->SetAlpha(alpha);
+  if (alpha == 0.f) {
+    return true;
+  }
+  return false;
+}

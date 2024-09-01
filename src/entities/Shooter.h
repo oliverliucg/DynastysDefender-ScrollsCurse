@@ -5,6 +5,7 @@
 
 #include "Bubble.h"
 #include "GameObject.h"
+#include "PowerUp.h"
 #include "Ray.h"
 #include "ResourceManager.h"
 #include "SoundEngine.h"
@@ -25,15 +26,18 @@ class Shooter : public GameObject {
 
   Ray& GetRay();
 
-  // Shoots the bubble that the shooter is carrying.
-  // Returns a unique pointer to the bubble.
-  std::unique_ptr<Bubble> ShootBubble();
+  //// Shoots the bubble that the shooter is carrying.
+  //// Returns a unique pointer to the bubble.
+  // std::unique_ptr<Bubble> ShootBubble();
 
-  // Refresh the color of the carried bubble.
+  // Refreshes the color of the carried bubble.
   void RefreshCarriedBubbleColor(glm::vec3 color);
 
-  // Refresh the color of the next bubble.
+  // Refreshes the color of the next bubble.
   void RefreshNextBubbleColor(glm::vec3 color);
+
+  // Equips the power up to the shooter.
+  void EquipPowerUp(std::unique_ptr<PowerUp> powerUp);
 
   // Shoots the bubble that the shooter is carrying.
   // Returns a unique pointer to the bubble.
@@ -42,34 +46,43 @@ class Shooter : public GameObject {
   // Generates a new bubble for the shooter to carry.
   void GenerateBubble();
 
-  // Set roll for the shooter and the next bubble.
+  // Sets roll for the shooter and the next bubble.
   void SetRoll(float roll);
 
-  // Set the position of the shooter.
+  // Sets the position of the shooter.
   void SetPosition(glm::vec2 pos);
 
-  // Get the const bubble that the shooter is carrying
+  // Gets the const bubble that the shooter is carrying
   const Bubble& GetCarriedBubble() const;
 
-  // Get a new color for the next bubble based on the exsiting static bubbles.
+  // Gets the const bubble that the shooter is going to shoot next.
+  const Bubble& GetNextBubble() const;
+
+  // Gets a new color for the next bubble based on the exsiting static bubbles.
   glm::vec4 GetNewBubbleColor(
       const std::unordered_map<int, std::unique_ptr<Bubble>>& statics);
 
-  // Update carriedBubble radius.
+  // Checks if the shooter is carrying a power up.
+  bool HasPowerUp() const;
+
+  // Updates the powerup carried by the shooter.
+  void UpdatePowerUp(float dt);
+
+  // Updates carriedBubble radius.
   void UpdateCarriedBubbleRadius(float radius);
 
-  // Swap the carried bubble and the next bubble.
+  // Swaps the carried bubble and the next bubble.
   void SwapCarriedBubbleAndNextBubble();
 
  private:
   // The bubble that the shooter is carrying.
-  Bubble carriedBubble;
+  std::unique_ptr<Bubble> carriedBubble;
   // Anoter bubble that the shooter is going to shoot next.
-  Bubble nextBubble;
+  std::unique_ptr<Bubble> nextBubble;
   // The ray start from the center carriedBubble.
   Ray ray;
-  //  Get the shooting direction.
-  glm::vec2 GetShootingDirection();
-  // Get a new color for the next bubble.
-  glm::vec4 GetNewBubbleColor();
+  // Gets the shooting direction.
+  glm::vec2 GetShootingDirection() const;
+  // Gets a new color for the next bubble.
+  glm::vec4 GetNewBubbleColor() const;
 };

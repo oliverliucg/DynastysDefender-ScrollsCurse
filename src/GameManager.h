@@ -31,6 +31,7 @@
 #include "Page.h"
 #include "PartialTextureRenderer.h"
 #include "PostProcessor.h"
+#include "PowerUp.h"
 #include "RayRenderer.h"
 #include "ResourceManager.h"
 #include "ScissorBoxHandler.h"
@@ -122,8 +123,10 @@ class GameManager {
   float mouseX{0.f}, mouseY{0.f}, mouseLastX{0.f}, mouseLastY{0.f};
   float width, height;
   int level{1};
+  bool isLevelFailed{false};
   GameLevel gameLevel;
   int64_t score{0};
+  int comboCount{0};
   bool hideDefaultMouseCursor{false};
 
   GameManager(unsigned int width, unsigned int height);
@@ -163,6 +166,9 @@ class GameManager {
   // Shooter
   std::unique_ptr<Shooter> shooter;
 
+  // PowerUps
+  std::unique_ptr<PowerUp> powerUp;
+
   // Particles
   std::unique_ptr<ShadowTrailSystem> shadowTrailSystem;
   std::unique_ptr<ExplosionSystem> explosionSystem;
@@ -183,8 +189,11 @@ class GameManager {
   // Bubbles that are exploding.
   std::unordered_map<int, std::unique_ptr<Bubble>> explodings;
 
-  // Stores individual scores gained during game play
+  // Stores individual scores gained during game play.
   std::queue<int> scoreIncrements;
+
+  // Stores the scores' text objects.
+  std::vector<std::shared_ptr<Text>> scoreIncrementTexts;
 
   // Number of score increments to be reflected on the screen
   int numOfScoreIncrementsReady{0};
@@ -456,6 +465,8 @@ class GameManager {
   // the current round.
   int CalculateScore(int numBubbles, float bubbleRadius, BubbleState bubbleType,
                      float timeUsed);
+
+  void AddScoreIncrementText(int scoreIncrement, glm::vec2 scorePosition);
 
   // Increase the score by the given value.
   void IncreaseScore(const int64_t value);

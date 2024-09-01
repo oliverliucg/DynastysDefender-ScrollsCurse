@@ -46,21 +46,21 @@ class Bubble : public GameObject {
   // or bottom boundaries, it will bounce off. If it penetrates the top boundary
   // or it penetrates the static bubbles, its position will be adjusted to the
   // point of penetration and its velocity will be set to 0.
-  bool Move(float deltaTime, glm::vec4 boundaries,
-            std::unordered_map<int, std::unique_ptr<Bubble> >& statics);
+  virtual bool Move(float deltaTime, glm::vec4 boundaries,
+                    std::unordered_map<int, std::unique_ptr<Bubble> >& statics);
 
   // Move the bubble by the velocity vector. No boundary check.
   void Move(float deltaTime);
 
   // Getters and setters
-  void SetRadius(float radius);
+  virtual void SetRadius(float radius);
   float GetRadius() const;
   glm::vec2 GetCenter() const;
 
   // Apply gravity to the bubble.
   void ApplyGravity(float deltaTime);
 
- private:
+ protected:
   float radius{0.f};
   BubbleState state{BubbleState::kNormal};
 };
