@@ -66,6 +66,8 @@ bool PowerUp::Move(float deltaTime, glm::vec4 boundaries,
                    std::unordered_map<int, std::unique_ptr<Bubble> >& statics) {
   this->bubblesToBeDestroyed.clear();
   position += velocity * deltaTime;
+  isStonePlateHittingBoundary = false;
+  auto& soundEngine = SoundEngine::GetInstance();
   if (position.x < boundaries.x) {
     float deltaX = position.x - boundaries.x;
     float deltaY = velocity.y / velocity.x * deltaX;
@@ -74,6 +76,8 @@ bool PowerUp::Move(float deltaTime, glm::vec4 boundaries,
     velocity.x *= -1.0f;
     // Set the rotation direction of the dagger to the opposite of the current.
     daggerRotationSpeed *= -1.0f;
+    isStonePlateHittingBoundary = true;
+    soundEngine.PlaySound("wall_collide");
   } else if (position.x + size.x > boundaries.z) {
     float deltaX = position.x + size.x - boundaries.z;
     float deltaY = velocity.y / velocity.x * deltaX;
@@ -82,6 +86,8 @@ bool PowerUp::Move(float deltaTime, glm::vec4 boundaries,
     velocity.x *= -1.0f;
     // Set the rotation direction of the dagger to the opposite of the current.
     daggerRotationSpeed *= -1.0f;
+    isStonePlateHittingBoundary = true;
+    soundEngine.PlaySound("wall_collide");
   }
   if (position.y < boundaries.y) {
     float deltaY = position.y - boundaries.y;
@@ -89,12 +95,16 @@ bool PowerUp::Move(float deltaTime, glm::vec4 boundaries,
     position.y = boundaries.y;
     position.x -= deltaX;
     velocity.y *= -1.0f;
+    isStonePlateHittingBoundary = true;
+    soundEngine.PlaySound("wall_collide");
   } else if (position.y + size.y > boundaries.w) {
     float deltaY = position.y + size.y - boundaries.w;
     float deltaX = velocity.x / velocity.y * deltaY;
     position.y = boundaries.w - size.y;
     position.x -= deltaX;
     velocity.y *= -1.0f;
+    isStonePlateHittingBoundary = true;
+    soundEngine.PlaySound("wall_collide");
   }
 
   // Check penetration with static bubbles
@@ -127,6 +137,14 @@ bool PowerUp::Move(float deltaTime, glm::vec4 boundaries,
   }
   numOfDaggers -= this->bubblesToBeDestroyed.size();
   return !this->bubblesToBeDestroyed.empty();
+}
+
+bool PowerUp::IsStonePlateHittingBoundary() const {
+  return this->isStonePlateHittingBoundary;
+}
+
+void PowerUp::SetIsStonePlateHittingBoundary(bool hitting) {
+  isStonePlateHittingBoundary = hitting;
 }
 
 const std::vector<int>& PowerUp::GetBubblesToBeDestroyed() const {

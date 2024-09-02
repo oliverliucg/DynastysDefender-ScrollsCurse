@@ -319,6 +319,9 @@ class GameManager {
   // Get Scroll state
   ScrollState GetScrollState();
 
+  // Calculate the offsets when scroll is shaking.
+  glm::vec2 CalculateScollShakingOffsets(bool isScrollVibrating = true);
+
   // Check if the bubble collides with the existing static bubbles
   std::vector<int> IsCollidingWithStaticBubbles(
       std::unique_ptr<Bubble>& bubble);

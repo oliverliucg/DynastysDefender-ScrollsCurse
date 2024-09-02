@@ -866,6 +866,8 @@ void GameManager::LoadSounds() {
   // Game Play sound
   soundEngine.LoadSound("wood_collide", "audio/gameplay/wood_collide.wav",
                         0.65f);
+  soundEngine.LoadSound("wall_collide", "audio/gameplay/wall_collide6.wav",
+                        1.f);
   soundEngine.LoadSound("earthquake", "audio/gameplay/earthquake.wav");
   soundEngine.LoadSound("bubble_pop", "audio/gameplay/bubble_pop.wav", 0.4f);
   soundEngine.LoadSound("bubble_explode", "audio/gameplay/bubble_explode5.wav",
@@ -1456,7 +1458,6 @@ void GameManager::Update(float dt) {
   } else if (this->state == GameState::SPLASH_SCREEN) {
     this->SetState(GameState::INITIAL);
     this->GoToState(GameState::STORY);
-    SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (soundEngine.IsPlaying("white_noise") &&
         soundEngine.GetPlaybackPosition("white_noise") > 0.45f) {
       float curVolume = soundEngine.GetVolume("white_noise");
@@ -1483,7 +1484,6 @@ void GameManager::Update(float dt) {
             originalSampleOffsets -
             intensifyDiffProportion *
                 (originalSampleOffsets - targetSampleOffsets);
-        SoundEngine& soundEngine = SoundEngine::GetInstance();
         constexpr float thresholdSampleOffsets = 1.f / 1050.f;
         if (newSampleOffsets >= thresholdSampleOffsets &&
             soundEngine.GetPlayCount("shock_wave") == 0) {
@@ -1516,7 +1516,6 @@ void GameManager::Update(float dt) {
         this->SetState(GameState::INTRO);
         // Unload the logo texture
         ResourceManager::GetInstance().UnloadTexture("logo");
-        SoundEngine& soundEngine = SoundEngine::GetInstance();
         // Stop splash screen sound.
         if (soundEngine.IsPlaying("splash_end")) {
           soundEngine.StopSound("splash_end");
@@ -1578,7 +1577,6 @@ void GameManager::Update(float dt) {
       // jump to the next state when the timer is expired
       if (timer->IsEventTimerExpired("intro")) {
         // Play sound of pressing key 'Enter'
-        SoundEngine& soundEngine = SoundEngine::GetInstance();
         soundEngine.PlaySound("key_enter");
         // Disable the typing effect of the introduction text
         texts.at("introduction")->DisableTypingEffect();
@@ -1594,7 +1592,6 @@ void GameManager::Update(float dt) {
       // Unload the splash screen texture
       ResourceManager::GetInstance().UnloadTexture("splash");
       // Unload the key typing sound
-      SoundEngine& soundEngine = SoundEngine::GetInstance();
       soundEngine.UnloadSound("key_s");
       soundEngine.UnloadSound("keys_s_j");
       soundEngine.UnloadSound("key_enter");
@@ -1644,7 +1641,7 @@ void GameManager::Update(float dt) {
         // Disable the scroll
         this->scroll->SetState(ScrollState::DISABLED);
         // Play defeated sound
-        SoundEngine::GetInstance().PlaySound("defeated");
+        soundEngine.PlaySound("defeated");
       }
     }
   } else if (this->scroll->GetState() == ScrollState::DEPLOYING) {
@@ -1652,7 +1649,7 @@ void GameManager::Update(float dt) {
       if (this->timer->IsEventTimerExpired("scrollInSleeve")) {
         this->scroll->SetAlpha(1.f);
         this->timer->CleanEvent("scrollInSleeve");
-        SoundEngine::GetInstance().PlaySound("scroll_out_sleeve");
+        soundEngine.PlaySound("scroll_out_sleeve");
       }
     } else {
       this->scroll->Deploy(dt);
@@ -1691,7 +1688,6 @@ void GameManager::Update(float dt) {
       // Go to the state of LOSE
       this->GoToState(GameState::LOSE);
       // Gradually lower the volume of the background music
-      auto& soundEngine = SoundEngine::GetInstance();
       std::string currentBackgroundMusic =
           soundEngine.GetPlayingBackgroundMusic();
       if (soundEngine.IsStreamPlaying(currentBackgroundMusic)) {
@@ -1702,14 +1698,36 @@ void GameManager::Update(float dt) {
     }
   }
 
-  // Scroll should only shake when the scroll is OPENED.
-  this->gameArenaShaking &= this->scroll->GetState() == ScrollState::OPENED;
-  if (!this->gameArenaShaking &&
-      SoundEngine::GetInstance().IsPlaying("scroll_vibrate")) {
-    float volume = SoundEngine::GetInstance().GetVolume("scroll_vibrate");
+  if (this->timer->HasEvent("scrollvibrate")) {
+    if (this->timer->IsEventTimerExpired("scrollvibrate")) {
+      this->timer->CleanEvent("scrollvibrate");
+      this->gameArenaShaking = false;
+    } else {
+      this->gameArenaShaking = true;
+    }
+  } else if (this->timer->HasEvent("hittingwall")) {
+    if (this->timer->IsEventTimerExpired("hittingwall")) {
+      this->gameArenaShaking = false;
+    } else {
+      // Scroll would shake when hit by stone plate.
+      this->gameArenaShaking = true;
+    }
+  }
+
+  // if (!this->timer->HasEvent("scrollvibrate") &&
+  //     this->timer->HasEvent("hittingwall") &&
+  //     !this->timer->IsEventTimerExpired("hittingwall")) {
+  //   // Scroll would shake when hit by stone plate.
+  //   this->gameArenaShaking = true;
+  // } else {
+  //   // Scroll should only shake when the scroll is OPENED.
+  //   this->gameArenaShaking &= this->scroll->GetState() ==
+  //   ScrollState::OPENED;
+  // }
+  if (!this->gameArenaShaking && soundEngine.IsPlaying("scroll_vibrate")) {
+    float volume = soundEngine.GetVolume("scroll_vibrate");
     if (volume == 1.f) {
-      SoundEngine::GetInstance().GraduallyChangeVolume("scroll_vibrate", 0.f,
-                                                       0.5f);
+      soundEngine.GraduallyChangeVolume("scroll_vibrate", 0.f, 0.5f);
     }
   }
 
@@ -1796,7 +1814,7 @@ void GameManager::Update(float dt) {
       this->SetState(GameState::WIN);
 
       // Play victory music
-      SoundEngine::GetInstance().PlaySound("victory");
+      soundEngine.PlaySound("victory");
     }
   }
 
@@ -1895,17 +1913,22 @@ void GameManager::Update(float dt) {
     auto it = moves.begin();
     while (it != moves.end()) {
       auto& [id_ref, bubble] = *it++;
-
-      // Check if the moving bubble is a powerup.
+      bool isPenetrating = false;
       if (auto* movingPowerUp = dynamic_cast<PowerUp*>(bubble.get())) {
         movingPowerUp->Update(dt);
+        isPenetrating = movingPowerUp->Move(dt, gameBoardBoundaries, statics);
+        if (movingPowerUp->IsStonePlateHittingBoundary()) {
+          this->timer->SetEventTimer("hittingwall", 0.06f);
+          this->timer->StartEventTimer("hittingwall");
+        }
+      } else {
+        isPenetrating = bubble->Move(dt, gameBoardBoundaries, statics);
       }
-
-      int id = id_ref;
-      bool isPenetrating = bubble->Move(dt, gameBoardBoundaries, statics);
       if (!isPenetrating) {
         continue;
       }
+
+      int id = id_ref;
       if (auto* movingPowerUp = dynamic_cast<PowerUp*>(bubble.get())) {
         for (auto& toBeDestroyedId : movingPowerUp->GetBubblesToBeDestroyed()) {
           assert(statics.count(toBeDestroyedId) > 0 &&
@@ -1968,7 +1991,7 @@ void GameManager::Update(float dt) {
                                        bubble->GetRadius() * 0.6f);
           }
           explosionSystem->CreateExplosions(explosionInfo);
-          SoundEngine::GetInstance().PlaySound("bubble_explode", false);
+          soundEngine.PlaySound("bubble_explode", false);
           explodings.clear();
           // Destroy the powerup when running out of daggers.
           if (movingPowerUp->GetNumOfDaggers() == 0) {
@@ -2085,7 +2108,7 @@ void GameManager::Update(float dt) {
                                        bubble->GetRadius() * 0.6f);
           }
           explosionSystem->CreateExplosions(explosionInfo);
-          SoundEngine::GetInstance().PlaySound("bubble_explode", false);
+          soundEngine.PlaySound("bubble_explode", false);
           explodings.clear();
           // Insert dagger into the stone plate.
           powerUp->InsertDagger();
@@ -2167,7 +2190,6 @@ void GameManager::Update(float dt) {
         ++(this->level);
         if (this->level > this->GetNumGameLevels()) {
           // Gradually lower the fighting music volume as we are ready to win
-          auto& soundEngine = SoundEngine::GetInstance();
           std::string currentBackgroundMusic =
               soundEngine.GetPlayingBackgroundMusic();
           if (soundEngine.IsStreamPlaying(currentBackgroundMusic)) {
@@ -2203,8 +2225,7 @@ void GameManager::Update(float dt) {
       if (this->timer->IsEventTimerExpired("beforenarrowing")) {
         // Stop the shake effect
         this->gameArenaShaking = false;
-        SoundEngine::GetInstance().GraduallyChangeVolume("scroll_vibrate", 0.f,
-                                                         0.5f);
+        soundEngine.GraduallyChangeVolume("scroll_vibrate", 0.f, 0.5f);
         // Narrow the scroll
         this->scroll->SetState(ScrollState::NARROWING);
         this->scroll->SetTargetSilkLenForNarrowing(gameBoardSize.y -
@@ -2219,10 +2240,18 @@ void GameManager::Update(float dt) {
             0, intToU32String(static_cast<int64_t>(std::ceil(
                    this->timer->GetEventRemainingTime("beforenarrowing")))));
         // Shaking the whole scroll if the time is less than 1.5s.
-        if (!this->gameArenaShaking &&
-            this->timer->GetEventRemainingTime("beforenarrowing") < 1.5f) {
+        float remainingTimeForNarrowing =
+            this->timer->GetEventRemainingTime("beforenarrowing");
+        if (!this->gameArenaShaking && remainingTimeForNarrowing < 1.5f) {
           this->gameArenaShaking = true;
-          SoundEngine::GetInstance().PlaySound("scroll_vibrate");
+          this->timer->SetEventTimer("scrollvibrate",
+                                     remainingTimeForNarrowing);
+          this->timer->StartEventTimer("scrollvibrate");
+          // Stop play the vibrate sound if it is playing.
+          if (soundEngine.IsPlaying("scroll_vibrate")) {
+            soundEngine.StopSound("scroll_vibrate");
+          }
+          soundEngine.PlaySound("scroll_vibrate");
         }
       }
     }
@@ -2330,7 +2359,7 @@ void GameManager::Update(float dt) {
         postProcessor->SetBlur(true);
         postProcessor->SetSampleOffsets(0.0005f);
 
-        SoundEngine::GetInstance().PlaySound("drop");
+        soundEngine.PlaySound("drop");
       }
       texts[topic]->SetScale(newScale);
     } else {
@@ -2555,8 +2584,8 @@ void GameManager::Update(float dt) {
         this->timer->SetEventTimer("cracks", 1.5f);
         this->timer->StartEventTimer("cracks");
         // Play the sound of guojie landing on the ground.
-        SoundEngine::GetInstance().PlaySound("wood_collide", false);
-        SoundEngine::GetInstance().PlaySound("earthquake", false);
+        soundEngine.PlaySound("wood_collide", false);
+        soundEngine.PlaySound("earthquake", false);
       }
     }
   }
@@ -2573,7 +2602,7 @@ void GameManager::Update(float dt) {
     //   SoundEngine::GetInstance().StopSound("background_relax");
     // }
     // SoundEngine::GetInstance().PlaySound("background_fight0", false);
-    SoundEngine::GetInstance().StartBackgroundMusic(/*isFighting=*/true);
+    soundEngine.StartBackgroundMusic(/*isFighting=*/true);
   }
 
   // Check if the event timer for shaking the screen has expired.
@@ -2581,7 +2610,6 @@ void GameManager::Update(float dt) {
       this->timer->IsEventTimerExpired("guojieshaking")) {
     postProcessor->SetShake(false);
     postProcessor->SetBlur(false);
-    SoundEngine& soundEngine = SoundEngine::GetInstance();
     if (soundEngine.GetVolume("earthquake") == 1.f) {
       /*this->timer->CleanEvent("guojieshaking");*/
       SoundEngine& soundEngine = SoundEngine::GetInstance();
@@ -2738,7 +2766,7 @@ void GameManager::Update(float dt) {
                          this->timer->GetEventTimer("reduceflipvolume"));
       }
       if (volume > 0.f) {
-        SoundEngine::GetInstance().PlaySound("flip_paper", false, volume);
+        soundEngine.PlaySound("flip_paper", false, volume);
       }
     } else {
       this->timer->CleanEvent("refreshscore");
@@ -3002,45 +3030,28 @@ void GameManager::Render() {
           originalPositionsForShaking["time"] = texts["time"]->GetPosition();
 
           // start shake effect
-          float shakingStrengthForX =
-              kBaseUnit * 0.6048f;  // Shaking intensity for the X axis
-          float shakingStrengthForY =
-              kBaseUnit * 0.3402f;  // Shaking intensity for the Y axis
-          float timeMultiplierForX =
-              60.0f;  // Controls the frequency of shaking along the X axis
-          float timeMultiplierForY =
-              160.0f;  // Controls the frequency of shaking along the Y axis
-          float currentTime = glfwGetTime();
-          // Calculate the shake offset based on the current time
-          float shakeOffsetX =
-              cos(currentTime * timeMultiplierForX) * shakingStrengthForX;
-          float shakeOffsetY =
-              cos(currentTime * timeMultiplierForY) * shakingStrengthForY;
+          glm::vec2 shakingOffets = CalculateScollShakingOffsets(
+              this->timer->HasEvent("scrollvibrate"));
           // shake the scroll
-          scroll->SetCenter(scroll->GetCenter() +
-                            glm::vec2(shakeOffsetX, shakeOffsetY));
+          scroll->SetCenter(scroll->GetCenter() + shakingOffets);
           // shake the game board
-          gameBoard->SetPosition(gameBoard->GetPosition() +
-                                 glm::vec2(shakeOffsetX, shakeOffsetY));
+          gameBoard->SetPosition(gameBoard->GetPosition() + shakingOffets);
           // shake the shooter
-          shooter->SetPosition(shooter->GetPosition() +
-                               glm::vec2(shakeOffsetX, shakeOffsetY));
+          shooter->SetPosition(shooter->GetPosition() + shakingOffets);
           // Update the path of the ray
           shooter->GetRay().UpdatePath(this->gameBoard->GetBoundaries(),
                                        this->statics);
           // shake the moving bubbles
           for (auto& [id, bubble] : moves) {
-            bubble->SetPosition(bubble->GetPosition() +
-                                glm::vec2(shakeOffsetX, shakeOffsetY));
+            bubble->SetPosition(bubble->GetPosition() + shakingOffets);
           }
           // shake the static bubbles
           for (auto& [id, bubble] : statics) {
-            bubble->SetPosition(bubble->GetPosition() +
-                                glm::vec2(shakeOffsetX, shakeOffsetY));
+            bubble->SetPosition(bubble->GetPosition() + shakingOffets);
           }
           // shake the time text
           texts["time"]->SetPosition(texts["time"]->GetPosition() +
-                                     glm::vec2(shakeOffsetX, shakeOffsetY));
+                                     shakingOffets);
         }
 
         scroll->Draw(spriteRenderer);
@@ -3894,6 +3905,38 @@ void GameManager::SetScrollState(ScrollState newScrollState) {
 }
 
 ScrollState GameManager::GetScrollState() { return this->scroll->GetState(); }
+
+glm::vec2 GameManager::CalculateScollShakingOffsets(bool isScrollVibrating) {
+  float shakeOffsetX = 0.f, shakeOffsetY = 0.f;
+  if (isScrollVibrating) {
+    float shakingStrengthForX =
+        kBaseUnit * 0.6048f;  // Shaking intensity for the X axis
+    float shakingStrengthForY =
+        kBaseUnit * 0.3402f;  // Shaking intensity for the Y axis
+    float timeMultiplierForX =
+        60.0f;  // Controls the frequency of shaking along the X axis
+    float timeMultiplierForY =
+        160.0f;  // Controls the frequency of shaking along the Y axis
+    float currentTime = glfwGetTime();
+    // Calculate the shake offset based on the current time
+    shakeOffsetX = cos(currentTime * timeMultiplierForX) * shakingStrengthForX;
+    shakeOffsetY = cos(currentTime * timeMultiplierForY) * shakingStrengthForY;
+  } else {
+    float shakingStrengthForX =
+        kBaseUnit * 0.3402f;  // Shaking intensity for the X axis
+    float shakingStrengthForY =
+        kBaseUnit * 0.3402f;  // Shaking intensity for the Y axis
+    float timeMultiplierForX =
+        60.0f;  // Controls the frequency of shaking along the X axis
+    float timeMultiplierForY =
+        60.0f;  // Controls the frequency of shaking along the Y axis
+    float currentTime = glfwGetTime();
+    // Calculate the shake offset based on the current time
+    shakeOffsetX = cos(currentTime * timeMultiplierForX) * shakingStrengthForX;
+    shakeOffsetY = cos(currentTime * timeMultiplierForY) * shakingStrengthForY;
+  }
+  return glm::vec2(shakeOffsetX, shakeOffsetY);
+}
 
 std::vector<int> GameManager::GetNeighborIds(std::unique_ptr<Bubble>& bubble,
                                              float absError) {

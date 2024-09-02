@@ -5,6 +5,7 @@
 
 #include "Bubble.h"
 #include "ResourceManager.h"
+#include "SoundEngine.h"
 
 // power up state
 enum class PowerUpState {
@@ -45,6 +46,10 @@ class PowerUp : public Bubble {
       float deltaTime, glm::vec4 boundaries,
       std::unordered_map<int, std::unique_ptr<Bubble> >& statics) override;
 
+  bool IsStonePlateHittingBoundary() const;
+
+  void SetIsStonePlateHittingBoundary(bool hitting);
+
   const std::vector<int>& GetBubblesToBeDestroyed() const;
 
   void Update(float dt);
@@ -60,6 +65,7 @@ class PowerUp : public Bubble {
   int numOfDaggers{0};
   float stonePlateRotationSpeed{-0.1f};
   float daggerRotationSpeed{0.1f};
+  bool isStonePlateHittingBoundary{false};
   PowerUpState powerUpState{PowerUpState::kInactive};
   std::vector<int> bubblesToBeDestroyed;
 };
