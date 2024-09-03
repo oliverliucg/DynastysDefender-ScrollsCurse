@@ -3073,10 +3073,10 @@ void GameManager::Render() {
         // Shooter
         shooter->Draw(spriteRenderer);
 
-        //// Ray
-        /*  shooter->GetRay().UpdatePath(this->gameBoard->GetBoundaries(),
-         * this->statics);*/
-        shooter->GetRay().Draw(rayRenderer);
+        // Ray (Only visible when the difficulty is not 'expert')
+        if (difficulty != Difficulty::EXPERT) {
+          shooter->GetRay().Draw(rayRenderer);
+        }
 
         // Particles
         explosionSystem->Draw(/*isDarkBackground=*/false);
@@ -3259,15 +3259,15 @@ void GameManager::Render() {
 int GameManager::GetNumGameLevels() {
   switch (difficulty) {
     case Difficulty::EASY:
-      return 10;
+      return 15;
     case Difficulty::MEDIUM:
-      return 20;
-    case Difficulty::HARD:
       return 30;
+    case Difficulty::HARD:
+      return 45;
     case Difficulty::EXPERT:
-      return 40;
+      return 60;
     default:
-      return 20;
+      return 30;
   }
 }
 
@@ -3284,7 +3284,9 @@ int GameManager::GetBubbleNumForLevel() {
     return base + this->level * 5;
   } else if (this->level <= 20) {
     int base = 40;
-    if (this->difficulty == Difficulty::HARD) {
+    if (this->difficulty == Difficulty::MEDIUM) {
+      base += 5;
+    } else if (this->difficulty == Difficulty::HARD) {
       base += 10;
     } else if (this->difficulty == Difficulty::EXPERT) {
       base += 15;
@@ -3292,12 +3294,31 @@ int GameManager::GetBubbleNumForLevel() {
     return base + (this->level - 10) * 5;
   } else if (this->level <= 30) {
     int base = 75;
-    if (this->difficulty != Difficulty::HARD) {
+    if (this->difficulty == Difficulty::HARD) {
+      base += 10;
+    } else if (this->difficulty == Difficulty::EXPERT) {
       base += 15;
     }
     return base + (this->level - 20) * 5;
+  } else if (this->level <= 40) {
+    int base = 105;
+    if (this->difficulty == Difficulty::HARD) {
+      base += 10;
+    } else if (this->difficulty == Difficulty::EXPERT) {
+      base += 15;
+    }
+    return base + (this->level - 30) * 5;
+  } else if (this->level <= 50) {
+    int base = 140;
+    if (this->difficulty == Difficulty::EXPERT) {
+      base += 15;
+    }
+    return base + (this->level - 40) * 5;
+  } else if (this->level <= 60) {
+    int base = 170;
+    return base + (this->level - 50) * 5;
   } else {
-    return 115 + (this->level - 30) * 5;
+    return 120;
   }
 }
 
