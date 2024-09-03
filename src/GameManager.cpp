@@ -297,14 +297,13 @@ void GameManager::Init() {
                 gameBoard->GetSize().y * 300.f / 1701),
       glm::vec2(0.5f, 0.53f), glm::vec2(0.5f, 0.8f),
       resourceManager.GetTexture("shooter1"));
-  shooter->GenerateBubble();
   shooter->SetPosition(glm::vec2(
       this->width / 2 - shooter->GetCarriedBubble().GetRadius(),
       gameBoard->GetPosition().y + gameBoard->GetSize().y * 0.800117578f));
 
   // Initialize powerup
   powerUp = std::make_unique<PowerUp>(
-      glm::vec2(this->width * 0.6901f, this->height * 0.1852f),
+      glm::vec2(this->width * 0.7101f, this->height * 0.1852f),
       this->height * 0.2083f, resourceManager.GetTexture("stoneplate"),
       resourceManager.GetTexture("spindle"),
       resourceManager.GetTexture("dagger"), 0);
@@ -866,12 +865,17 @@ void GameManager::LoadSounds() {
   // Game Play sound
   soundEngine.LoadSound("wood_collide", "audio/gameplay/wood_collide.wav",
                         0.65f);
-  soundEngine.LoadSound("wall_collide", "audio/gameplay/wall_collide6.wav",
-                        1.f);
+  soundEngine.LoadSound("wall_collide", "audio/gameplay/wall_collide7.wav",
+                        0.87f);
   soundEngine.LoadSound("earthquake", "audio/gameplay/earthquake.wav");
   soundEngine.LoadSound("bubble_pop", "audio/gameplay/bubble_pop.wav", 0.4f);
   soundEngine.LoadSound("bubble_explode", "audio/gameplay/bubble_explode5.wav",
                         0.4f);
+  soundEngine.LoadSound("powerup_trigger",
+                        "audio/gameplay/powerup_trigger2.wav", 0.4f);
+  soundEngine.LoadSound("equip", "audio/gameplay/equip4.wav", 0.3f);
+  soundEngine.LoadSound("dagger_swipe", "audio/gameplay/dagger_swipe_1.wav",
+                        1.f);
   soundEngine.LoadSound("color_switch", "audio/gameplay/color_switch.wav", 1.f);
   soundEngine.LoadSound("arrow_shoot", "audio/gameplay/bubble_shoot.wav", 0.7f);
   soundEngine.LoadSound("arrow_hit", "audio/gameplay/arrow_hit1.wav", 0.7f);
@@ -1452,14 +1456,12 @@ void GameManager::Update(float dt) {
 
   if (this->state == GameState::PRELOAD) {
     if (this->targetState == GameState::SPLASH_SCREEN) {
-      // postProcessor->SetChaos(true);
-      // postProcessor->SetSampleOffsets(1.f / 20000.f);
+      postProcessor->SetChaos(true);
+      postProcessor->SetSampleOffsets(1.f / 20000.f);
       this->SetToTargetState();
     }
     return;
   } else if (this->state == GameState::SPLASH_SCREEN) {
-    this->SetState(GameState::INITIAL);
-    this->GoToState(GameState::STORY);
     if (soundEngine.IsPlaying("white_noise") &&
         soundEngine.GetPlaybackPosition("white_noise") > 0.45f) {
       float curVolume = soundEngine.GetVolume("white_noise");
@@ -1982,7 +1984,7 @@ void GameManager::Update(float dt) {
                                        bubble->GetRadius() * 0.6f);
           }
           explosionSystem->CreateExplosions(explosionInfo);
-          soundEngine.PlaySound("bubble_explode", false);
+          soundEngine.PlaySound("dagger_swipe", false);
           explodings.clear();
           // Destroy the powerup when running out of daggers.
           if (movingPowerUp->GetNumOfDaggers() == 0) {
@@ -2099,10 +2101,14 @@ void GameManager::Update(float dt) {
                                        bubble->GetRadius() * 0.6f);
           }
           explosionSystem->CreateExplosions(explosionInfo);
-          soundEngine.PlaySound("bubble_explode", false);
           explodings.clear();
           // Insert dagger into the stone plate.
           powerUp->InsertDagger();
+          if (this->powerUp->GetNumOfDaggers() == 1) {
+            soundEngine.PlaySound("powerup_trigger");
+          } else {
+            soundEngine.PlaySound("bubble_explode");
+          }
         } else if (connectedBubbleIds.size() == 2) {
           // Triple the weight of the current bubble's color when the number of
           // static bubbles are greater than 3.
@@ -4758,9 +4764,18 @@ void GameManager::GenerateRandomStaticBubblesHelper(GameLevel gameLevel) {
       // available free slots.
       std::vector<glm::vec2> commonFreeSlots =
           GetCommonFreeSlots(lastAddedFreeSlots, freeSlots);
-      //  Randomly select a free slot from the common free slots.
-      int randomIndex = rand() % lastAddedFreeSlots.size();
-      centerForNewBubble = lastAddedFreeSlots[randomIndex];
+      if (commonFreeSlots.empty()) {
+        // If there is no common free slot, then we simply choose a free slot
+        // that is a neighbor of a bubble;
+        do {
+          int randomIndex = rand() % freeSlots.size();
+          centerForNewBubble = freeSlots[randomIndex];
+        } while (!IsNeighborOfStaticBubbles(centerForNewBubble));
+      } else {
+        //  Randomly select a free slot from the common free slots.
+        int randomIndex = rand() % commonFreeSlots.size();
+        centerForNewBubble = commonFreeSlots[randomIndex];
+      }
     } else if (toBeNeighborOfBubble) {
       // Randomly select a free slot that is a neighbor of an existing static
       // bubble.

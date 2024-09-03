@@ -64,29 +64,21 @@ void Shooter::EquipPowerUp(std::unique_ptr<PowerUp> powerUp) {
   powerUp->SetDaggerRotationSpeed(0.8f);
   // Equip the power up to the shooter
   this->carriedBubble = std::move(powerUp);
+  // Play the sound effect for equipping a power up
+  SoundEngine::GetInstance().PlaySound("equip", false);
 }
 
-// std::unique_ptr<Bubble> Shooter::ShootBubble() {
-//   std::unique_ptr<Bubble> copiedBubble =
-//       std::make_unique<Bubble>(carriedBubble);
-//   copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *
-//                             kVelocityUnit);
-//   // RGB
-//   glm::vec3 rgb(nextBubble->GetColor().r, nextBubble->GetColor().g,
-//                 nextBubble->GetColor().b);
-//   carriedBubble->SetColor(glm::vec4(rgb, carriedBubble->GetColor().a));
-//   // Create a new color for the next bubble
-//   nextBubble->SetColor(GetNewBubbleColor());
-//   //// Set the color for the ray
-//   //
-//   ray.SetColor(glm::vec4(glm::vec3(carriedBubble->GetColorWithoutAlpha()), 1.0f));
-//   return copiedBubble;
-// }
-
 std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
-  // Play the sound effect for shooting a bubble
+  // bool isPowerUp = dynamic_cast<PowerUp*>(carriedBubble.get()) != nullptr;
+  // if (isPowerUp) {
+  //   // Play the sound effect for shooting a power up
+  //   SoundEngine::GetInstance().PlaySound("powerup_shoot", false);
+  // } else {
+  //   // Play the sound effect for shooting a bubble
+  //   SoundEngine::GetInstance().PlaySound("bubble_pop", false);
+  // }
+  //  Play the sound effect for shooting a bubble
   SoundEngine::GetInstance().PlaySound("bubble_pop", false);
-
   std::unique_ptr<Bubble> copiedBubble = std::move(carriedBubble);
   copiedBubble->SetVelocity(this->GetShootingDirection() * 16.0f *
                             kVelocityUnit);
@@ -103,18 +95,6 @@ std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
   //// Set the color for the ray
   // ray.SetColor(glm::vec4(glm::vec3(carriedBubble->GetColorWithoutAlpha()), 1.0f));
   return copiedBubble;
-}
-
-void Shooter::GenerateBubble() {
-  //// Otherwise, generate a new bubble. The bubble is always at the rotation
-  /// center of the shooter. The radius of it is equal to the regular bubble
-  /// radius provided by the ResourceManager.
-  // glm::vec2 rotationCenter(position.x+rotationPivot.x*size.x,
-  // position.y+rotationPivot.y*size.y); carriedBubble =
-  // std::make_unique<Bubble>(glm::vec2(rotationCenter.x - kBubbleRadius,
-  // rotationCenter.y - kBubbleRadius), kBubbleRadius, glm::vec2(0.0f, 0.0f),
-  // glm::vec4(0.0f, 1.0f, 0.0f, 0.8f),
-  // ResourceManager::GetInstance().GetTexture("bubble"));
 }
 
 void Shooter::SetRoll(float roll) {

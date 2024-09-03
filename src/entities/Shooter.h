@@ -26,10 +26,6 @@ class Shooter : public GameObject {
 
   Ray& GetRay();
 
-  //// Shoots the bubble that the shooter is carrying.
-  //// Returns a unique pointer to the bubble.
-  // std::unique_ptr<Bubble> ShootBubble();
-
   // Refreshes the color of the carried bubble.
   void RefreshCarriedBubbleColor(glm::vec3 color);
 
@@ -40,11 +36,7 @@ class Shooter : public GameObject {
   void EquipPowerUp(std::unique_ptr<PowerUp> powerUp);
 
   // Shoots the bubble that the shooter is carrying.
-  // Returns a unique pointer to the bubble.
   std::unique_ptr<Bubble> ShootBubble(glm::vec4 nextBubbleColor);
-
-  // Generates a new bubble for the shooter to carry.
-  void GenerateBubble();
 
   // Sets roll for the shooter and the next bubble.
   void SetRoll(float roll);
