@@ -192,8 +192,8 @@ class GameManager {
   // Stores individual scores gained during game play.
   std::queue<int> scoreIncrements;
 
-  // Stores the scores' text objects.
-  std::vector<std::shared_ptr<Text>> scoreIncrementTexts;
+  // Stores the scores' text objects and their time to start fading out.
+  std::vector<std::pair<std::shared_ptr<Text>, float>> scoreIncrementTexts;
 
   // Number of score increments to be reflected on the screen
   int numOfScoreIncrementsReady{0};
@@ -320,7 +320,7 @@ class GameManager {
   ScrollState GetScrollState();
 
   // Calculate the offsets when scroll is shaking.
-  glm::vec2 CalculateScollShakingOffsets(bool isScrollVibrating = true);
+  glm::vec2 CalculateScrollShakingOffsets(bool isScrollVibrating = true);
 
   // Check if the bubble collides with the existing static bubbles
   std::vector<int> IsCollidingWithStaticBubbles(

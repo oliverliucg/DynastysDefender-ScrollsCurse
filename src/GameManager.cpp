@@ -1042,7 +1042,9 @@ void GameManager::ProcessInput(float dt) {
           this->timer->PauseEventTimer("beforenarrowing");
         }
         // pause counting play time
-        this->timer->PauseEventTimer("playtime");
+        if (!this->timer->IsPaused("playtime")) {
+          this->timer->PauseEventTimer("playtime");
+        }
       }
     }
 
@@ -1713,17 +1715,6 @@ void GameManager::Update(float dt) {
       this->gameArenaShaking = true;
     }
   }
-
-  // if (!this->timer->HasEvent("scrollvibrate") &&
-  //     this->timer->HasEvent("hittingwall") &&
-  //     !this->timer->IsEventTimerExpired("hittingwall")) {
-  //   // Scroll would shake when hit by stone plate.
-  //   this->gameArenaShaking = true;
-  // } else {
-  //   // Scroll should only shake when the scroll is OPENED.
-  //   this->gameArenaShaking &= this->scroll->GetState() ==
-  //   ScrollState::OPENED;
-  // }
   if (!this->gameArenaShaking && soundEngine.IsPlaying("scroll_vibrate")) {
     float volume = soundEngine.GetVolume("scroll_vibrate");
     if (volume == 1.f) {
@@ -2828,10 +2819,13 @@ void GameManager::Update(float dt) {
 
   // Fading out the score increment texts if any.
   if (!scoreIncrementTexts.empty()) {
-    std::vector<std::shared_ptr<Text>> scoreIncrementTextsTemp;
-    for (auto& scoreIncrementText : scoreIncrementTexts) {
-      if (!scoreIncrementText->fadeOut(dt)) {
-        scoreIncrementTextsTemp.emplace_back(scoreIncrementText);
+    std::vector<std::pair<std::shared_ptr<Text>, float>>
+        scoreIncrementTextsTemp;
+    for (auto& scoreIncrementTextInfo : scoreIncrementTexts) {
+      scoreIncrementTextInfo.second -= dt;
+      if (scoreIncrementTextInfo.second > 0.f ||
+          !scoreIncrementTextInfo.first->fadeOut(dt)) {
+        scoreIncrementTextsTemp.emplace_back(scoreIncrementTextInfo);
       }
     }
     std::swap(scoreIncrementTexts, scoreIncrementTextsTemp);
@@ -3030,7 +3024,7 @@ void GameManager::Render() {
           originalPositionsForShaking["time"] = texts["time"]->GetPosition();
 
           // start shake effect
-          glm::vec2 shakingOffets = CalculateScollShakingOffsets(
+          glm::vec2 shakingOffets = CalculateScrollShakingOffsets(
               this->timer->HasEvent("scrollvibrate"));
           // shake the scroll
           scroll->SetCenter(scroll->GetCenter() + shakingOffets);
@@ -3109,7 +3103,8 @@ void GameManager::Render() {
         handler.DisableScissorTest();
 
         // Draw the score increment texts
-        for (const auto& scoreIncrementText : scoreIncrementTexts) {
+        for (const auto& [scoreIncrementText, timeToStartFadingOut] :
+             scoreIncrementTexts) {
           scoreIncrementText->Draw(textRenderer);
         }
 
@@ -3404,6 +3399,14 @@ GameState GameManager::GetState() { return this->state; }
 void GameManager::GoToState(GameState newState) {
   this->targetState = newState;
   this->transitionState = TransitionState::START;
+  // Stop scroll vibrating when the current game state is ACTIVE but the target
+  // state is not.
+  if (this->state == GameState::ACTIVE && newState != GameState::ACTIVE) {
+    if (this->timer->HasEvent("scrollvibrate")) {
+      this->gameArenaShaking = false;
+      this->timer->CleanEvent("scrollvibrate");
+    }
+  }
 }
 
 void GameManager::GoToScreenMode(ScreenMode newScreenMode) {
@@ -3906,7 +3909,7 @@ void GameManager::SetScrollState(ScrollState newScrollState) {
 
 ScrollState GameManager::GetScrollState() { return this->scroll->GetState(); }
 
-glm::vec2 GameManager::CalculateScollShakingOffsets(bool isScrollVibrating) {
+glm::vec2 GameManager::CalculateScrollShakingOffsets(bool isScrollVibrating) {
   float shakeOffsetX = 0.f, shakeOffsetY = 0.f;
   if (isScrollVibrating) {
     float shakingStrengthForX =
@@ -5128,7 +5131,8 @@ void GameManager::AddScoreIncrementText(int scoreIncrement,
   scoreIncrementText->SetScale(0.03f / kFontScale);
   scoreIncrementText->SetColor(glm::vec3(1.0f, 0.0f, 0.847f));
   scoreIncrementText->SetAlpha(1.0f);
-  this->scoreIncrementTexts.emplace_back(scoreIncrementText);
+  this->scoreIncrementTexts.emplace_back(
+      std::make_pair(scoreIncrementText, /*timeToStartFadingOut=*/0.3f));
 }
 
 void GameManager::IncreaseScore(const int64_t score) {
