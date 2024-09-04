@@ -11,7 +11,8 @@
     "2": "{Swap Colors}: Press the {Shift Key} to swap the current bubble with the next bubble color.",
     "3": "{Aim Shooter}:\n\t• {Left Rotation}: Hold the {Left Arrow Key} to rotate the shooter counter-clockwise.\n\t• {Right Rotation}: Hold the {Right Arrow Key} to rotate the shooter clockwise.",
     "4": "{Precision Aiming}: Hold the {Ctrl Key} to slow down the shooter's rotation, allowing for precise directional adjustments.",
-    "5": "{Pause Game}: Press the {Esc Key} to pause the game. This will display a menu with the following options:\n\t• {Resume}: Continue your current game session.\n\t• {Restart}: Start the game over from the beginning.\n\t• {Stop}: Exit the current game and return to the main menu."
+    "5": "{Equip Dagger Plate}: Press the {Alt Key} to equip the Dagger Plate to the shooter. The Dagger Plate can be triggered and updated by consecutively bursting out bubbles.",
+    "6": "{Pause Game}: Press the {Esc Key} to pause the game. This will display a menu with the following options:\n\t• {Resume}: Continue your current game session.\n\t• {Restart}: Start the game over from the beginning.\n\t• {Stop}: Exit the current game and return to the main menu."
   },
   "characterintro": {
     "liuche": "{Liu Che}: Emperor Wu of Han, one of the most influential emperors in Chinese history. During his reign, he initiated numerous significant reforms and military actions, profoundly impacting Chinese history. At a banquet in the Princess's mansion, he was suddenly attacked by the assassin Guo Jie and subdued.",

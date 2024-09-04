@@ -11,7 +11,8 @@
     "2": "{Cambiar colores}: Presiona la {Tecla Shift} para intercambiar el color de la burbuja actual con el siguiente.",
     "3": "{Apuntar con el Lanzador}:\n\t• {Rotación Izquierda}: Mantén presionada la {Tecla de Flecha Izquierda} para rotar el lanzador en sentido antihorario.\n\t• {Rotación Derecha}: Mantén presionada la {Tecla de Flecha Derecha} para rotar el lanzador en sentido horario.",
     "4": "{Apuntado Preciso}: Mantén presionada la {Tecla Ctrl} para disminuir la velocidad de rotación del lanzador, permitiendo ajustes direccionales precisos.",
-    "5": "{Pause du Jeu}: Appuyez sur la {Touche Esc} pour mettre le jeu en pause. Cela affichera un menu avec les options suivantes:\n\t• {Reprendre}: Continuer votre session de jeu actuelle.\n\t• {Redémarrer}: Commencer le jeu depuis le début.\n\t• {Arrêter}: Quitter le jeu actuel et retourner au menu principal."
+    "5": "{Equipar Placa Daga}: Presiona la {Tecla Alt} para equipar la Placa Daga al lanzador. La Placa Daga puede activarse y actualizarse por estallar burbujas consecutivamente.",
+    "6": "{Pausar Juego}: Presiona la {Tecla Esc} para pausar el juego. Se mostrará un menú con las siguientes opciones:\n\t• {Reanudar}: Continuar tu sesión de juego actual.\n\t• {Reiniciar}: Empezar el juego desde el principio.\n\t• {Detener}: Salir del juego actual y volver al menú principal."
   },
   "characterintro": {
     "liuche": "{Liu Che}: Emperador Wu de Han, uno de los emperadores más influyentes de la historia china. Durante su reinado, inició numerosas reformas importantes y acciones militares que tuvieron un profundo impacto en la historia de China. En un banquete en la mansión de la princesa, fue repentinamente atacado por el asesino Guo Jie y sometido.",

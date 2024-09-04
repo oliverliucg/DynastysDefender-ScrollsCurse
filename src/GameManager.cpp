@@ -491,14 +491,16 @@ void GameManager::Init() {
   textSection->SetMaxWidth(gameBoard->GetSize().x -
                            pages["story"]->GetLeftSpacing() -
                            0.5 * kBubbleRadius);
+  textSection->SetIdealMaxWidth(textSection->GetMaxWidth());
   pages["story"]->SetPosition(glm::vec2(
       this->gameBoard->GetPosition().x,
       std::max(
           this->gameBoard->GetCenter().y - pages["story"]->GetHeight() * 0.5f,
           this->gameBoard->GetPosition().y)));
-  if (textSection->NeedScrollIcon()) {
+  if (!textSection->IsScrollIconInitialized() &&
+      textSection->NeedScrollIcon()) {
     // Adjust the line width of text content
-    textSection->SetMaxWidth(textSection->GetMaxWidth() -
+    textSection->SetMaxWidth(textSection->GetIdealMaxWidth() -
                              PageSection::GetScrollIconWidth());
     // Create scroll icon
     textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
@@ -582,6 +584,7 @@ void GameManager::Init() {
   textSection->SetMaxWidth(gameBoard->GetSize().x -
                            pages["controls"]->GetLeftSpacing() -
                            0.5 * kBaseUnit);
+  textSection->SetIdealMaxWidth(textSection->GetMaxWidth());
   pages["controls"]->SetPosition(
       glm::vec2(this->gameBoard->GetPosition().x,
                 std::max(this->gameBoard->GetCenter().y -
@@ -589,7 +592,7 @@ void GameManager::Init() {
                          this->gameBoard->GetPosition().y)));
   if (textSection->NeedScrollIcon()) {
     // Adjust the line width of text content
-    textSection->SetMaxWidth(textSection->GetMaxWidth() -
+    textSection->SetMaxWidth(textSection->GetIdealMaxWidth() -
                              PageSection::GetScrollIconWidth());
     // Create scroll icon
     textSection->InitScrollIcon(colorRenderer, circleRenderer, lineRenderer,
@@ -1018,19 +1021,29 @@ void GameManager::ProcessInput(float dt) {
         auto newButtonSectionHeight = buttonSection->GetHeight();
         auto textSection =
             pages.at("controls")->GetSection("controltextsection");
+        float oldTextSectionMaxHeight = textSection->GetMaxHeight();
         textSection->SetMaxHeight(textSection->GetMaxHeight() +
                                   oldButtonSectionHeight -
                                   newButtonSectionHeight);
-
+        float newOffset = textSection->GetOffset() *
+                          textSection->GetMaxHeight() / oldTextSectionMaxHeight;
+        if (newOffset <
+            0.95f * textSection->GetMaxHeight() - textSection->GetHeight()) {
+          newOffset =
+              0.95f * textSection->GetMaxHeight() - textSection->GetHeight();
+        } else if (newOffset > 0.f) {
+          newOffset = 0.f;
+        }
         pages.at("controls")
             ->SetPosition(
                 glm::vec2(this->gameBoard->GetPosition().x,
                           std::max(this->gameBoard->GetCenter().y -
                                        pages.at("controls")->GetHeight() * 0.5f,
                                    this->gameBoard->GetPosition().y)));
+
         if (textSection->NeedScrollIcon()) {
           // Adjust the line width of text content
-          textSection->SetMaxWidth(textSection->GetMaxWidth() -
+          textSection->SetMaxWidth(textSection->GetIdealMaxWidth() -
                                    PageSection::GetScrollIconWidth());
           // Create scroll icon
           textSection->InitScrollIcon(
@@ -1038,7 +1051,10 @@ void GameManager::ProcessInput(float dt) {
               this->gameBoard->GetPosition().x + this->gameBoard->GetSize().x -
                   Scroll::GetSilkEdgeWidth() -
                   0.5f * PageSection::GetScrollIconWidth());
+          auto relation = textSection->GetScrollRelationShip();
+          textSection->SetScrollIconOffset(getXOfLine(newOffset, relation));
         }
+
         // Set scroll state to be CLOSING
         this->scroll->SetState(ScrollState::CLOSING);
         // pause timer of related events if it is not paused yet.
@@ -1207,10 +1223,40 @@ void GameManager::ProcessInput(float dt) {
                 auto newButtonSectionHeight = buttonSection->GetHeight();
                 auto textSection =
                     pages.at("controls")->GetSection("controltextsection");
+                float oldTextSectionMaxHeight = textSection->GetMaxHeight();
                 textSection->SetMaxHeight(textSection->GetMaxHeight() +
                                           oldButtonSectionHeight -
                                           newButtonSectionHeight);
-
+                float newOffset = textSection->GetOffset() *
+                                  textSection->GetMaxHeight() /
+                                  oldTextSectionMaxHeight;
+                if (newOffset < 0.95f * textSection->GetMaxHeight() -
+                                    textSection->GetHeight()) {
+                  newOffset = 0.95f * textSection->GetMaxHeight() -
+                              textSection->GetHeight();
+                } else if (newOffset > 0.f) {
+                  newOffset = 0.f;
+                }
+                if (textSection->NeedScrollIcon()) {
+                  // Adjust the line width of text content.
+                  textSection->SetMaxWidth(textSection->GetIdealMaxWidth() -
+                                           PageSection::GetScrollIconWidth());
+                  // Create scroll icon.
+                  textSection->InitScrollIcon(
+                      colorRenderer, circleRenderer, lineRenderer,
+                      this->gameBoard->GetPosition().x +
+                          this->gameBoard->GetSize().x -
+                          Scroll::GetSilkEdgeWidth() -
+                          0.5f * PageSection::GetScrollIconWidth());
+                  // Calculate the new scroll offset.
+                  auto relation = textSection->GetScrollRelationShip();
+                  textSection->SetScrollIconOffset(
+                      getXOfLine(newOffset, relation));
+                } else {
+                  // Remove the scroll icon if exists
+                  textSection->DeleteScrollIcon();
+                  textSection->SetMaxWidth(textSection->GetIdealMaxWidth());
+                }
                 // Update the page "controls" position.
                 pages.at("controls")
                     ->SetPosition(glm::vec2(
@@ -1218,22 +1264,6 @@ void GameManager::ProcessInput(float dt) {
                         std::max(this->gameBoard->GetCenter().y -
                                      pages.at("controls")->GetHeight() * 0.5f,
                                  this->gameBoard->GetPosition().y)));
-
-                if (textSection->NeedScrollIcon()) {
-                  // Adjust the line width of text content
-                  textSection->SetMaxWidth(textSection->GetMaxWidth() -
-                                           PageSection::GetScrollIconWidth());
-                  // Create scroll icon
-                  textSection->InitScrollIcon(
-                      colorRenderer, circleRenderer, lineRenderer,
-                      this->gameBoard->GetPosition().x +
-                          this->gameBoard->GetSize().x -
-                          Scroll::GetSilkEdgeWidth() -
-                          0.5f * PageSection::GetScrollIconWidth());
-                } else {
-                  // Remove the scroll icon if exists
-                  textSection->DeleteScrollIcon();
-                }
               } else if (content == "difficulty") {
                 this->GoToState(GameState::DIFFICULTY_SETTINGS);
               } else if (content == "displaysettings") {
@@ -3521,7 +3551,6 @@ void GameManager::LoadTextRenderer() {
         case Language::PORTUGUESE_BR:
         case Language::PORTUGUESE_PT:
         case Language::RUSSIAN:
-
           textRenderers[language] = std::make_shared<WesternTextRenderer>(
               resourceManager.GetShader("text"), this->width, this->height,
               benchmark);
@@ -3575,18 +3604,16 @@ void GameManager::LoadCommonCharacters() {
 }
 
 void GameManager::LoadTexts() {
-  static int count = 0;
-  ++count;
   ResourceManager& resourceManager = ResourceManager::GetInstance();
-  bool hashex5A = false;
   // Load the texts for the game
   resourceManager.LoadText(
       ConfigManager::GetInstance().GetTextFilePath().c_str());
   // Initialize text box
   std::vector<std::u32string> textsToLoad;
-  textsToLoad.push_back(resourceManager.GetText("story", "1"));
-  textsToLoad.push_back(resourceManager.GetText("story", "2"));
-  textsToLoad.push_back(resourceManager.GetText("story", "3"));
+  int numOfItems = 3;
+  for (int i = 1; i <= numOfItems; ++i) {
+    textsToLoad.push_back(resourceManager.GetText("story", std::to_string(i)));
+  }
   if (texts.find("story") == texts.end()) {
     texts["story"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBaseUnit / 2.0f,
@@ -3603,10 +3630,11 @@ void GameManager::LoadTexts() {
   }
 
   textsToLoad.clear();
-  textsToLoad.push_back(resourceManager.GetText("controls", "1"));
-  textsToLoad.push_back(resourceManager.GetText("controls", "2"));
-  textsToLoad.push_back(resourceManager.GetText("controls", "3"));
-  textsToLoad.push_back(resourceManager.GetText("controls", "4"));
+  numOfItems = 6;
+  for (int i = 1; i <= numOfItems; ++i) {
+    textsToLoad.push_back(
+        resourceManager.GetText("controls", std::to_string(i)));
+  }
   if (texts.find("controls") == texts.end()) {
     texts["controls"] = std::make_shared<Text>(
         /*pos=*/glm::vec2(gameBoard->GetPosition().x + kBaseUnit / 2.0f,

@@ -69,14 +69,6 @@ void Shooter::EquipPowerUp(std::unique_ptr<PowerUp> powerUp) {
 }
 
 std::unique_ptr<Bubble> Shooter::ShootBubble(glm::vec4 nextBubbleColor) {
-  // bool isPowerUp = dynamic_cast<PowerUp*>(carriedBubble.get()) != nullptr;
-  // if (isPowerUp) {
-  //   // Play the sound effect for shooting a power up
-  //   SoundEngine::GetInstance().PlaySound("powerup_shoot", false);
-  // } else {
-  //   // Play the sound effect for shooting a bubble
-  //   SoundEngine::GetInstance().PlaySound("bubble_pop", false);
-  // }
   //  Play the sound effect for shooting a bubble
   SoundEngine::GetInstance().PlaySound("bubble_pop", false);
   std::unique_ptr<Bubble> copiedBubble = std::move(carriedBubble);
@@ -191,6 +183,9 @@ void Shooter::UpdateCarriedBubbleRadius(float radius) {
 }
 
 void Shooter::SwapCarriedBubbleAndNextBubble() {
+  if (this->HasPowerUp()) {
+    return;
+  }
   glm::vec3 nextBubbleColor = nextBubble->GetColorWithoutAlpha();
   glm::vec3 carriedBubbleColor = carriedBubble->GetColorWithoutAlpha();
   if (nextBubbleColor == carriedBubbleColor) {

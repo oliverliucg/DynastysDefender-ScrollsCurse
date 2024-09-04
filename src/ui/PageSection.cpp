@@ -92,9 +92,20 @@ void PageSection::SetMaxWidth(float width) {
 
 float PageSection::GetMaxWidth() const { return max_width_; }
 
+void PageSection::SetIdealMaxWidth(float width) { ideal_max_width_ = width; }
+
+float PageSection::GetIdealMaxWidth() const { return ideal_max_width_; }
+
 void PageSection::SetOffset(float offset) { offset_ = offset; }
 
 float PageSection::GetOffset() const { return offset_; }
+
+void PageSection::SetScrollIconOffset(float offset) {
+  glm::vec2 iconCenter = scroll_icon_->GetCenter();
+  iconCenter.y = position_.y + scroll_icon_->GetSize().y * 0.5f;
+  scroll_icon_->SetCenter(iconCenter);
+  MoveScrollIcon(offset);
+}
 
 void PageSection::SetScrollIconAllowed(bool is_allowed) {
   is_scroll_icon_allowed_ = is_allowed;
@@ -342,7 +353,10 @@ void PageSection::DeleteScrollIcon() {
 }
 
 bool PageSection::NeedScrollIcon() {
+  const float currentMaxWidth = this->GetMaxWidth();
+  this->SetMaxWidth(this->GetIdealMaxWidth());
   float height = GetHeight();
+  this->SetMaxWidth(currentMaxWidth);
   return height > max_height_;
 }
 

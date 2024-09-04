@@ -11,7 +11,8 @@
     "2": "{Échanger les couleurs}: Appuyez sur la {Touche Maj} pour échanger la couleur de la bulle actuelle avec la suivante.",
     "3": "{Orientation du Lanceur}:\n\t• {Rotation à Gauche}: Maintenez la {Touche Flèche Gauche} pour tourner le lanceur dans le sens antihoraire.\n\t• {Rotation à Droite}: Maintenez la {Touche Flèche Droite} pour tourner le lanceur dans le sens horaire.",
     "4": "{Visée Précise}: Maintenez la {Touche Ctrl} pour ralentir la rotation du lanceur, permettant des ajustements directionnels précis.",
-    "5": "{Pause du Jeu}: Appuyez sur la {Touche Esc} pour mettre le jeu en pause. Cela affichera un menu avec les options suivantes:\n\t• {Reprendre}: Continuer votre session de jeu actuelle.\n\t• {Redémarrer}: Commencer le jeu depuis le début.\n\t• {Arrêter}: Quitter le jeu actuel et retourner au menu principal."
+    "5": "{Équiper Plaque Dague}: Appuyez sur la {Touche Alt} pour équiper la Plaque Dague au lanceur. La Plaque Dague peut se déclencher et se mettre à jour en faisant éclater des bulles consécutivement.",
+    "6": "{Pause du Jeu}: Appuyez sur la {Touche Esc} pour mettre le jeu en pause. Cela affichera un menu avec les options suivantes:\n\t• {Reprendre}: Continuer votre session de jeu actuelle.\n\t• {Redémarrer}: Commencer le jeu depuis le début.\n\t• {Arrêter}: Quitter le jeu actuel et retourner au menu principal."
   },
   "characterintro": {
     "liuche": "{Liu Che} : Empereur Wu de Han, l'un des empereurs les plus influents de l'histoire chinoise. Pendant son règne, il a initié de nombreuses réformes importantes et des actions militaires, ayant un impact profond sur l'histoire de la Chine. Lors d'un banquet dans le manoir de la princesse, il fut soudainement attaqué par l'assassin Guo Jie et maîtrisé.",

@@ -39,8 +39,11 @@ class PageSection {
   float GetMaxHeight() const;
   void SetMaxWidth(float width);
   float GetMaxWidth() const;
+  void SetIdealMaxWidth(float width);
+  float GetIdealMaxWidth() const;
   void SetOffset(float offset);
   float GetOffset() const;
+  void SetScrollIconOffset(float offset);
   void SetScrollIconAllowed(bool is_allowed);
   bool IsScrollIconAllowed() const;
   glm::vec4 GetBoundingBox() const;
@@ -82,6 +85,8 @@ class PageSection {
   float max_height_{kWindowSize.y};
   // The maximum width of the section.
   float max_width_{kWindowSize.x};
+  // The ideal maximum width of the section.
+  float ideal_max_width_{kWindowSize.x};
   // offset while rendering the components.
   float offset_{0.f};
   // scroll icon is allowed or not.
