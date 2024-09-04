@@ -2194,7 +2194,7 @@ void GameManager::Update(float dt) {
         this->timer->StartEventTimer("firearrow");
 
         this->GoToState(GameState::PREPARING);
-        numOfScoreIncrementsReady += scoreIncrements.size();
+        numOfScoreIncrementsReady = scoreIncrements.size();
         this->timer->SetEventTimer("refreshscore", 0.05f);
         this->timer->StartEventTimer("refreshscore");
         // If it is on the final level, then we double the score increment if
@@ -2235,7 +2235,7 @@ void GameManager::Update(float dt) {
       this->GoToState(GameState::PREPARING);
       this->scroll->SetState(ScrollState::CLOSING);
       if (!scoreIncrements.empty()) {
-        numOfScoreIncrementsReady += scoreIncrements.size();
+        numOfScoreIncrementsReady = scoreIncrements.size();
         this->timer->SetEventTimer("refreshscore", 0.05f);
         this->timer->StartEventTimer("refreshscore");
       }
